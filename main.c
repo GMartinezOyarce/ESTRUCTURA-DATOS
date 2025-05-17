@@ -25,7 +25,7 @@ struct NodoDeclaraciones{
 }
 /*Lista Circular Simplemente enlazada de imputados*/
 struct NodoImputados{
-  struct Imputado *imputado;
+  struct Imputado *datosImputado;
   struct NodoImputados *sig;
 }
 
