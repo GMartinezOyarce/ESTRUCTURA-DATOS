@@ -9,7 +9,7 @@ struct Denuncia{
   /*Quien hizo la denuncia*/
   char *origenDenunciante;
   /*Fecha en la que se hizo la denuncia*/
-  int fecha;
+  char *fecha;
   /*Si la denuncia sigue en proceso o ya termino,
 *   0 = Terminado  1 = Sigue vigente*/
   int estado;
