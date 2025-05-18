@@ -35,7 +35,7 @@ struct NodoImputados{
 
 struct Imputado{
   /*Denuncia que se acuso al Imputado*/
-  struct Denuncia *denuncia;
+  char *ruc;
   /*Rut del imputado*/
   char *rut;
   /*Causa del cual se esta investigando al imputado*/
