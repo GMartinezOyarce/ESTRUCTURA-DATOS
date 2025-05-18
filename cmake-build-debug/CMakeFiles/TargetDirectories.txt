@@ -1,0 +1,3 @@
+C:/Users/gabom/OneDrive/Escritorio/code/GIT/ESTRUCTURA-DATOS/cmake-build-debug/CMakeFiles/ESTRUCTURA_DATOS.dir
+C:/Users/gabom/OneDrive/Escritorio/code/GIT/ESTRUCTURA-DATOS/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/gabom/OneDrive/Escritorio/code/GIT/ESTRUCTURA-DATOS/cmake-build-debug/CMakeFiles/rebuild_cache.dir

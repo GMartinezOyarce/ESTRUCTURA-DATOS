@@ -29,6 +29,10 @@ struct NodoImputados{
   struct NodoImputados *sig;
 }
 
+
+
+
+
 struct Imputado{
   /*Denuncia que se acuso al Imputado*/
   struct Denuncia *denuncia;
