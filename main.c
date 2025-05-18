@@ -16,18 +16,18 @@ struct Denuncia{
   char *descripcion;
   /*Si Imputado == NULL, no se ha identificado al imputado*/
   struct Imputado *imputado;
- }
+ };
 
 /*Lista Simplemente enlazada*/
 struct NodoDeclaraciones{
   char *declaracion;
   struct NodoDeclaraciones *sig;
-}
+};
 /*Lista Circular Simplemente enlazada de imputados*/
 struct NodoImputados{
   struct Imputado *datosImputado;
   struct NodoImputados *sig;
-}
+};
 
 
 
@@ -46,7 +46,7 @@ struct Imputado{
   int estado;
   /*Lista simplemente enlazada de declaraciones*/
   struct NodoDeclaraciones *declaraciones;
-}
+};
 
 
 int main(){
