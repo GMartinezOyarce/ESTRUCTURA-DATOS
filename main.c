@@ -1,5 +1,133 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+struct JuicioOral {
+  /*Si la sentencia fue Condenatoria o Absolutoria*/
+  char *sentencia;
+  char *descripcionSentencia;
+
+  /*si tipoDeJuicio == 0, es un juicio publico
+   * si tipodeJuicio == 1, es un juicio privado
+   */
+  int tipoDeJuicio;
+
+  struct CarpetaInvestigativa *investigacion;
+};
+
+/*Lista Simplemente Enlazada*/
+struct NodoJuicioOral {
+  struct JuicioOral *juicio;
+  struct NodoJuicioOral *sig;
+};
+
+
+
+struct Resolucion {
+  /*EJ: ordenes de detencion, medidas cautelares,
+   *autorizacion para diligencias invasivas,
+   *asignacion de abogado para imputado*/
+  char *tipoResolucion;
+  char *descripcion;
+  char *fecha;
+
+};
+
+/*Lista simple Circular*/
+struct NodoResoluciones {
+  struct Resolucion *resolucion;
+  struct NodoResoluciones *sig;
+};
+
+struct Diligencia {
+  /*La persona que pidio la diligencia
+   * El fiscal, la victima, el imputado, un abogado, carabineros o PDI
+   */
+  char *OrigenDiligencia;
+
+  /*Ejemplos: allanamientos, intercepciones Telefonicas, citaciones,
+   * toma de declaraciones a victimas, testigos o imputados, peritajes,
+   * inspecciones, medidas de proteccion a victimas o testigos
+   */
+  char *tipoDiligencia;
+
+  char *descripcionDiligencia;
+
+  char *fechaDiligencia;
+
+  /*Si quien pide la diligencia no es el fiscal,
+   * la diligencia queda como rechazada pero igualmente se guarda
+   * dentro de la carpeta investigativa
+   * si declaracion == 1, aprobada
+   * si declaracion == 0, rechazada
+   */
+  int decicion;
+};
+
+/*Lista Simplemente enlazada*/
+struct NodoDiligencias {
+  struct Diligencia *diligencia;
+  struct NodoDiligencias *sig;
+};
+
+struct Declaracion {
+  char *rut;
+  /*Quien hizo la declaracion, testigo, victima,
+   * carabineros, pdi o un tercero
+   */
+  char *origenDeclaracion;
+  char *declaracion;
+  char *fecha;
+};
+
+/*Lista Simplemente enlazada*/
+struct NodoDeclaraciones{
+  struct Declaracion *declaracion;
+  struct NodoDeclaraciones *sig;
+};
+
+struct Imputado{
+  /*Rut del imputado*/
+  char *rut;
+  /*Causa del cual se esta investigando al imputado*/
+  char *causa;
+  /*Medidas que se tomo para controlar al imputado,
+   * como prision preventiva o arraigo
+   */
+  char *medidasCautelares;
+  /*Estado del caso del imputado*/
+
+
+};
+
+
+struct CarpetaInvestigativa {
+  char *ruc;
+  /*Posibles Estados de Carpeta:
+   * En investigacion , Archivada, Sobreseimiento(Temporal o Permanente)
+   * Juicio Oral, Cumplimiento de Sentensia, suspencion Condicional, Acuerdo reparatorio
+   */
+  char *estadoCarpeta;
+  /*Si se hace un sobresimiento, un acuerdo reparatorio, escribir aca la desripcion de la decision*/
+  char *descripcionEstadoCarpeta;
+  struct Denuncia *denuncia;
+  struct Imputado *imputado;
+  /*Lista Simplemente enlazada*/
+  struct NodoDeclaraciones *declaraciones;
+  /*Lista Simplemente enlazada*/
+  struct NodoPruebas *pruebas;
+  /*Lista Simplemente enlazada*/
+  struct NodoDiligencias *diligencias;
+  /*Lista Circular*/
+  struct NodoResoluciones *resoluciones;
+};
+
+/*Arbol binario de carpetas investigativas*/
+struct arbolCarpetas {
+  struct CarpetaInvestigativa *carpetaInvestigativa;
+  struct CarpetaInvestigativa *izq, *der;
+};
+
 
 struct Denuncia{
   /* RUC Para identificar la denuncia*/
@@ -26,41 +154,28 @@ struct Denuncia{
 
  };
 
-/*Lista Simplemente enlazada*/
-struct NodoDeclaraciones{
-  char *declaracion;
-  struct NodoDeclaraciones *sig;
-};
-/*Lista Circular Simplemente enlazada de imputados*/
-struct NodoImputados{
-  struct Imputado *datosImputado;
-  struct NodoImputados *sig;
-};
 
-
-
-struct Imputado{
-  /*Denuncia que se acuso al Imputado*/
-  char *ruc;
-  /*Rut del imputado*/
-  char *rut;
-  /*Causa del cual se esta investigando al imputado*/
-  char *causa;
-  /*Medidas que se tomo para controlar al imputado*/
-  char *medidasCautelares;
-  /*Estado del caso del imputado*/
-  int estado;
-  /*Lista simplemente enlazada de declaraciones*/
-  struct NodoDeclaraciones *declaraciones;
-};
 
 struct Peticion {
   char *ruc;
   char *rut;
+
   /*Quien pidio la peticion (Victima, abogados, pdi, carabineros u otros)*/
   char *origenPeticion;
+
+  /*Tipos de solicitudes:
+   * Agregar, borrar o modificar Denuncia
+   * Agregar, borrar o modificar Diligencias
+   * Agregar o modificar Imputado
+   * Agregar Diligencias Judiciales
+   * Agregar Pruebas
+   * Agregar Declaraciones
+   *
+   */
   char *tipoSolicitud;
+
   char *descripcionSolicitud;
+
   /*Si aprobacion == 0, la peticion todavia no se ha revisado
    * Si aprobacion == 1, la peticion se ha aprobado
    * si aprobacion == -1, la peticion se ha rechazado
@@ -73,10 +188,8 @@ struct NodoPeticiones {
   struct NodoPeticiones *sig;
 };
 
-
-
 struct Fiscal {
-  int rut;
+  char *rut;
   char *contrasenia;
   /*Lista simplemente enlazada con nodo fantasma*/
   struct NodoPeticiones *Peticiones;
