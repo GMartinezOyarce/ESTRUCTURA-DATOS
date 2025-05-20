@@ -96,6 +96,67 @@ struct MinisterioPublico {
   int tamFiscal;
 };
 
+/*-----------------------MENUS----------------------------*/
+void limpiarPantalla() {
+  int i;
+  for(i=0;i<20;i++) printf("\n");
+}
+
+void menuDenuncias() {
+  int opcion;
+  do {
+    printf("\n--- Gestión de Denuncias ---\n");
+    printf("1. Agregar Denuncia\n");
+    printf("2. Buscar Denuncia por RUC\n");
+    printf("3. Modificar Denuncia\n");
+    printf("4. Eliminar Denuncia\n");
+    printf("5. Listar Todas las Denuncias\n");
+    printf("0. Volver al Menú Principal\n");
+    printf("Seleccione una opción: ");
+    scanf("%d", &opcion);
+
+    switch(opcion) {
+      case 1: /* función agregar denuncia */ break;
+      case 2: /* función buscar denuncia */ break;
+      case 3: /* función modificar denuncia */ break;
+      case 4: /* función eliminar denuncia */ break;
+      case 5: /* función listar denuncias */ break;
+      case 0: break;
+      default: printf("Opción inválida.\n");
+    }
+  } while(opcion != 0);
+}
+
+
+void mostrarMenuPrincipal() {
+  int opcion;
+  do {
+    printf("\n=== SISTEMA DE GESTIÓN PENAL - MINISTERIO PÚBLICO ===\n");
+    printf("1. Registrar / Consultar Denuncias\n");
+    printf("2. Gestionar Carpetas Investigativas\n");
+    printf("3. Administrar Imputados\n");
+    printf("4. Seguimiento de Diligencias\n");
+    printf("5. Controlar Estado de Causas\n");
+    printf("6. Gestionar Sentencias y Resoluciones\n");
+    printf("7. Generar Reportes\n");
+    printf("0. Salir\n");
+    printf("Seleccione una opción: ");
+    scanf("%d", &opcion);
+
+    switch(opcion) {
+      case 1: menuDenuncias(); break;
+      case 2: /*menuCarpetas()*/; break;
+      case 3: /*menuImputados()*/; break;
+      case 4: /*menuDiligencias()*/; break;
+      case 5: /*menuCausas()*/; break;
+      case 6: /*menuSentencias()*/; break;
+      case 7: /*generarReportes()*/; break;
+      case 0: return ; break;
+      default: printf("Opción inválida. Intente nuevamente.\n");
+    }
+  } while(opcion != 0);
+}
+
 int main(){
 
   return 0;
