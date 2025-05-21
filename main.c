@@ -289,6 +289,59 @@ void menuCarpetas(struct CarpetaInvestigativa Carpeta) {
   }while (opcion != 0);
 }
 
+void menuImputados(){
+  int opcion;
+  do {
+    printf("\n--- Gestión de Imputados---\n");
+    printf("1. Agregar Imputado a una Carpeta Investigativa\n");
+    printf("2. Modificar Imputado\n");
+    printf("3. Agregar Declaraciones\n");
+    printf("4. Agregar Medidas Cautelares\n");
+    printf("5. Agregar Estado Procesal\n");
+    printf("6. Buscar Imputado por RUT o Causa\n");
+    printf("7. Listar Todos los imputados del Fiscal\n");
+    printf("0. Volver al Menú Principal\n");
+    printf("Seleccione una opcion: ");
+    scanf("%d", &opcion);
+
+    switch(opcion) {
+      case 1: /* función agregar imputado */ break;
+      case 2: /* función modificarImputado  */ break;
+      case 3: /* función agregar declaraciones */ break;
+      case 4; /* función agregar medidas cautelares */ break;
+      case 5: /* función agregar estadoo procesal */ break;
+      case 6; /* función buscarImputado */ break;
+      case 7; /* función mostrar todos los imputados del fiscal */ break;
+      case 0: break;
+      default: printf("Opción inválida.\n");
+    }
+  }while(opcion != 0);
+}
+
+void menuDiligencias(){
+  int opcion;
+  do{
+    printf("--- Gestión de Diligencias ---\n");
+    printf("1. Agregar diligencias\n");
+    printf("2. Asignar prioridad a Diligencia\n");
+    printf("3. Ver diligencias pendientes por carpeta\n");
+    printf("4. Ver diligencias ordenadas por Prioridad\n");
+    printf("0. Volver al Menú Principal\n");
+    printf("Seleccione una opcion: ");
+    scanf("%d", &opcion);
+
+    switch(opcion) {
+      case 1: /* función agregar diligencias */ break;
+      case 2: /* función para asignar prioridad a diligencia dependiendo urgencia o impacto */ break;
+      case 3: /* función para ver diligencias pendientes */ break;
+      case 4: /* función para ver diligencias ordenadas por prioridad dependiendo urgencia o impacto */ break;
+      case 0: break;
+      default: printf("Opciónnn inválida.\n");
+    }
+  }while(opcion != 0);
+}
+
+
 void mostrarMenuPrincipal() {
   int opcion;
   limpiarPantalla();
