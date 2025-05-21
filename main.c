@@ -818,6 +818,413 @@ void mostrarTodosImputados(struct Fiscal *fiscal){
   mostrarTodosLosImputados(fiscal->carpetas);
 }
 
+void ListarCausas(struct Fiscal *fiscal) {
+  int i;
+  struct NodoDenuncias *denuncias=NULL;
+  limpiarPantalla();
+  printf("\n--- Causas de Denuncias ---\n\n\n");
+  denuncias=fiscal->Denuncias;
+
+  while (denuncias!=NULL) {
+    if (denuncias->denuncia!=NULL) {
+      if (denuncias->denuncia->ruc==NULL) {
+        printf("RUC: NO ENCONTRADO\n");
+      }
+      else {
+        printf("RUC: %s\n",denuncias->denuncia->ruc);
+      }
+      if (denuncias->denuncia->causa==0) {
+        printf("CAUSA: Crimen\n");
+      }
+      else if(denuncias->denuncia->causa==1) {
+        printf("CAUSA: Delito Simple\n");
+      }
+      else if(denuncias->denuncia->causa==2) {
+        printf("CAUSA: Falta\n");
+      }
+      else{
+        printf("CAUSA: NO SE PRESENTA UNA CAUSA");
+      }
+    }
+    denuncias=denuncias->sig;
+  }
+
+  printf("\nPresione Enter para continuar\n");
+  getchar();
+}
+
+void AgregarCausa(struct Fiscal *fiscal) {
+  char rucBusqueda[MIN];
+  int nuevaCausa;
+  struct Denuncia *denunciaEncontrada=NULL;
+  int opcion;
+  struct CarpetaInvestigativa *carpetaEncontrada=NULL;
+
+
+  do {
+    limpiarPantalla();
+    printf("---------------AGREGAR CAUSA-------------------\n");
+    printf("Ingrese el RUC de la denuncia asociada (formato: 123456789-2025): ");
+    fgets(rucBusqueda, MIN, stdin);
+    rucBusqueda[strcspn(rucBusqueda, "\n")] = 0;
+
+    if (fiscal -> carpetas == NULL) {
+      printf("No hay carpetas a las que pueda agregarle una Declaracion");
+      printf("Presione Enter para continuar");
+      getchar();
+      return;
+    }
+
+    denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
+    carpetaEncontrada = BUSCARCARPETA(fiscal->carpetas, rucBusqueda);
+
+    if (denunciaEncontrada == NULL) {
+      printf("\nNo se encontró ninguna denuncia con el RUC %s\n", rucBusqueda);
+      printf("1. Intentar nuevamente\n");
+      printf("2. Volver al menú anterior\n");
+      printf("Seleccione una opción: ");
+
+
+      scanf("%d", &opcion);
+      getchar();
+
+
+      if (opcion == 2) {
+        return; // Salir de la función si el usuario elige volver
+      }
+    }
+  } while (denunciaEncontrada == NULL);
+
+  limpiarPantalla();
+
+  if (denunciaEncontrada->causa>=0 && denunciaEncontrada->causa<=2){
+    printf("\nLa denuncia con el RUC %s ya presenta una causa\n", rucBusqueda);
+    if (denunciaEncontrada->causa==0) {
+      printf("CAUSA ACTUAL: Crimen\n");
+    }
+    else if(denunciaEncontrada->causa==1) {
+      printf("CAUSA ACTUAL: Delito\n");
+    }
+    else{
+      printf("CAUSA ACTUAL: Falta\n");
+    }
+    if (carpetaEncontrada!=NULL && carpetaEncontrada->imputado!=NULL) {
+      if (carpetaEncontrada->imputado->causa!=denunciaEncontrada->causa) {
+        printf("\n Nota: Se ha actualizado la causa del Imputado con la causa de la denuncia.");
+        carpetaEncontrada->imputado->causa=denunciaEncontrada->causa;
+      }
+    }
+  }
+
+  else {
+    printf("\nDefina la causa para la denuncia con el RUC %s\n\n", rucBusqueda);
+    printf("Formato:\n");
+    printf("0: Causa: Crimen\n");
+    printf("1: Causa: Delito\n");
+    printf("2: Causa: Falta\n");
+    printf("3: Cancelar\n\n");
+    printf("Ingrese un número: ");
+
+    do {
+      scanf("%d", &nuevaCausa);
+      if(nuevaCausa>=0 && nuevaCausa<=2) {
+        denunciaEncontrada->causa=nuevaCausa;
+        if (carpetaEncontrada!=NULL && carpetaEncontrada->imputado!=NULL) {
+          carpetaEncontrada->imputado->causa=nuevaCausa;
+        }
+        printf("\n\nSe ha definido con éxito una causa.\n");
+        getchar();
+      }
+
+      else if(nuevaCausa==3) {
+        printf("\n\nCancelado. Volviendo al menú anterior.\n");
+      }
+
+      else {
+        printf("\n\nNúmero Ingresado inválido. Inténtelo nuevamente\n\n");
+        printf("Formato:\n");
+        printf("0: Causa: Crimen\n");
+        printf("1: Causa: Delito\n");
+        printf("2: Causa: Falta\n");
+        printf("3: Cancelar\n\n");
+        printf("Ingrese un número: ");
+      }
+    }while (nuevaCausa<0 || nuevaCausa>3);
+  }
+}
+
+void ListarSentencias (struct Fiscal *fiscal) {
+  struct NodoJuicioOral *juicios=NULL;
+
+  limpiarPantalla();
+  printf("---------------LISTADO DE SENTENCIAS-------------------\n\n");
+
+  juicios=fiscal->Juicios;
+
+  while (juicios!=NULL) {
+    if (juicios->juicio!=NULL) {
+      if (juicios->juicio->investigacion!=NULL && juicios->juicio->investigacion->ruc!=NULL) {
+        printf("RUC: %s\n",juicios->juicio->investigacion->ruc);
+      }
+      else {
+        printf("RUC: NO DISPONIBLE\n");
+      }
+
+
+      if (juicios->juicio->sentencia==1) {
+        printf("Tipo de Sentencia: Absolutoria\n");
+      }
+      else if (juicios->juicio->sentencia==2) {
+        printf("Tipo de Sentencia: Condenatoria\n");
+      }
+      else {
+        printf("No existe un tipo de sentencia\n");
+      }
+
+
+      if (juicios->juicio->descripcionSentencia!=NULL) {
+        printf("Descripción de la Sentencia: %s\n\n",juicios->juicio->descripcionSentencia);
+      }
+      else {
+        printf("No se presenta Descripción de la Sentencia\n\n");
+      }
+    }
+    juicios=juicios->sig;
+  }
+  getchar();
+}
+
+void AgregarSentencia (struct Fiscal *fiscal) {
+  char rucBusqueda[MIN];
+  struct NodoJuicioOral *juicios=NULL;
+  int nuevaSentencia=3;
+  char nuevaDescripcionSentencia[MAX];
+  int cambio=2;
+
+  while (cambio!=1) {
+    limpiarPantalla();
+    printf("Ingrese el RUC de la Sentencia que desea Agregar (formato: 123456789-2025): ");
+    fgets(rucBusqueda, MIN, stdin);
+    rucBusqueda[strcspn(rucBusqueda, "\n")] = 0;
+
+    juicios=fiscal->Juicios;
+    while (juicios!=NULL) {
+      if (juicios->juicio!=NULL && juicios->juicio->investigacion!=NULL && juicios->juicio->investigacion->ruc!=NULL) {
+        if (strcmp(juicios->juicio->investigacion->ruc,rucBusqueda)==0) {
+          if (juicios->juicio->sentencia==0 || juicios->juicio->sentencia==1) {
+            printf("Esta sentencia ya existe.");
+            cambio=1;
+          }
+          else {
+            do {
+              printf("\n\nIngresa el tipo de sentencia\n\n");
+              printf("Formato:\n");
+              printf("0: Condenatoria\n");
+              printf("1: Absolutoria\n");
+              printf("2: Cancelar\n");
+              printf("Ingrese un número: ");
+              scanf("%d", &nuevaSentencia);
+              getchar();
+              if (nuevaSentencia<0 || nuevaSentencia>2) {
+                printf("\n\nNúmero Inválido. Inténtelo nuevamente.");
+              }
+            }while (nuevaSentencia<0 || nuevaSentencia>2);
+
+            juicios->juicio->sentencia=nuevaSentencia;
+            printf("Ingrese la Descripción de la Sentencia: ");
+            fgets(nuevaDescripcionSentencia, MAX, stdin);
+            nuevaDescripcionSentencia[strcspn(nuevaDescripcionSentencia, "\n")] = 0;
+            strcpy(juicios->juicio->descripcionSentencia,nuevaDescripcionSentencia);
+            cambio=1;
+            break;
+          }
+        }
+      }
+      juicios=juicios->sig;
+    }
+
+    if (cambio!=1) {
+      printf("\n\nNo se ha encontrado el RUT especificado. Desea ingresar otro?\n");
+      printf("\nFormato:\n");
+      printf("0: Sí\n");
+      printf("1: No\n");
+      printf("Ingrese un número: ");
+      scanf("%d",&cambio);
+    }
+  }
+}
+
+void listarResolucionesRecursivo(struct arbolCarpetas *raiz) {
+  struct CarpetaInvestigativa *carpeta;
+  struct NodoResoluciones *resoluciones=NULL;
+
+  /*CASOS BASE*/
+  if (raiz == NULL) {
+    return;
+  }
+  /*SE RECORRE DE MANERA IN-ORDER*/
+  /*se recorre la parte izquierda de la raiz*/
+  listarResolucionesRecursivo(raiz-> izq);
+  carpeta = raiz -> carpetaInvestigativa;
+  printf("--------------------------------------------------\n");
+  printf("RUC: %s\n", carpeta->ruc);
+
+  //AQUÍ VA EL RECORRER RESOLUCIONES
+
+  resoluciones = carpeta->resoluciones;
+
+  while (resoluciones != NULL) {
+    if (resoluciones->resolucion!=NULL) {
+      if (resoluciones->resolucion->tipoResolucion==0) {
+        printf("Tipo Resolución: Sentencia\n");
+      }
+      else if (resoluciones->resolucion->tipoResolucion==1) {
+        printf("Tipo Resolución: Autorización para Diligencias\n");
+      }
+      else if (resoluciones->resolucion->tipoResolucion==2) {
+        printf("Tipo Resolución: Medida Cautelar\n");
+      }
+      else if (resoluciones->resolucion->tipoResolucion==3) {
+        printf("Tipo Resolución: Sobreseimiento\n");
+      }
+      else {
+        printf("No hay Tipo de Resolución Registrado.\n");
+      }
+
+      if (resoluciones->resolucion->origenResolucion==0) {
+        printf("Origen: La Resolución fue emitida por el Juez de Garantía\n");
+      }
+      else if (resoluciones->resolucion->origenResolucion==1) {
+        printf("Origen: La Resolución fue emitida por el tribunal de Juicio Oral\n");
+      }
+      else {
+        printf("Origen: No ha sido especificado.");
+      }
+
+      if (resoluciones->resolucion->descripcion!=NULL) {
+        printf("Descripción de la Resolución: %s",resoluciones->resolucion->descripcion);
+      }
+      else {
+        printf("Descripción No ha sido especificada.");
+      }
+
+      if (resoluciones->resolucion->fecha!=NULL) {
+        printf("Fecha: %s",resoluciones->resolucion->fecha);
+      }
+      else {
+        printf("Fecha: No ha sido especificada.");
+      }
+    }
+    resoluciones=resoluciones->sig;
+  }
+
+  // 3. Recorre subárbol derecho
+  listarResolucionesRecursivo(raiz->der);
+}
+
+void ListarResoluciones(struct Fiscal *fiscal) {
+  limpiarPantalla();
+  printf("=============== LISTADO DE RESOLUCIONES =============");
+
+  if (fiscal-> carpetas == NULL) {
+    printf("NO HAY RESOLUCIONES REGISTRADAS");
+    return;
+  }
+  /*el listar Resoluciones solo se puede hacer recursivo*/
+  listarResolucionesRecursivo(fiscal-> carpetas);
+
+  printf("Presione Enter para continuar...");
+  getchar();
+}
+
+void AgregarResolucion(struct Fiscal *fiscal) {
+  char rucBusqueda[MIN];
+  int opcion;
+  struct CarpetaInvestigativa *carpetaEncontrada=NULL;
+  struct NodoResoluciones *nodo=NULL;
+  struct NodoResoluciones *rec=NULL;
+  struct Resolucion *nuevo=NULL;
+
+  do {
+    limpiarPantalla();
+    printf("---------------AGREGAR RESOLUCION-------------------\n");
+    printf("Ingrese el RUC de la denuncia asociada (formato: 123456789-2025): ");
+    fgets(rucBusqueda, MIN, stdin);
+    rucBusqueda[strcspn(rucBusqueda, "\n")] = 0;
+
+    if (fiscal -> carpetas == NULL) {
+      printf("No hay carpetas a las que pueda agregarle una Resolución");
+      printf("Presione Enter para continuar");
+      getchar();
+      return;
+    }
+
+    carpetaEncontrada = BUSCARCARPETA(fiscal->carpetas, rucBusqueda);
+
+    if (carpetaEncontrada == NULL) {
+      printf("\nNo se encontró ninguna carpeta con el RUC %s\n", rucBusqueda);
+      printf("1. Intentar nuevamente\n");
+      printf("2. Volver al menú anterior\n");
+      printf("Seleccione una opción: ");
+
+
+      scanf("%d", &opcion);
+      getchar();
+
+
+      if (opcion == 2) {
+        return; // Salir de la función si el usuario elige volver
+      }
+    }
+  } while (carpetaEncontrada == NULL);
+
+  nuevo=(struct Resolucion *)malloc(sizeof(struct Resolucion));
+  nodo=(struct NodoResoluciones *)malloc(sizeof(struct NodoResoluciones));
+
+  printf("Ingrese el Tipo de Resolución\n\n");
+  printf("Formato:\n");
+  printf("0: Sentencia\n");
+  printf("1: Autorización para Diligencias\n");
+  printf("2: Medida Cautelar\n");
+  printf("3: Sobreseimiento\n");
+  printf("Ingrese un número: ");
+  scanf("%d", &nuevo->tipoResolucion);
+  getchar();
+
+  printf("\n\nIngrese el Origen de la Resolución\n\n");
+  printf("Formato:\n");
+  printf("0: Emitida por el Juez de Garantía\n");
+  printf("1: Emitida por el Tribunal de Juicio Oral\n");
+  printf("Ingrese un número: ");
+  scanf("%d", &nuevo->origenResolucion);
+  getchar();
+
+  printf("\n\nIngrese la descripción de la Resolución:");
+  fgets(nuevo->descripcion, MAX, stdin);
+  nuevo->descripcion[strcspn(nuevo->descripcion, "\n")] = 0;
+
+  printf("\n\nIngrese la fecha de la Resolución:");
+  fgets(nuevo->fecha, MIN, stdin);
+  nuevo->fecha[strcspn(nuevo->fecha, "\n")] = 0;
+
+  nodo->resolucion=nuevo;
+  nodo->sig=NULL;
+
+  if (carpetaEncontrada->resoluciones == NULL) {
+    carpetaEncontrada->resoluciones = nodo;
+  } else {
+    rec = carpetaEncontrada->resoluciones;
+    while (rec->sig != NULL) {
+      rec = rec->sig;
+    }
+    rec->sig = nodo;
+  }
+
+  printf("La Resolución se asignó correctamente");
+  printf("Presione Enter para continuar");
+  getchar();
+
+}
 
 
 /*-----------------------------------------------------------------------*/
