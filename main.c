@@ -308,7 +308,7 @@ void CrearCarpeta(struct Fiscal *fiscal) {
         printf("---------------CREAR CARPETA INVESTIGATIVA-------------------\n");
         printf("Ingrese el RUC de la denuncia asociada (formato: 123456789-2025): ");
         fgets(rucBusqueda, MIN, stdin);
-        rucBusqueda[strcspn(rucBusqueda, "\n")] = '\0';
+        rucBusqueda[strcspn(rucBusqueda, "\n")] = 0;
 
         denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
 
@@ -328,6 +328,8 @@ void CrearCarpeta(struct Fiscal *fiscal) {
             }
         }
     } while (denunciaEncontrada == NULL);
+
+    limpiarPantalla();
 
     /* Paso 2: Crear la nueva carpeta investigativa*/
     nuevaCarpeta = (struct CarpetaInvestigativa*)malloc(sizeof(struct CarpetaInvestigativa));
@@ -405,6 +407,8 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   struct CarpetaInvestigativa *carpeta = NULL;
   char rucCarpeta[14];
 
+  limpiarPantalla();
+
   if (fiscal -> carpetas == NULL) {
     printf("No hay carpetas a las que pueda agregarle una Declaracion");
     return;
@@ -415,13 +419,13 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
 
   printf("Ingrese el RUC de su Carpeta");
   fgets(rucCarpeta, MIN, stdin);
-  rucCarpeta[strcspn(rucCarpeta, "\n")] = '\0';
+  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
 
   carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
 
   printf("Ingrese RUT del declarante: ");
   fgets(nuevo -> rut, 14, stdin);
-  nuevo-> rut[strcspn(nuevo -> rut, "\n")] = '\0';
+  nuevo-> rut[strcspn(nuevo -> rut, "\n")] = 0;
 
   printf("Ingrese origen (0: Víctima, 1: Testigo, 2: Imputado): ");
   scanf("%d", &nuevo->origenDeclaracion);
@@ -429,11 +433,11 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
 
   printf("Ingrese declaración: ");
   fgets(nuevo->declaracion, MAX, stdin);
-  nuevo-> declaracion[strcspn(nuevo-> declaracion, "\n")] = '\0';
+  nuevo-> declaracion[strcspn(nuevo-> declaracion, "\n")] = 0;
 
   printf("Ingrese fecha (dd/mm/aaaa): ");
   fgets(nuevo->fecha, 14, stdin);
-  nuevo-> fecha[strcspn(nuevo-> fecha, "\n")] = '\0';
+  nuevo-> fecha[strcspn(nuevo-> fecha, "\n")] = 0;
 
   nodo->declaracion = nuevo;
   nodo->sig = NULL;
@@ -449,7 +453,47 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   }
   printf("Declaración agregada con éxito\n");
 }
+/*-------------------------FUNCION AGREGAR  DILIGENCIAS-----------------*/
+void agregarDiligenciaACarpeta(struct CarpetaInvestigativa *carpeta) {
+  struct Diligencia *nueva;
+  struct NodoDiligencias *nodo;
 
+  nueva = (struct Diligencia*)malloc(sizeof(struct Diligencia));
+  nodo = (struct NodoDiligencias*)malloc(sizeof(struct NodoDiligencias));
+
+  limpiarPantalla();
+
+  printf("Ingrese origen (0: Fiscal, 1: Víctima, 2: Imputado): ");
+  scanf("%d", &nueva->OrigenDiligencia);
+  getchar();
+
+  printf("Ingrese tipo de diligencia: ");
+  fgets(nueva->tipoDiligencia, MAX, stdin);
+  nueva->tipoDiligencia[strcspn(nueva->tipoDiligencia, "\n")] = 0;
+
+  printf("Ingrese descripción: ");
+  fgets(nueva->descripcionDiligencia, MAX, stdin);
+  nueva->descripcionDiligencia[strcspn(nueva->descripcionDiligencia, "\n")] = 0;
+
+  printf("Ingrese fecha (dd/mm/aaaa): ");
+  scanf("%s", nueva->fechaDiligencia);
+
+  printf("Ingrese decisión (1: Aprobada, 0: Rechazada): ");
+  scanf("%d", &nueva->decicion);
+
+  printf("Ingrese urgencia (1: Baja, 2: Media, 3: Alta): ");
+  scanf("%d", &nueva->urgencia);
+
+  printf("Ingrese impacto (1: Bajo, 2: Medio, 3: Alto): ");
+  scanf("%d", &nueva->impacto);
+
+  nodo->diligencia = nueva;
+  nodo->sig = carpeta->diligencias;
+  carpeta->diligencias = nodo;
+
+  printf("\nDiligencia agregada correctamente.\n");
+}
+/*-----------------------------------------------------------------------*/
 void menuDenuncias() {
   int opcion;
   limpiarPantalla();
