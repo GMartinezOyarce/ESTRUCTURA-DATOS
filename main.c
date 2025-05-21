@@ -222,7 +222,7 @@ struct MinisterioPublico {
   int tamFiscal;
 };
 
-/*-----------------------MENUS----------------------------*/
+/*-----------------------FUNCIONES DE MENUS----------------------------*/
 void limpiarPantalla() {
   int i;
   for(i=0;i<20;i++) printf("\n");
@@ -230,32 +230,68 @@ void limpiarPantalla() {
 
 void menuDenuncias() {
   int opcion;
+  limpiarPantalla();
   do {
     printf("\n--- Gestión de Denuncias ---\n");
     printf("1. Agregar Denuncia\n");
     printf("2. Buscar Denuncia por RUC\n");
-    printf("3. Modificar Denuncia\n");
-    printf("4. Eliminar Denuncia\n");
-    printf("5. Listar Todas las Denuncias\n");
+    printf("3. Buscar Denuncia por ESTADO");
+    printf("4. Modificar Denuncia\n");
+    printf("5. Eliminar Denuncia\n");
+    printf("6. Listar Todas las Denuncias\n");
     printf("0. Volver al Menú Principal\n");
     printf("Seleccione una opción: ");
     scanf("%d", &opcion);
 
     switch(opcion) {
       case 1: /* función agregar denuncia */ break;
-      case 2: /* función buscar denuncia */ break;
-      case 3: /* función modificar denuncia */ break;
-      case 4: /* función eliminar denuncia */ break;
-      case 5: /* función listar denuncias */ break;
+      case 2: /* función buscar denuncia RUC */ break;
+      case 3: /* funcion buscar denuncia Estado*/ break;
+      case 4: /* función modificar denuncia */ break;
+      case 5: /* función eliminar denuncia */ break;
+      case 6: /* función listar denuncias */ break;
       case 0: break;
       default: printf("Opción inválida.\n");
     }
   } while(opcion != 0);
 }
+void menuCarpetas(struct CarpetaInvestigativa Carpeta) {
+  int opcion;
+  limpiarPantalla();
+  do {
+    printf("\n === Gestion de Carpetas investigativas.\n");
+    printf("1. Crear nueva Carpeta Investigativa.\n");
+    printf("2. Buscar Carpeta Investigativa por RUC.\n");
+    printf("3. Modificar Estado de Carpeta.\n");
+    printf("4. Agregar declaración a Carpeta.\n");
+    printf("5. Agregar diligencia a Carpeta.\n");
+    printf("6. Agregar resolucion a Carpeta.\n");
+    printf("7. Agregar imputado a Carpeta;\n");
+    printf("8. Agregar Pruebas a Carpeta.");
+    printf("8. listar todas las Carpetas\n");
+    printf("0. Volver al Menu Principal\n");
 
+    scanf("%d", &opcion);
+
+    switch(opcion) {
+      case 1: /*funcion CREAR Carpeta*/ break;
+      case 2: /*funcion MODIFICAR carpeta RUC */ break;
+      case 3: /*funcion MODIFICAR estado Carpeta*/ break;
+      case 4: /*funcion AGREGAR declaración*/ break;
+      case 5: /*funcion AGREGAR diligencia*/ break;
+      case 6: /*funcion AGREGAR resolucion*/ break;
+      case 7: /*funcion AGREGAR imputado*/ break;
+      case 8: /*funcion AGREGAR prueabas*/ break;
+      case 8: /*funcion LISTAR carpetas*/ break;
+      case 0: /*volver al menu principal*/ break;
+      default: printf("Opcion Invalida. Intente Denuevo"); break;
+    }
+  }while (opcion != 0);
+}
 
 void mostrarMenuPrincipal() {
   int opcion;
+  limpiarPantalla();
   do {
     printf("\n=== SISTEMA DE GESTIÓN PENAL - MINISTERIO PÚBLICO ===\n");
     printf("1. Registrar / Consultar Denuncias\n");
@@ -271,7 +307,7 @@ void mostrarMenuPrincipal() {
 
     switch(opcion) {
       case 1: menuDenuncias(); break;
-      case 2: /*menuCarpetas()*/; break;
+      case 2: menuCarpetas(); break;
       case 3: /*menuImputados()*/; break;
       case 4: /*menuDiligencias()*/; break;
       case 5: /*menuCausas()*/; break;
