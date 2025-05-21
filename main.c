@@ -2,10 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX 1000
+#define MIN 14
+
 struct JuicioOral {
   /*Si la sentencia fue Condenatoria o Absolutoria*/
-  char *sentencia;
-  char *descripcionSentencia;
+  char sentencia[MAX];
+  char descripcionSentencia[MAX];
 
   /*si tipoDeJuicio == 0, es un juicio publico
    * si tipodeJuicio == 1, es un juicio privado
@@ -21,15 +24,26 @@ struct NodoJuicioOral {
   struct NodoJuicioOral *sig;
 };
 
+struct Prueba {
+  char tipoDePrueba[MAX];
+  char descripcionPrueba[MAX];
+  char fecha[MIN];
+};
+
+/*Lista Simplemente Enlazada*/
+struct NodoPruebas {
+  struct Prueba *prueba;
+  struct NodoPruebas *sig;
+};
 
 
 struct Resolucion {
   /*EJ: ordenes de detencion, medidas cautelares,
    *autorizacion para diligencias invasivas,
    *asignacion de abogado para imputado*/
-  char *tipoResolucion;
-  char *descripcion;
-  char *fecha;
+  char tipoResolucion[MAX];
+  char descripcion[MAX];
+  char fecha[MIN];
 
 };
 
@@ -43,17 +57,17 @@ struct Diligencia {
   /*La persona que pidio la diligencia
    * El fiscal, la victima, el imputado, un abogado, carabineros o PDI
    */
-  char *OrigenDiligencia;
+  char OrigenDiligencia[MAX];
 
   /*Ejemplos: allanamientos, intercepciones Telefonicas, citaciones,
    * toma de declaraciones a victimas, testigos o imputados, peritajes,
    * inspecciones, medidas de proteccion a victimas o testigos
    */
-  char *tipoDiligencia;
+  char tipoDiligencia[MAX];
 
-  char *descripcionDiligencia;
+  char descripcionDiligencia[MAX];
 
-  char *fechaDiligencia;
+  char fechaDiligencia[MIN];
 
   /*Si quien pide la diligencia no es el fiscal,
    * la diligencia queda como rechazada pero igualmente se guarda
@@ -75,9 +89,9 @@ struct Declaracion {
   /*Quien hizo la declaracion, testigo, victima,
    * carabineros, pdi o un tercero
    */
-  char *origenDeclaracion;
-  char *declaracion;
-  char *fecha;
+  char origenDeclaracion[MAX];
+  char declaracion[MAX];
+  char fecha[MIN];
 };
 
 /*Lista Simplemente enlazada*/
@@ -88,28 +102,27 @@ struct NodoDeclaraciones{
 
 struct Imputado{
   /*Rut del imputado*/
-  char *rut;
+  char rut[MIN];
   /*Causa del cual se esta investigando al imputado*/
-  char *causa;
+  char causa[MAX];
   /*Medidas que se tomo para controlar al imputado,
    * como prision preventiva o arraigo
    */
-  char *medidasCautelares;
-  /*Estado del caso del imputado*/
+  char medidasCautelares[MAX];
 
 
 };
 
 
 struct CarpetaInvestigativa {
-  char *ruc;
+  char ruc[MIN];
   /*Posibles Estados de Carpeta:
    * En investigacion , Archivada, Sobreseimiento(Temporal o Permanente)
    * Juicio Oral, Cumplimiento de Sentensia, suspencion Condicional, Acuerdo reparatorio
    */
-  char *estadoCarpeta;
+  char estadoCarpeta[MAX];
   /*Si se hace un sobresimiento, un acuerdo reparatorio, escribir aca la desripcion de la decision*/
-  char *descripcionEstadoCarpeta;
+  char descripcionEstadoCarpeta[MAX];
   struct Denuncia *denuncia;
   struct Imputado *imputado;
   /*Lista Simplemente enlazada*/
@@ -131,26 +144,26 @@ struct arbolCarpetas {
 
 struct Denuncia{
   /* RUC Para identificar la denuncia*/
-  char *ruc;
+  char ruc[MIN];
   /* Rut del denunciante*/
-  char *denunciante;
+  char denunciante[MAX];
   /*Quien hizo la denuncia*/
-  char *origenDenunciante;
+  char origenDenunciante[MAX];
   /*Fecha en la que se hizo la denuncia*/
-  char *fecha;
+  char fecha[MIN];
   /*Razon por la que se esta denunciando*/
   char *causa;
   /*Estado de la denuncia
    * * En investigacion, cerrada, en juicio o archivada
    */
-  char *estado;
+  char estado[MAX];
   /*Descripcion del Caso*/
-  char *descripcion;
+  char descripcion[MAX];
 
   /*Si Imputado == NULL, no se ha identificado al posible responsable,
    * una vez se apruebe la investigacion, el posible responsable pasa a ser imputado
    */
-  int *rutPosibleResponsable;
+  char rutPosibleResponsable;
 
  };
 
@@ -174,7 +187,7 @@ struct Peticion {
    */
   char *tipoSolicitud;
 
-  char *descripcionSolicitud;
+  char descripcionSolicitud[MAX];
 
   /*Si aprobacion == 0, la peticion todavia no se ha revisado
    * Si aprobacion == 1, la peticion se ha aprobado
@@ -189,8 +202,8 @@ struct NodoPeticiones {
 };
 
 struct Fiscal {
-  char *rut;
-  char *contrasenia;
+  char rut[MIN];
+  char contrasenia[MAX];
   /*Lista simplemente enlazada con nodo fantasma*/
   struct NodoPeticiones *Peticiones;
   /*lista simplemente enlazada, Posiblemente se cambie a circular doblemente enlazada,
