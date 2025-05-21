@@ -341,6 +341,60 @@ void menuDiligencias(){
   }while(opcion != 0);
 }
 
+void menuCausas() {
+  int opcion;
+  do {
+    printf("\n--- Gestión de Causas ---\n");
+    printf("1. Agregar Causa\n");
+    printf("2. Buscar Causa por Imputado\n");
+    printf("3. Buscar Causa por Denuncia\n");
+    printf("4. Modificar Estado de la Causa\n");
+    printf("5. Listar Todas las Causas\n");
+    printf("0. Volver al Menú Principal\n");
+    printf("Seleccione una opción: ");
+    scanf("%d", &opcion);
+
+    switch(opcion) {
+      case 1: /* función agregar causa */ break;
+      case 2: /* función buscar causa imputado */ break;
+      case 3: /* función buscar causa denuncia */ break;
+      case 4: /* función modificar causa */ break;
+      case 5: /* función listar causa */ break;
+      case 0: return ; break;
+      default: printf("Opción inválida.\n");
+    }
+  } while(opcion != 0);
+}
+
+void menuSentenciasResoluciones() {
+  int opcion;
+  do {
+    printf("\n--- Gestión de Sentencias y Resoluciones ---\n");
+    printf("1. Agregar Sentencia\n");
+    printf("2. Agregar Resolucion\n");
+    printf("3. Buscar Resolución por Causa\n");
+    printf("4. Buscar Resolución por Imputado\n");
+    printf("5. Buscar Resolución por Tipo de Resolución\n");
+    printf("6. Listar Todas las Sentencias\n");
+    printf("7. Listar Todas las Resoluciones\n");
+    printf("0. Volver al Menú Principal\n");
+    printf("Seleccione una opción: ");
+    scanf("%d", &opcion);
+
+    switch(opcion) {
+      case 1: /* función agregar sentencia */ break;
+      case 2: /* función agregar resolucion */ break;
+      case 3: /* función buscar resolución por causa */ break;
+      case 4: /* función buscar resolución por imputado */ break;
+      case 5: /* función buscar resolución por tipo */ break;
+      case 6: /* función listar todas las sentencias */ break;
+      case 7: /* función listar todas las resoluciones */ break;
+      case 0: return ; break;
+      default: printf("Opción inválida.\n");
+    }
+  } while(opcion != 0);
+}
+
 
 void mostrarMenuPrincipal() {
   int opcion;
