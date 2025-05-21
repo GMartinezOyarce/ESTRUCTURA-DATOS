@@ -6,8 +6,9 @@
 #define MIN 14
 
 struct JuicioOral {
-  /*Si la sentencia fue Condenatoria o Absolutoria*/
-  char sentencia[MAX];
+  /*Si sentencia == 0 es Condenatoria
+   *Si sentencia == 1 es Absolutoria*/
+  int sentencia;
   char descripcionSentencia[MAX];
 
   /*si tipoDeJuicio == 0, es un juicio publico
@@ -25,7 +26,12 @@ struct NodoJuicioOral {
 };
 
 struct Prueba {
-  char tipoDePrueba[MAX];
+  /*Si Tipo Prueba == 0 es un informe Pericial
+   * Si Tipo Prueba == 1 es una grabacion
+   * Si Tipo Prueba == 2 es un documento
+   * Si Tipo Prueba == 3 es una prueba fisica
+   */
+  int tipoDePrueba;
   char descripcionPrueba[MAX];
   char fecha[MIN];
 };
@@ -38,10 +44,17 @@ struct NodoPruebas {
 
 
 struct Resolucion {
-  /*EJ: ordenes de detencion, medidas cautelares,
-   *autorizacion para diligencias invasivas,
-   *asignacion de abogado para imputado*/
-  char tipoResolucion[MAX];
+  /*Si Tipo Resolucion == 0 es Sentencia
+   * si Tipo Resolucion == 1 es Autorizacion para diligencias
+   * si Tipo Resolucion == 2 es una medida Cautelar
+   * si tipo Resolucion == 3 es un sobreseimiento
+   */
+  int tipoResolucion;;
+
+  /*Si origen == 0 la resolucion fue emitida por el Juez de Garantia
+   * Si origen == 1 la resolucion fue emitida por el tribunal de Juicio Oral
+   */
+  int origenResolucion;
   char descripcion[MAX];
   char fecha[MIN];
 
@@ -55,13 +68,17 @@ struct NodoResoluciones {
 
 struct Diligencia {
   /*La persona que pidio la diligencia
-   * El fiscal, la victima, el imputado, un abogado, carabineros o PDI
+   *Si Origen Diligencia == 0 lo pidio El fiscal
+   *Si origen == 1 lo pidio la victima,
+   *Si origen == 2 lo pidioel imputado
    */
-  char OrigenDiligencia[MAX];
+  int OrigenDiligencia;
 
   /*Ejemplos: allanamientos, intercepciones Telefonicas, citaciones,
    * toma de declaraciones a victimas, testigos o imputados, peritajes,
    * inspecciones, medidas de proteccion a victimas o testigos
+   *
+   * Ya que son demaciados tipos no podemos usar int
    */
   char tipoDiligencia[MAX];
 
@@ -76,6 +93,17 @@ struct Diligencia {
    * si declaracion == 0, rechazada
    */
   int decicion;
+  /*Si urgencia == 1, es urgencia baja
+   * Si urgencia == 2, es urgencia media
+   * Si urgencia == 3, es urgencia Alta
+   */
+  int urgencia;
+  /*
+   * Si impacto == 1, es de bajo impacto para la investigacion
+   * Si impacto == 2 es de medio impacto para la investigacion
+   * Si impacto == 3 es de alto impacto para la investigacion
+   */
+  int impacto;
 };
 
 /*Lista Simplemente enlazada*/
@@ -85,11 +113,12 @@ struct NodoDiligencias {
 };
 
 struct Declaracion {
-  char *rut;
-  /*Quien hizo la declaracion, testigo, victima,
-   * carabineros, pdi o un tercero
+  char rut[MIN];
+  /*Si declaracion == 0 es una declaracion de la victima
+   *Si declaracion == 1 es una declaracion de un testigo
+   *Si declaracion == 2 es una declaracion de un imputado
    */
-  char origenDeclaracion[MAX];
+  int origenDeclaracion;
   char declaracion[MAX];
   char fecha[MIN];
 };
@@ -103,8 +132,12 @@ struct NodoDeclaraciones{
 struct Imputado{
   /*Rut del imputado*/
   char rut[MIN];
-  /*Causa del cual se esta investigando al imputado*/
-  char causa[MAX];
+  /*Tipo de causa por la que de esta demandando
+   * si causa == 0 es un crimen (Infraccion grave)
+   * si causa == 1 es un delito simple (Ejemplo:Hurto, estafa)
+   * si causa == 2 es una falta (Ejemplo: Infracciones de transito)
+   */
+  int causa;
   /*Medidas que se tomo para controlar al imputado,
    * como prision preventiva o arraigo
    */
@@ -117,10 +150,12 @@ struct Imputado{
 struct CarpetaInvestigativa {
   char ruc[MIN];
   /*Posibles Estados de Carpeta:
-   * En investigacion , Archivada, Sobreseimiento(Temporal o Permanente)
-   * Juicio Oral, Cumplimiento de Sentensia, suspencion Condicional, Acuerdo reparatorio
+   *Si estado == 0 En investigacion
+   *Si estado == 1 Juicio Oral
+   *Si estado == 2 Archivada
+   *Si estado == 3 Cerrada
    */
-  char estadoCarpeta[MAX];
+  int estadoCarpeta;
   /*Si se hace un sobresimiento, un acuerdo reparatorio, escribir aca la desripcion de la decision*/
   char descripcionEstadoCarpeta[MAX];
   struct Denuncia *denuncia;
@@ -146,46 +181,56 @@ struct Denuncia{
   /* RUC Para identificar la denuncia*/
   char ruc[MIN];
   /* Rut del denunciante*/
-  char denunciante[MAX];
-  /*Quien hizo la denuncia*/
-  char origenDenunciante[MAX];
+  char denunciante[MIN];
+  /*Si origen Denunciante == 0 denuncio una victima
+   * Si origen Denunciante == 1 denuncio un testigo
+   * Si origen Denunciante == 2 denuncio un tercero
+   * Si origen Denunciante == 3 denuncio Carabineros
+   * Si origen Denunciante == 4 denuncio PDI
+   */
+  int origenDenunciante;
   /*Fecha en la que se hizo la denuncia*/
   char fecha[MIN];
-  /*Razon por la que se esta denunciando*/
-  char *causa;
-  /*Estado de la denuncia
-   * * En investigacion, cerrada, en juicio o archivada
+
+  /*Tipo de causa por la que de esta demandando
+   * si causa == 0 es un crimen (Infraccion grave)
+   * si causa == 1 es un delito simple (Ejemplo:Hurto, estafa)
+   * si causa == 2 es una falta (Ejemplo: Infracciones de transito)
    */
-  char estado[MAX];
+  int causa;
+  /*Posibles Estados de Denuncia:
+  *Si estado == 0 En investigacion
+  *Si estado == 1 Juicio Oral
+  *Si estado == 2 Archivada
+  *Si estado == 3 Cerrada
+  */
+  int estadoDenuncia;
   /*Descripcion del Caso*/
   char descripcion[MAX];
 
-  /*Si Imputado == NULL, no se ha identificado al posible responsable,
-   * una vez se apruebe la investigacion, el posible responsable pasa a ser imputado
-   */
-  char rutPosibleResponsable;
 
  };
 
+struct NodoDenuncias {
+  struct Denuncia *denuncia;
+  struct NodoDenuncias *sig;
+};
 
 
 struct Peticion {
-  char *ruc;
-  char *rut;
+  char ruc[MIN];
+  char rut[MIN];
 
-  /*Quien pidio la peticion (Victima, abogados, pdi, carabineros u otros)*/
-  char *origenPeticion;
+  /*Quien pidio la peticion
+   Si origen == 0 la Victima o su abogado hizo la peticion
+   Si origen == 1 el imputado o su abogado hizo la peticion*/
+  int origenPeticion;
 
   /*Tipos de solicitudes:
-   * Agregar, borrar o modificar Denuncia
-   * Agregar, borrar o modificar Diligencias
-   * Agregar o modificar Imputado
-   * Agregar Diligencias Judiciales
-   * Agregar Pruebas
-   * Agregar Declaraciones
-   *
+   * Si tipo Solicitud == 0, es para revicion de la carpeta
+   * Si tipo Solicitud == 1, es para solicitar diligencias adicionales
    */
-  char *tipoSolicitud;
+  int tipoSolicitud;
 
   char descripcionSolicitud[MAX];
 
@@ -221,6 +266,11 @@ struct MinisterioPublico {
   struct Fiscal **fiscales;
   int tamFiscal;
 };
+/*-----------------------FUNCIONES DE DENUNCIAS----------------------------*/
+void agregarDenuncia(){
+}
+
+
 
 /*-----------------------FUNCIONES DE MENUS----------------------------*/
 void limpiarPantalla() {
