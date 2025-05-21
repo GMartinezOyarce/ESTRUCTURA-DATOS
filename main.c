@@ -277,21 +277,29 @@ void limpiarPantalla() {
   int i;
   for(i=0;i<20;i++) printf("\n");
 }
+struct CarpetaInvestigativa* BUSCARCARPETA(struct arbolCarpetas *raiz, char *ruc) {
+  if (raiz == NULL) return NULL;
 
+  int cmp = strcmp(ruc, raiz->carpetaInvestigativa->ruc);
+  if (cmp == 0) return raiz->carpetaInvestigativa;
+  if (cmp < 0) return BUSCARCARPETA(raiz->izq, ruc);
+  return BUSCARCARPETA(raiz->der, ruc);
+}
+/*Función para buscar una denuncia por RUC en la lista de denuncias del fiscal*/
+struct Denuncia* BUSCARDENUNCIA(struct Fiscal *fiscal, char *ruc) {
+  struct NodoDenuncias *actual = fiscal->Denuncias;
+  while (actual != NULL) {
+    if (strcmp(actual->denuncia->ruc, ruc) == 0) {
+      return actual->denuncia;
+    }
+    actual = actual->sig;
+  }
+  return NULL;
+}
 /*---------------------FUNCIONES SOBRE CARPETAS----------------*/
 
 /*---------------------FUNCION CREAR CARPETA
-/*Función para buscar una denuncia por RUC en la lista de denuncias del fiscal*/
-struct Denuncia* BUSCARDENUNCIA(struct Fiscal *fiscal, char *ruc) {
-    struct NodoDenuncias *actual = fiscal->Denuncias;
-    while (actual != NULL) {
-        if (strcmp(actual->denuncia->ruc, ruc) == 0) {
-            return actual->denuncia;
-        }
-        actual = actual->sig;
-    }
-    return NULL;
-}
+
 
 /* Función para crear una nueva carpeta investigativa*/
 void CrearCarpeta(struct Fiscal *fiscal) {
@@ -313,10 +321,10 @@ void CrearCarpeta(struct Fiscal *fiscal) {
         denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
 
         if (denunciaEncontrada == NULL) {
-            printf("\nNo se encontró ninguna denuncia con el RUC %s\n", rucBusqueda);
+            printf("\nNo se encontro ninguna denuncia con el RUC %s\n", rucBusqueda);
             printf("1. Intentar nuevamente\n");
-            printf("2. Volver al menú anterior\n");
-            printf("Seleccione una opción: ");
+            printf("2. Volver al menu anterior\n");
+            printf("Seleccione una opcion: ");
 
 
             scanf("%d", &opcion);
@@ -384,21 +392,13 @@ void CrearCarpeta(struct Fiscal *fiscal) {
         }
     }
 
-    printf("\n¡Carpeta investigativa creada con éxito!\n");
+    printf("\n¡Carpeta investigativa creada con exito!\n");
     printf("Presione Enter para continuar...");
     getchar();
 }
 
 
 /*-----------------------------FUNCION AGREGAR DECLARACION------------------*/
-struct CarpetaInvestigativa* BUSCARCARPETA(struct arbolCarpetas *raiz, char *ruc) {
-  if (raiz == NULL) return NULL;
-
-  int cmp = strcmp(ruc, raiz->carpetaInvestigativa->ruc);
-  if (cmp == 0) return raiz->carpetaInvestigativa;
-  if (cmp < 0) return BUSCARCARPETA(raiz->izq, ruc);
-  return BUSCARCARPETA(raiz->der, ruc);
-}
 
 void agregarDeclaracion(struct Fiscal *fiscal) {
   struct Declaracion *nuevo = NULL;
@@ -408,21 +408,27 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   char rucCarpeta[14];
 
   limpiarPantalla();
+  getchar();
 
   if (fiscal -> carpetas == NULL) {
     printf("No hay carpetas a las que pueda agregarle una Declaracion");
+    printf("Presione Enter para continuar...");
+    getchar();
     return;
   }
 
   nuevo = (struct Declaracion*)malloc(sizeof(struct Declaracion));
   nodo = (struct NodoDeclaraciones*)malloc(sizeof(struct NodoDeclaraciones));
 
-  printf("Ingrese el RUC de su Carpeta");
+  printf("Ingrese el RUC de su Carpeta\n");
   fgets(rucCarpeta, MIN, stdin);
   rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
 
   carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
-  /*se NECESITA AÑADIR VERIFICACION*/
+  if (carpeta == NULL) {
+    printf("No se ENCONTRO LA CARPETA");
+    return;
+  }
 
   printf("Ingrese RUT del declarante: ");
   fgets(nuevo -> rut, 14, stdin);
@@ -453,6 +459,8 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
     rec->sig = nodo;
   }
   printf("Declaración agregada con éxito\n");
+  printf("Presione Enter para continuar...");
+  getchar();
 }
 /*-------------------------FUNCION AGREGAR  DILIGENCIAS-----------------*/
 void agregarDiligencia(struct Fiscal *fiscal) {
@@ -514,6 +522,8 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   }
 
   printf("\nDiligencia agregada correctamente.\n");
+  printf("Presione Enter para continuar...");
+  getchar();
 }
 
 /*---------FUNCION AGREGAR RESOLUCION----------------*/
@@ -534,7 +544,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
     return;
   }
 
-  nodo = (struct Nodoresoluciones*)malloc(sizeof(struct NodoResoluciones));
+  nodo = (struct NodoResoluciones*)malloc(sizeof(struct NodoResoluciones));
   nuevaResolucion = (struct Resolucion*)malloc(sizeof(struct Resolucion));
   limpiarPantalla();
 
@@ -544,7 +554,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
   printf("1. Autorizacion para Diligancias/n");
   printf("2. Medida Cautelar/n");
   printf("3. Sobreseimiento/n");
-  scanf("%d", nuevaResolucion->tipoResolucion);
+  scanf("%d", &nuevaResolucion->tipoResolucion);
 
   /*Si origen == 0 la resolucion fue emitida por el Juez de Garantia
    * Si origen == 1 la resolucion fue emitida por el tribunal de Juicio Oral
@@ -552,7 +562,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
   printf("Ingrese el Origen de la Resolucion/n");
   printf("0. Resolución emitida por Juez de Garantía/n");
   printf("1. Resolución emitida por Tribunal De jucio Oral/n");
-  scanf("%d", nuevaResolucion-> origenResolucion);
+  scanf("%d", &nuevaResolucion-> origenResolucion);
 
   printf("Ingrese la Descripcion de su Resolucion/n");
   fgets(nuevaResolucion->descripcion, MAX, stdin);
@@ -575,6 +585,8 @@ void agregarResolucion(struct Fiscal *fiscal) {
     rec->sig = nodo;
   }
   printf("Resolución agregada Correctamente");
+  printf("Presione Enter para continuar...");
+  getchar();
 }
 /*-------------------------FUNCION AGREGAR IMPUTADO-----------------------------------------*/
 void agregarImputado(struct Fiscal *fiscal) {
@@ -615,8 +627,107 @@ void agregarImputado(struct Fiscal *fiscal) {
   carpeta -> imputado = nuevoImputado;
 
   printf("Imputado Agregar Correctamente.");
+  printf("Presione Enter para continuar...");
+  getchar();
 }
 
+/*--------------------FUNCION AGREGAR PRUEBA----------------------*/
+void agregarPrueba(struct Fiscal *fiscal) {
+  struct Prueba *nuevaPrueba;
+  struct NodoPruebas *nuevoNodo;
+  struct NodoPruebas *rec;
+  struct CarpetaInvestigativa *carpeta;
+  char rucCarpeta[MAX];
+  char enter[1];
+
+  limpiarPantalla();
+
+  printf("Ingrese el RUC de su Imputado");
+  fgets(rucCarpeta, MIN, stdin);
+  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
+
+  carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
+  if (carpeta == NULL) {
+    printf("CARPETA NO ENCONTRADA.");
+    return;
+  }
+  nuevaPrueba = (struct Prueba*)malloc(sizeof(struct Prueba));
+  nuevoNodo = (struct NodoPruebas*)malloc(sizeof(struct NodoPruebas));
+
+  printf("Ingrese tipo de prueba (0: Informe, 1: Grabación, 2: Documento, 3: Física): ");
+  scanf("%d", &nuevaPrueba->tipoDePrueba);
+  getchar();
+
+  printf("Ingrese descripción: ");
+  fgets(nuevaPrueba->descripcionPrueba, MAX, stdin);
+  nuevaPrueba->descripcionPrueba[strcspn(nuevaPrueba->descripcionPrueba, "\n")] = 0;
+
+  printf("Ingrese fecha (dd/mm/aaaa): ");
+  scanf("%s", nuevaPrueba->fecha);
+
+  nuevoNodo->prueba = nuevaPrueba;
+  nuevoNodo->sig = NULL;
+
+  if (carpeta->pruebas == NULL) {
+    carpeta->pruebas = nuevoNodo;
+  } else {
+    rec = carpeta->pruebas;
+    while (rec->sig != NULL) {
+      rec = rec->sig;
+    }
+    rec->sig = nuevoNodo;
+  }
+
+  printf("La prueba se asigno correctamente");
+  printf("Presione Enter para continuar...");
+  getchar();
+
+}
+void listarCarpetasRecursivo(struct arbolCarpetas *raiz) {
+  struct CarpetaInvestigativa *carpeta;
+
+  /*CASOS BASE*/
+  if (raiz == NULL) {
+    return;
+  }
+  /*SE RECORRE DE MANERA IN-ORDER*/
+  /*se recorre la parte izquierda de la raiz*/
+  listarCarpetasRecursivo(raiz-> izq);
+  carpeta = raiz -> carpetaInvestigativa;
+  printf("--------------------------------------------------\n");
+  printf("RUC: %s\n", carpeta->ruc);
+  printf("Estado: ");
+  switch (carpeta->estadoCarpeta) {
+    case 0: printf("En investigación\n"); break;
+    case 1: printf("Juicio Oral\n"); break;
+    case 2: printf("Archivada\n"); break;
+    case 3: printf("Cerrada\n"); break;
+    default: printf("Desconocido\n"); break;
+  }
+  printf("Descripción Estado: %s\n", carpeta->descripcionEstadoCarpeta);
+  if (carpeta->imputado)
+    printf("RUT Imputado: %s\n", carpeta->imputado->rut);
+  else
+    printf("Sin imputado asignado\n");
+
+  // 3. Recorre subárbol derecho
+  listarCarpetasRecursivo(raiz->der);
+}
+
+
+void listarCarpetas(struct Fiscal *fiscal) {
+  limpiarPantalla();
+  printf("=============== LISTADO DE CARPETAS =============");
+  if (fiscal-> carpetas == NULL) {
+    printf("NO HAY CARPETAS REGISTRADAS");
+    return;
+  }
+  /*el listar Carpetas solo se puede hacer recursivo*/
+  listarCarpetasRecursivo(fiscal-> carpetas);
+
+  printf("Presione Enter para continuar...");
+  getchar();
+}
 /*-------------------------*/
 
 
@@ -650,9 +761,12 @@ void menuDenuncias() {
     }
   } while(opcion != 0);
 }
+
 void menuCarpetas(struct Fiscal *fiscal) {
   int opcion;
   limpiarPantalla();
+  getchar();
+
   do {
     printf("\n === Gestion de Carpetas investigativas.\n");
     printf("1. Crear nueva Carpeta Investigativa.\n");
@@ -662,8 +776,8 @@ void menuCarpetas(struct Fiscal *fiscal) {
     printf("5. Agregar diligencia a Carpeta.\n");
     printf("6. Agregar resolucion a Carpeta.\n");
     printf("7. Agregar imputado a Carpeta;\n");
-    printf("8. Agregar Pruebas a Carpeta.");
-    printf("8. listar todas las Carpetas\n");
+    printf("8. Agregar Pruebas a Carpeta.\n");
+    printf("9. listar todas las Carpetas\n");
     printf("0. Volver al Menu Principal\n");
 
     scanf("%d", &opcion);
@@ -674,10 +788,10 @@ void menuCarpetas(struct Fiscal *fiscal) {
       case 3: /*funcion MODIFICAR estado Carpeta*/ break;
       case 4: agregarDeclaracion(fiscal); break;
       case 5: agregarDiligencia(fiscal); break;
-      case 6: agregarResolucion(fiscal);   break;
+      case 6: agregarResolucion(fiscal); break;
       case 7: agregarImputado(fiscal); break;
-      case 8: /*funcion AGREGAR prueabas*/ break;
-      case 9: /*funcion LISTAR carpetas*/ break;
+      case 8: agregarPrueba(fiscal); break;
+      case 9: listarCarpetas(fiscal); break;
       case 0: /*volver al menu principal*/ break;
       default: printf("Opcion Invalida. Intente Denuevo"); break;
     }
@@ -791,7 +905,7 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
   int opcion;
   limpiarPantalla();
   do {
-    printf("\n=== SISTEMA DE GESTIÓN PENAL - MINISTERIO PÚBLICO ===\n");
+    printf("\n=== SISTEMA DE GESTION PENAL - MINISTERIO PUBLICO ===\n");
     printf("1. Registrar / Consultar Denuncias\n");
     printf("2. Gestionar Carpetas Investigativas\n");
     printf("3. Administrar Imputados\n");
@@ -800,16 +914,16 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
     printf("6. Gestionar Sentencias y Resoluciones\n");
     printf("7. Generar Reportes\n");
     printf("0. Salir\n");
-    printf("Seleccione una opción: ");
+    printf("Seleccione una opcion: ");
     scanf("%d", &opcion);
 
     switch(opcion) {
       case 1: menuDenuncias(); break;
       case 2: menuCarpetas(fiscal); break;
-      case 3: /*menuImputados()*/; break;
-      case 4: /*menuDiligencias()*/; break;
-      case 5: /*menuCausas()*/; break;
-      case 6: /*menuSentencias()*/; break;
+      case 3: menuImputados(fiscal); break;
+      case 4: menuDiligencias(); break;
+      case 5: menuCausas(); break;
+      case 6: menuSentenciasResoluciones(); break;
       case 7: /*generarReportes()*/; break;
       case 0: return ;
       default: printf("Opción inválida. Intente nuevamente.\n");
@@ -817,7 +931,122 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
   } while(opcion != 0);
 }
 
+/*PARA DATOS DE PRUEBA*/
+
+void inicializarDatosPrueba(struct MinisterioPublico *mp) {
+    /* Declarar todas las variables al inicio del bloque */
+    struct Fiscal* fiscal;
+    struct Denuncia* denuncia;
+    struct NodoDenuncias* nodoDenuncia;
+    struct CarpetaInvestigativa* carpeta;
+    struct Imputado* imputado;
+    struct Declaracion* decl;
+    struct NodoDeclaraciones* nodoDecl;
+    struct Diligencia* dil;
+    struct NodoDiligencias* nodoDil;
+    struct Resolucion* res;
+    struct NodoResoluciones* nodoRes;
+    struct arbolCarpetas* arbol;
+
+    /* Inicializar Ministerio Público */
+    mp->tamFiscal = 1;
+    mp->fiscales = (struct Fiscal**)malloc(sizeof(struct Fiscal*) * 1);
+
+    /* Crear fiscal */
+    fiscal = (struct Fiscal*)malloc(sizeof(struct Fiscal));
+    strcpy(fiscal->rut, "12345678-9");
+    strcpy(fiscal->contrasenia, "pass123");
+    fiscal->Peticiones = NULL;
+    fiscal->Juicios = NULL;
+    fiscal->carpetas = NULL;
+
+    /* Crear denuncia */
+    denuncia = (struct Denuncia*)malloc(sizeof(struct Denuncia));
+    strcpy(denuncia->ruc, "123456789-2024");
+    strcpy(denuncia->denunciante, "98765432-1");
+    denuncia->origenDenunciante = 0;
+    strcpy(denuncia->fecha, "01/01/2024");
+    denuncia->causa = 1;
+    denuncia->estadoDenuncia = 0;
+    strcpy(denuncia->descripcion, "Robo de computador en oficina");
+
+    /* Enlazar denuncia */
+    nodoDenuncia = (struct NodoDenuncias*)malloc(sizeof(struct NodoDenuncias));
+    nodoDenuncia->denuncia = denuncia;
+    nodoDenuncia->sig = NULL;
+    fiscal->Denuncias = nodoDenuncia;
+
+    /* Crear carpeta */
+    carpeta = (struct CarpetaInvestigativa*)malloc(sizeof(struct CarpetaInvestigativa));
+    strcpy(carpeta->ruc, "123456789-2024");
+    carpeta->estadoCarpeta = 0;
+    strcpy(carpeta->descripcionEstadoCarpeta, "En investigacion inicial");
+    carpeta->denuncia = denuncia;
+    carpeta->declaraciones = NULL;
+    carpeta->pruebas = NULL;
+    carpeta->diligencias = NULL;
+    carpeta->resoluciones = NULL;
+
+    /* Crear imputado */
+    imputado = (struct Imputado*)malloc(sizeof(struct Imputado));
+    strcpy(imputado->rut, "19283746-5");
+    imputado->causa = 1;
+    strcpy(imputado->medidasCautelares, "Arraigo nacional");
+    carpeta->imputado = imputado;
+
+    /* Crear declaracion */
+    decl = (struct Declaracion*)malloc(sizeof(struct Declaracion));
+    strcpy(decl->rut, "11223344-5");
+    decl->origenDeclaracion = 1;
+    strcpy(decl->declaracion, "Vi al sospechoso en el lugar de los hechos");
+    strcpy(decl->fecha, "02/01/2024");
+
+    nodoDecl = (struct NodoDeclaraciones*)malloc(sizeof(struct NodoDeclaraciones));
+    nodoDecl->declaracion = decl;
+    nodoDecl->sig = NULL;
+    carpeta->declaraciones = nodoDecl;
+
+    /* Crear diligencia */
+    dil = (struct Diligencia*)malloc(sizeof(struct Diligencia));
+    dil->OrigenDiligencia = 0;
+    strcpy(dil->tipoDiligencia, "Allanamiento");
+    strcpy(dil->descripcionDiligencia, "Allanamiento domicilio sospechoso");
+    strcpy(dil->fechaDiligencia, "03/01/2024");
+    dil->decicion = 1;
+    dil->urgencia = 3;
+    dil->impacto = 3;
+
+    nodoDil = (struct NodoDiligencias*)malloc(sizeof(struct NodoDiligencias));
+    nodoDil->diligencia = dil;
+    nodoDil->sig = NULL;
+    carpeta->diligencias = nodoDil;
+
+    /* Crear resolucion */
+    res = (struct Resolucion*)malloc(sizeof(struct Resolucion));
+    res->tipoResolucion = 1;
+    res->origenResolucion = 0;
+    strcpy(res->descripcion, "Autorizacion para allanamiento");
+    strcpy(res->fecha, "02/01/2024");
+
+    nodoRes = (struct NodoResoluciones*)malloc(sizeof(struct NodoResoluciones));
+    nodoRes->resolucion = res;
+    nodoRes->sig = NULL;
+    carpeta->resoluciones = nodoRes;
+
+    /* Configurar arbol */
+    arbol = (struct arbolCarpetas*)malloc(sizeof(struct arbolCarpetas));
+    arbol->carpetaInvestigativa = carpeta;
+    arbol->izq = NULL;
+    arbol->der = NULL;
+    fiscal->carpetas = arbol;
+
+    /* Asignar fiscal */
+    mp->fiscales[0] = fiscal;
+}
 int main(){
+  struct MinisterioPublico ministerioPublico;
+  inicializarDatosPrueba(&ministerioPublico);
+  mostrarMenuPrincipal(ministerioPublico.fiscales[0]);
 
   return 0;
 }
