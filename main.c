@@ -278,6 +278,112 @@ void limpiarPantalla() {
   for(i=0;i<20;i++) printf("\n");
 }
 
+/*---------------------FUNCIONES SOBRE CARPETAS----------------*/
+
+/*Función para buscar una denuncia por RUC en la lista de denuncias del fiscal*/
+struct Denuncia* BUSCARDENUNCIA(struct Fiscal *fiscal, char *ruc) {
+    struct NodoDenuncias *actual = fiscal->Denuncias;
+    while (actual != NULL) {
+        if (strcmp(actual->denuncia->ruc, ruc) == 0) {
+            return actual->denuncia;
+        }
+        actual = actual->sig;
+    }
+    return NULL;
+}
+
+/* Función para crear una nueva carpeta investigativa*/
+void CrearCarpeta(struct arbolCarpetas *Arbol, struct Fiscal *fiscal) {
+    char rucBusqueda[MIN];
+    struct Denuncia *denunciaEncontrada = NULL;
+    struct CarpetaInvestigativa *nuevaCarpeta = NULL;
+    struct arbolCarpetas *actual = NULL;
+    struct arbolCarpetas *nuevoNodo = NULL;
+    int opcion;
+
+    /* Paso 1: Buscar la denuncia por RUC*/
+    do {
+        limpiarPantalla();
+        printf("---------------CREAR CARPETA INVESTIGATIVA-------------------\n");
+        printf("Ingrese el RUC de la denuncia asociada (formato: 123456789-2025): ");
+        scanf("%s", rucBusqueda);
+        getchar();
+
+        denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
+
+        if (denunciaEncontrada == NULL) {
+            printf("\nNo se encontró ninguna denuncia con el RUC %s\n", rucBusqueda);
+            printf("1. Intentar nuevamente\n");
+            printf("2. Volver al menú anterior\n");
+            printf("Seleccione una opción: ");
+
+
+            scanf("%d", &opcion);
+            getchar();
+
+            if (opcion == 2) {
+                return; // Salir de la función si el usuario elige volver
+            }
+        }
+    } while (denunciaEncontrada == NULL);
+
+    /* Paso 2: Crear la nueva carpeta investigativa*/
+    nuevaCarpeta = (struct CarpetaInvestigativa*)malloc(sizeof(struct CarpetaInvestigativa));
+
+    /* Copiar el RUC de la denuncia*/
+    strcpy(nuevaCarpeta->ruc, denunciaEncontrada->ruc);
+
+    /* Asignar la denuncia encontrada*/
+    nuevaCarpeta->denuncia = denunciaEncontrada;
+
+    /* Inicializar otros campos*/
+    nuevaCarpeta->declaraciones = NULL;
+    nuevaCarpeta->pruebas = NULL;
+    nuevaCarpeta->diligencias = NULL;
+    nuevaCarpeta->resoluciones = NULL;
+    nuevaCarpeta->imputado = NULL;
+    nuevaCarpeta-> estadoCarpeta = 0;
+
+
+    /* Paso 3: Insertar la carpeta en el árbol*/
+    if (Arbol == NULL) {
+        // Crear el árbol si no existe
+        Arbol = (struct arbolCarpetas*)malloc(sizeof(struct arbolCarpetas));
+        Arbol->carpetaInvestigativa = nuevaCarpeta;
+        Arbol->izq = NULL;
+        Arbol->der = NULL;
+    }
+    else {
+        /* Insertar en el árbol binario ordenado por RUC*/
+        actual = Arbol;
+        nuevoNodo = (struct arbolCarpetas*)malloc(sizeof(struct arbolCarpetas));
+        nuevoNodo->carpetaInvestigativa = nuevaCarpeta;
+        nuevoNodo->izq = NULL;
+        nuevoNodo->der = NULL;
+
+        while (actual != NULL) {
+            if (strcmp(nuevaCarpeta->ruc, actual->carpetaInvestigativa->ruc) < 0) {
+                if (actual->izq == NULL) {
+                    actual->izq = nuevoNodo;
+                    break;
+                } else {
+                    actual = actual->izq;
+                }
+            } else {
+                if (actual->der == NULL) {
+                    actual->der = nuevoNodo;
+                    break;
+                } else {
+                    actual = actual->der;
+                }
+            }
+        }
+    }
+
+    printf("\n¡Carpeta investigativa creada con éxito!\n");
+    printf("Presione Enter para continuar...");
+    getchar();
+}
 void menuDenuncias() {
   int opcion;
   limpiarPantalla();
@@ -305,7 +411,7 @@ void menuDenuncias() {
     }
   } while(opcion != 0);
 }
-void menuCarpetas(struct CarpetaInvestigativa Carpeta) {
+void menuCarpetas(struct arbolCarpetas *carpetas, struct Fiscal *fiscal) {
   int opcion;
   limpiarPantalla();
   do {
@@ -324,7 +430,7 @@ void menuCarpetas(struct CarpetaInvestigativa Carpeta) {
     scanf("%d", &opcion);
 
     switch(opcion) {
-      case 1: /*funcion CREAR Carpeta*/ break;
+      case 1: CrearCarpeta(carpetas,fiscal); break;
       case 2: /*funcion MODIFICAR carpeta RUC */ break;
       case 3: /*funcion MODIFICAR estado Carpeta*/ break;
       case 4: /*funcion AGREGAR declaración*/ break;
@@ -332,7 +438,7 @@ void menuCarpetas(struct CarpetaInvestigativa Carpeta) {
       case 6: /*funcion AGREGAR resolucion*/ break;
       case 7: /*funcion AGREGAR imputado*/ break;
       case 8: /*funcion AGREGAR prueabas*/ break;
-      case 8: /*funcion LISTAR carpetas*/ break;
+      case 9: /*funcion LISTAR carpetas*/ break;
       case 0: /*volver al menu principal*/ break;
       default: printf("Opcion Invalida. Intente Denuevo"); break;
     }
@@ -358,10 +464,10 @@ void menuImputados(){
       case 1: /* función agregar imputado */ break;
       case 2: /* función modificarImputado  */ break;
       case 3: /* función agregar declaraciones */ break;
-      case 4; /* función agregar medidas cautelares */ break;
+      case 4: /* función agregar medidas cautelares */ break;
       case 5: /* función agregar estadoo procesal */ break;
-      case 6; /* función buscarImputado */ break;
-      case 7; /* función mostrar todos los imputados del fiscal */ break;
+      case 6: /* función buscarImputado */ break;
+      case 7: /* función mostrar todos los imputados del fiscal */ break;
       case 0: break;
       default: printf("Opción inválida.\n");
     }
@@ -446,7 +552,7 @@ void menuSentenciasResoluciones() {
 }
 
 
-void mostrarMenuPrincipal() {
+void mostrarMenuPrincipal(struct Fiscal *fiscal) {
   int opcion;
   limpiarPantalla();
   do {
@@ -464,7 +570,7 @@ void mostrarMenuPrincipal() {
 
     switch(opcion) {
       case 1: menuDenuncias(); break;
-      case 2: menuCarpetas(); break;
+      case 2: menuCarpetas(fiscal-> carpetas, fiscal); break;
       case 3: /*menuImputados()*/; break;
       case 4: /*menuDiligencias()*/; break;
       case 5: /*menuCausas()*/; break;
