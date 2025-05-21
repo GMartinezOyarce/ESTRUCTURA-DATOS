@@ -285,6 +285,20 @@ struct CarpetaInvestigativa* BUSCARCARPETA(struct arbolCarpetas *raiz, char *ruc
   if (cmp < 0) return BUSCARCARPETA(raiz->izq, ruc);
   return BUSCARCARPETA(raiz->der, ruc);
 }
+
+/* Limpiar el buffer de entrada después de un scanf()*/
+void limpiarBuffer() {
+  int c;
+  while ((c = getchar()) != '\n' && c != EOF);
+}
+
+/* Esperar a que el usuario presione Enter*/
+void esperarEnter() {
+  printf("\nPresione Enter para continuar...\n");
+  limpiarBuffer(); /* Consume el '\n' previo si existe*/
+  getchar(); /* Espera a que el usuario presione Enter*/
+}
+
 /*Función para buscar una denuncia por RUC en la lista de denuncias del fiscal*/
 struct Denuncia* BUSCARDENUNCIA(struct Fiscal *fiscal, char *ruc) {
   struct NodoDenuncias *actual = fiscal->Denuncias;
@@ -328,7 +342,7 @@ void CrearCarpeta(struct Fiscal *fiscal) {
 
 
             scanf("%d", &opcion);
-            getchar();
+            limpiarBuffer();
 
 
             if (opcion == 2) {
@@ -412,8 +426,7 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
 
   if (fiscal -> carpetas == NULL) {
     printf("No hay carpetas a las que pueda agregarle una Declaracion");
-    printf("Presione Enter para continuar...");
-    getchar();
+    esperarEnter();
     return;
   }
 
@@ -427,6 +440,7 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
   if (carpeta == NULL) {
     printf("No se ENCONTRO LA CARPETA");
+    esperarEnter();
     return;
   }
 
@@ -436,7 +450,7 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
 
   printf("Ingrese origen (0: Víctima, 1: Testigo, 2: Imputado): ");
   scanf("%d", &nuevo->origenDeclaracion);
-  getchar();
+  limpiarBuffer();
 
   printf("Ingrese declaración: ");
   fgets(nuevo->declaracion, MAX, stdin);
@@ -459,8 +473,7 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
     rec->sig = nodo;
   }
   printf("Declaración agregada con éxito\n");
-  printf("Presione Enter para continuar...");
-  getchar();
+  esperarEnter();
 }
 /*-------------------------FUNCION AGREGAR  DILIGENCIAS-----------------*/
 void agregarDiligencia(struct Fiscal *fiscal) {
@@ -482,11 +495,15 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
 
   carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
-  /*se NECESITA AÑADIR VERIFICACION*/
+  if (carpeta == NULL) {
+    printf("No se ENCONTRO LA CARPETA");
+    esperarEnter();
+    return;
+  }
 
   printf("Ingrese origen (0: Fiscal, 1: Víctima, 2: Imputado): ");
   scanf("%d", &nueva->OrigenDiligencia);
-  getchar();
+  limpiarBuffer();
 
   printf("Ingrese tipo de diligencia: ");
   fgets(nueva->tipoDiligencia, MAX, stdin);
@@ -498,15 +515,19 @@ void agregarDiligencia(struct Fiscal *fiscal) {
 
   printf("Ingrese fecha (dd/mm/aaaa): ");
   scanf("%s", nueva->fechaDiligencia);
+  limpiarBuffer();
 
   printf("Ingrese decisión (1: Aprobada, 0: Rechazada): ");
   scanf("%d", &nueva->decicion);
+  limpiarBuffer();
 
   printf("Ingrese urgencia (1: Baja, 2: Media, 3: Alta): ");
   scanf("%d", &nueva->urgencia);
+  limpiarBuffer();
 
   printf("Ingrese impacto (1: Bajo, 2: Medio, 3: Alto): ");
   scanf("%d", &nueva->impacto);
+  limpiarBuffer();
 
   nodo->diligencia = nueva;
   nodo->sig = NULL;
@@ -522,8 +543,7 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   }
 
   printf("\nDiligencia agregada correctamente.\n");
-  printf("Presione Enter para continuar...");
-  getchar();
+  esperarEnter();
 }
 
 /*---------FUNCION AGREGAR RESOLUCION----------------*/
@@ -541,6 +561,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
   carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
   if (carpeta == NULL) {
     printf("CARPETA NO ENCONTRADA.");
+    esperarEnter();
     return;
   }
 
@@ -555,6 +576,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
   printf("2. Medida Cautelar/n");
   printf("3. Sobreseimiento/n");
   scanf("%d", &nuevaResolucion->tipoResolucion);
+  limpiarBuffer();
 
   /*Si origen == 0 la resolucion fue emitida por el Juez de Garantia
    * Si origen == 1 la resolucion fue emitida por el tribunal de Juicio Oral
@@ -563,6 +585,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
   printf("0. Resolución emitida por Juez de Garantía/n");
   printf("1. Resolución emitida por Tribunal De jucio Oral/n");
   scanf("%d", &nuevaResolucion-> origenResolucion);
+  limpiarBuffer();
 
   printf("Ingrese la Descripcion de su Resolucion/n");
   fgets(nuevaResolucion->descripcion, MAX, stdin);
@@ -585,8 +608,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
     rec->sig = nodo;
   }
   printf("Resolución agregada Correctamente");
-  printf("Presione Enter para continuar...");
-  getchar();
+  esperarEnter();
 }
 /*-------------------------FUNCION AGREGAR IMPUTADO-----------------------------------------*/
 void agregarImputado(struct Fiscal *fiscal) {
@@ -601,7 +623,8 @@ void agregarImputado(struct Fiscal *fiscal) {
 
   carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
   if (carpeta == NULL) {
-    printf("CARPETA NO ENCONTRADA.");
+    printf("CARPETA NO ENCONTRADA.\n");
+    esperarEnter();
     return;
   }
 
@@ -618,7 +641,7 @@ void agregarImputado(struct Fiscal *fiscal) {
   printf("1. Delito Simple (Ejemplo: Hurto, estafa)");
   printf("2. Falta (Ejemplo: Infracciones de transito)");
   scanf("%d", nuevoImputado-> causa);
-  getchar();
+  limpiarBuffer();
 
   printf("Ingrese las Medidas Cautelares (MAX 1000 caracteres)");
   fgets(nuevoImputado->medidasCautelares, MAX, stdin);
@@ -627,8 +650,7 @@ void agregarImputado(struct Fiscal *fiscal) {
   carpeta -> imputado = nuevoImputado;
 
   printf("Imputado Agregar Correctamente.");
-  printf("Presione Enter para continuar...");
-  getchar();
+  esperarEnter();
 }
 
 /*--------------------FUNCION AGREGAR PRUEBA----------------------*/
@@ -642,13 +664,14 @@ void agregarPrueba(struct Fiscal *fiscal) {
 
   limpiarPantalla();
 
-  printf("Ingrese el RUC de su Imputado");
+  printf("Ingrese el RUC de su Imputado ");
   fgets(rucCarpeta, MIN, stdin);
   rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
 
   carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
   if (carpeta == NULL) {
-    printf("CARPETA NO ENCONTRADA.");
+    printf("CARPETA NO ENCONTRADA.\n");
+    esperarEnter();
     return;
   }
   nuevaPrueba = (struct Prueba*)malloc(sizeof(struct Prueba));
@@ -656,7 +679,7 @@ void agregarPrueba(struct Fiscal *fiscal) {
 
   printf("Ingrese tipo de prueba (0: Informe, 1: Grabación, 2: Documento, 3: Física): ");
   scanf("%d", &nuevaPrueba->tipoDePrueba);
-  getchar();
+  limpiarBuffer();
 
   printf("Ingrese descripción: ");
   fgets(nuevaPrueba->descripcionPrueba, MAX, stdin);
@@ -664,6 +687,7 @@ void agregarPrueba(struct Fiscal *fiscal) {
 
   printf("Ingrese fecha (dd/mm/aaaa): ");
   scanf("%s", nuevaPrueba->fecha);
+  limpiarBuffer();
 
   nuevoNodo->prueba = nuevaPrueba;
   nuevoNodo->sig = NULL;
@@ -679,8 +703,7 @@ void agregarPrueba(struct Fiscal *fiscal) {
   }
 
   printf("La prueba se asigno correctamente");
-  printf("Presione Enter para continuar...");
-  getchar();
+  esperarEnter();
 
 }
 void listarCarpetasRecursivo(struct arbolCarpetas *raiz) {
@@ -725,8 +748,7 @@ void listarCarpetas(struct Fiscal *fiscal) {
   /*el listar Carpetas solo se puede hacer recursivo*/
   listarCarpetasRecursivo(fiscal-> carpetas);
 
-  printf("Presione Enter para continuar...");
-  getchar();
+  esperarEnter();
 }
 /*-------------------------*/
 
