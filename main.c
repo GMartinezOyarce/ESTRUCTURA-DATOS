@@ -422,6 +422,7 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
 
   carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
+  /*se NECESITA AÑADIR VERIFICACION*/
 
   printf("Ingrese RUT del declarante: ");
   fgets(nuevo -> rut, 14, stdin);
@@ -454,14 +455,26 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   printf("Declaración agregada con éxito\n");
 }
 /*-------------------------FUNCION AGREGAR  DILIGENCIAS-----------------*/
-void agregarDiligenciaACarpeta(struct CarpetaInvestigativa *carpeta) {
+void agregarDiligencia(struct Fiscal *fiscal) {
   struct Diligencia *nueva;
   struct NodoDiligencias *nodo;
+  struct CarpetaInvestigativa *carpeta;
+  struct NodoDiligencias *rec= NULL;
+  char rucCarpeta[14];
+
+
 
   nueva = (struct Diligencia*)malloc(sizeof(struct Diligencia));
   nodo = (struct NodoDiligencias*)malloc(sizeof(struct NodoDiligencias));
 
   limpiarPantalla();
+
+  printf("Ingrese el RUC de su Carpeta");
+  fgets(rucCarpeta, MIN, stdin);
+  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
+
+  carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
+  /*se NECESITA AÑADIR VERIFICACION*/
 
   printf("Ingrese origen (0: Fiscal, 1: Víctima, 2: Imputado): ");
   scanf("%d", &nueva->OrigenDiligencia);
@@ -488,11 +501,127 @@ void agregarDiligenciaACarpeta(struct CarpetaInvestigativa *carpeta) {
   scanf("%d", &nueva->impacto);
 
   nodo->diligencia = nueva;
-  nodo->sig = carpeta->diligencias;
-  carpeta->diligencias = nodo;
+  nodo->sig = NULL;
+
+  if (carpeta->diligencias == NULL) {
+    carpeta->diligencias = nodo;
+  } else {
+    rec = carpeta->diligencias;
+    while (rec->sig != NULL) {
+      rec = rec->sig;
+    }
+    rec->sig = nodo;
+  }
 
   printf("\nDiligencia agregada correctamente.\n");
 }
+
+/*---------FUNCION AGREGAR RESOLUCION----------------*/
+void agregarResolucion(struct Fiscal *fiscal) {
+  struct NodoResoluciones *nodo;
+  struct NodoResoluciones *rec;
+  struct Resolucion *nuevaResolucion;
+  struct CarpetaInvestigativa *carpeta;
+  char rucCarpeta[14];
+
+  printf("Ingrese el RUC de la carpteta a la que desea agregar una Resolucion");
+  fgets(rucCarpeta, MIN, stdin);
+  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
+
+  carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
+  if (carpeta == NULL) {
+    printf("CARPETA NO ENCONTRADA.");
+    return;
+  }
+
+  nodo = (struct Nodoresoluciones*)malloc(sizeof(struct NodoResoluciones));
+  nuevaResolucion = (struct Resolucion*)malloc(sizeof(struct Resolucion));
+  limpiarPantalla();
+
+
+  printf("/nÏngrese el tipo de resolución:/n ");
+  printf("0. Sentencia/n");
+  printf("1. Autorizacion para Diligancias/n");
+  printf("2. Medida Cautelar/n");
+  printf("3. Sobreseimiento/n");
+  scanf("%d", nuevaResolucion->tipoResolucion);
+
+  /*Si origen == 0 la resolucion fue emitida por el Juez de Garantia
+   * Si origen == 1 la resolucion fue emitida por el tribunal de Juicio Oral
+   */
+  printf("Ingrese el Origen de la Resolucion/n");
+  printf("0. Resolución emitida por Juez de Garantía/n");
+  printf("1. Resolución emitida por Tribunal De jucio Oral/n");
+  scanf("%d", nuevaResolucion-> origenResolucion);
+
+  printf("Ingrese la Descripcion de su Resolucion/n");
+  fgets(nuevaResolucion->descripcion, MAX, stdin);
+  nuevaResolucion->descripcion[strcspn(nuevaResolucion->descripcion, "\n")] = 0;
+
+  printf("Ingrese la Fecha de su Resolucion/n");
+  fgets(nuevaResolucion->fecha, MAX, stdin);
+  nuevaResolucion->fecha[strcspn(nuevaResolucion->fecha, "\n")] = 0;
+
+  nodo->resolucion = nuevaResolucion;
+  nodo->sig = NULL;
+
+  if (carpeta->resoluciones == NULL) {
+    carpeta->resoluciones = nodo;
+  } else {
+    rec = carpeta->resoluciones;
+    while (rec->sig != NULL) {
+      rec = rec->sig;
+    }
+    rec->sig = nodo;
+  }
+  printf("Resolución agregada Correctamente");
+}
+/*-------------------------FUNCION AGREGAR IMPUTADO-----------------------------------------*/
+void agregarImputado(struct Fiscal *fiscal) {
+  struct Imputado *nuevoImputado;
+  struct CarpetaInvestigativa *carpeta;
+  char rucCarpeta[MIN];
+  limpiarPantalla();
+
+  printf("Ingrese el RUC de su Imputado");
+  fgets(rucCarpeta, MIN, stdin);
+  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
+
+  carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
+  if (carpeta == NULL) {
+    printf("CARPETA NO ENCONTRADA.");
+    return;
+  }
+
+  limpiarPantalla();
+
+  nuevoImputado = (struct Imputado*)malloc(sizeof(struct Imputado));
+
+  printf("Ingrese el RUT del imputado(123456789-8)/n");
+  fgets(nuevoImputado-> rut, MIN, stdin);
+  nuevoImputado->rut[strcspn(nuevoImputado->rut, "\n")] = 0;
+
+  printf("Ingrese la Causa (Solamente un numero)/n");
+  printf("0. Crimen (Infraccion grave)/n");
+  printf("1. Delito Simple (Ejemplo: Hurto, estafa)");
+  printf("2. Falta (Ejemplo: Infracciones de transito)");
+  scanf("%d", nuevoImputado-> causa);
+  getchar();
+
+  printf("Ingrese las Medidas Cautelares (MAX 1000 caracteres)");
+  fgets(nuevoImputado->medidasCautelares, MAX, stdin);
+  nuevoImputado->medidasCautelares[strcspn(nuevoImputado-> medidasCautelares, "\n")] = 0;
+
+  carpeta -> imputado = nuevoImputado;
+
+  printf("Imputado Agregar Correctamente.");
+}
+
+/*-------------------------*/
+
+
+
+
 /*-----------------------------------------------------------------------*/
 void menuDenuncias() {
   int opcion;
@@ -544,9 +673,9 @@ void menuCarpetas(struct Fiscal *fiscal) {
       case 2: /*funcion MODIFICAR carpeta RUC */ break;
       case 3: /*funcion MODIFICAR estado Carpeta*/ break;
       case 4: agregarDeclaracion(fiscal); break;
-      case 5: /*funcion AGREGAR diligencia*/ break;
-      case 6: /*funcion AGREGAR resolucion*/ break;
-      case 7: /*funcion AGREGAR imputado*/ break;
+      case 5: agregarDiligencia(fiscal); break;
+      case 6: agregarResolucion(fiscal);   break;
+      case 7: agregarImputado(fiscal); break;
       case 8: /*funcion AGREGAR prueabas*/ break;
       case 9: /*funcion LISTAR carpetas*/ break;
       case 0: /*volver al menu principal*/ break;
@@ -555,29 +684,25 @@ void menuCarpetas(struct Fiscal *fiscal) {
   }while (opcion != 0);
 }
 
-void menuImputados(){
+void menuImputados(struct Fiscal *fiscal){
   int opcion;
   do {
     printf("\n--- Gestión de Imputados---\n");
     printf("1. Agregar Imputado a una Carpeta Investigativa\n");
     printf("2. Modificar Imputado\n");
     printf("3. Agregar Declaraciones\n");
-    printf("4. Agregar Medidas Cautelares\n");
-    printf("5. Agregar Estado Procesal\n");
-    printf("6. Buscar Imputado por RUT o Causa\n");
-    printf("7. Listar Todos los imputados del Fiscal\n");
+    printf("4. Buscar Imputado por RUT o Causa\n");
+    printf("5. Listar Todos los imputados del Fiscal\n");
     printf("0. Volver al Menú Principal\n");
     printf("Seleccione una opcion: ");
     scanf("%d", &opcion);
 
     switch(opcion) {
-      case 1: /* función agregar imputado */ break;
-      case 2: /* función modificarImputado  */ break;
-      case 3: /* función agregar declaraciones */ break;
-      case 4: /* función agregar medidas cautelares */ break;
-      case 5: /* función agregar estadoo procesal */ break;
-      case 6: /* función buscarImputado */ break;
-      case 7: /* función mostrar todos los imputados del fiscal */ break;
+      case 1: agregarImputado(fiscal); break;
+      case 2: /* función modificarImputado */ break;
+      case 3: agregarDeclaracion(fiscal); break;
+      case 4: /* función buscarImputado */ break;
+      case 5: /* función mostrar todos los imputados del fiscal */ break;
       case 0: break;
       default: printf("Opción inválida.\n");
     }
