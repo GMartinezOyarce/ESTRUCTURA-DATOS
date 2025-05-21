@@ -741,7 +741,7 @@ void recorrerBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
   recorrerBuscarRUT(nodoArbol->izq, rutBuscado);
 
   if(nodoArbol->carpetaInvestigativa->imputado != NULL){
-    struct imputado *imputado = nodoArbol->carpetaInvestigativa->imputado;
+    struct Imputado *imputado = nodoArbol->carpetaInvestigativa->imputado;
     if (strcmp(imputado->rut, rutBuscado) == 0) {
       printf("\n--- Imputado Encontrado ---\n");
       printf("RUT: %s\n", imputado->rut);
@@ -880,8 +880,8 @@ void menuImputados(struct Fiscal *fiscal){
       case 1: agregarImputado(fiscal); break;
       case 2: /* función modificautadorImp */ break;
       case 3: agregarDeclaracion(fiscal); break;
-      case 4: buscarImputadoPorRut(fiscal) break;
-      case 5: mostrarTodosImputados(fiscal) break;
+      case 4: buscarImputadoPorRut(fiscal); break;
+      case 5: mostrarTodosImputados(fiscal); break;
       case 0: break;
       default: printf("Opción inválida.\n");
     }
