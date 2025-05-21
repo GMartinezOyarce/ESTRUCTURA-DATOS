@@ -730,6 +730,71 @@ void listarCarpetas(struct Fiscal *fiscal) {
 }
 /*-------------------------*/
 
+/*----------Funciones MenuCarpeta---------*/
+
+/*--------Función recorrerRut--------*/
+
+void recorrerBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
+  if (nodoArbol == NULL) {
+      return;
+  }
+  recorrerBuscarRUT(nodoArbol->izq, rutBuscado);
+
+  if(nodoArbol->carpetaInvestigativa->imputado != NULL){
+    struct imputado *imputado = nodoArbol->carpetaInvestigativa->imputado;
+    if (strcmp(imputado->rut, rutBuscado) == 0) {
+      printf("\n--- Imputado Encontrado ---\n");
+      printf("RUT: %s\n", imputado->rut);
+      printf("Causa: %s\n", imputado->causa);
+      printf("Medidas cautelares: %s\n", imputado->medidasCautelares);
+      printf("RUC de la carpeta: %s\n", nodoArbol->carpetaInvestigativa->ruc);
+    }
+  }
+  recorrerBuscarRUT(nodoArbol->der, rutBuscado);
+}
+
+void buscarImputadoPorRut(struct Fiscal *fiscal){
+  char rut[MIN];
+
+  if(fiscal->carpetas == NULL) {
+    printf("No hay carpetas registradas.\n");
+    return;
+  }
+  limpiarPantalla();
+  printf("=== BUSCAR IMPUTADO POR RUT ===\n");
+  printf("Ingrese el RUT del imputado: ");
+  fgets(rut, MIN, stdin);
+  rut[strcspn(rut, "\n")]= 0;  /*saltar linea de posible espacio*/
+  recorrerBuscarRUT(fiscal->carpetas, rut);
+}
+
+void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol){
+  if(nodoArbol == NULL) {
+    return;
+  }
+
+  mostrarTodosLosImputados(nodoArbol->izq);
+  struct Imputado *imputado = nodoArbol->carpetaInvestigativa->imputado;
+  if(imputado != NULL){
+    printf("\n--- IMPUTADO ---\n");
+    printf("RUT: %s\n", imputado->rut);
+    printf("Causa: %s\n", imputado->causa);
+    printf("Medidas Cautelares: %s\n", imputado->medidasCautelares);
+    printf("RUC Carpeta: %s\n", nodoArbol->carpetaInvestigativa->ruc);
+  }
+  mostrarTodosLosImputados(nodoArbol->der);
+}
+
+void mostrarTodosImputados(struct Fiscal *fiscal){
+  if (fiscal->carpetas == NULL) {
+    printf("No hay carpetas registradas.\n");
+    return;
+  }
+
+  limpiarPantalla();
+  printf("=== LISTADO DE IMPUTADOS DEL FISCAL ===\n");
+  mostrarTodosLosImputados(fiscal->carpetas);
+}
 
 
 
@@ -813,10 +878,10 @@ void menuImputados(struct Fiscal *fiscal){
 
     switch(opcion) {
       case 1: agregarImputado(fiscal); break;
-      case 2: /* función modificarImputado */ break;
+      case 2: /* función modificautadorImp */ break;
       case 3: agregarDeclaracion(fiscal); break;
-      case 4: /* función buscarImputado */ break;
-      case 5: /* función mostrar todos los imputados del fiscal */ break;
+      case 4: buscarImputadoPorRut(fiscal) break;
+      case 5: mostrarTodosImputados(fiscal) break;
       case 0: break;
       default: printf("Opción inválida.\n");
     }
