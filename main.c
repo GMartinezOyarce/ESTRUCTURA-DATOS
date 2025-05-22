@@ -326,6 +326,128 @@ int revisarEspacios( char *str) {
 
 
 /*-----------------------FUNCIONES DE DENUNCIAS----------------------------*/
+void printDenuncia (struct Denuncia *denuncia) {
+  printf("\n\n");
+  printf("RUC: %s\n\n",denuncia->ruc);
+  /*Print de quien hizo la denuncia*/
+  if (denuncia->origenDenunciante == 0) {
+    printf("Denunciante: Victima\n\n");
+  }
+  if (denuncia->origenDenunciante== 1) {
+    printf("Denunciante: Testigo\n\n");
+  }
+  if (denuncia->origenDenunciante== 2) {
+    printf("Denunciante: Un Tercero\n\n");
+  }
+  if (denuncia->origenDenunciante== 3) {
+    printf("Denunciante: Carabineros\n\n");
+  }
+  if (denuncia->origenDenunciante== 4) {
+    printf("Denunciante: PDI\n\n");
+  }
+
+  printf("Rut Denunciante: %s\n\n",denuncia->rutDenunciante);
+
+  /*Print de las causas*/
+  if (denuncia->causa == 0) {
+    printf("Causa por la cual se esta denunciando: Crimen\n\n");
+  }
+  if (denuncia->causa == 1) {
+    printf("Causa por la cual se esta denunciando: Delito\n\n");
+  }
+  if (denuncia->causa == 2) {
+    printf("Causa por la cual se esta denunciando: Infraccion\n\n");
+  }
+
+  printf("Descripcion: %s\n\n",denuncia->descripcion);
+
+  printf("Fecha en la cual se hizo la denuncia: %s\n\n",denuncia->fecha);
+
+  /*Print de estados de la denuncia*/
+  if (denuncia->estadoDenuncia == -1) {
+    printf("Estado: Todavia no se ha iniciado Ninguna investigacion a la Denuncia\n\n");
+  }
+  if (denuncia->estadoDenuncia == 0) {
+    printf("Estado: Denuncia en investigacion\n\n");
+  }
+  if (denuncia->estadoDenuncia == 1) {
+    printf("Estado: Denuncia se encuentra en Juicio Oral\n\n");
+  }
+  if (denuncia->estadoDenuncia == 2) {
+    printf("Estado: Denuncia se encuentra archivada\n\n");
+  }
+  if (denuncia->estadoDenuncia == 3) {
+    printf("Estado: Denuncia ha sido cerrada de forma permanente\n\n");
+  }
+
+}
+void buscarDenunciaRUC(struct Fiscal *fiscal) {
+  int opcion;
+  struct Denuncia *denuncia;
+  char ruc[RUC];
+  do {
+    printf("Ingrese RUC de la denuncia:\n");
+    limpiarBuffer();
+    fgets(ruc, RUC, stdin);
+    ruc[strcspn(ruc, "\n")] = 0;
+    if (ruc[9] != '-' || revisarEspacios(ruc) == 1) {
+      printf("Formato Equivocado\n");
+      printf("1. Intentar nuevamente\n");
+      printf("2. Volver al menu anterior\n");
+      printf("Seleccione una opcion: \n");
+      limpiarBuffer();
+      scanf("%d", &opcion);
+
+    }else {
+      break;
+    }
+  }while (1);
+
+  denuncia = BUSCARDENUNCIA(fiscal,&ruc);
+  if (denuncia == NULL) {
+    printf("No se ha encontrado su Denuncia\n");
+  }else {
+    printDenuncia(denuncia);
+  }
+
+}
+
+void buscarDenunciaEstado(struct Fiscal *fiscal) {
+  int opcion,encontrado = 0;
+  struct NodoDenuncias *head = fiscal->denuncias, *actual;
+  limpiarPantalla();
+  if (head == NULL) {
+
+    printf("No se ha ingresado ninguna Denuncia al sistema\n");
+
+  }else {
+    do {
+      printf("Ingrese el numero de estado de Denuncia:\n");
+      printf("-1 = Sin investigacion\n");
+      printf("0 = en investigacion\n");
+      printf("1 = en Juicio Oral\n");
+      printf("2 = Archivada\n");
+      printf("3 = Cerrada\n");
+      printf("Seleccione una opcion: \n");
+      limpiarBuffer();
+      scanf("%d", &opcion);
+      if (opcion == -1 || opcion == 0 || opcion == 1|| opcion == 2 || opcion == 3) {
+        break;
+      }
+      limpiarPantalla();
+    }while (1);
+    actual = head;
+    do {
+      if (actual->denuncia->estadoDenuncia == opcion) {
+        printDenuncia(actual->denuncia);
+      }
+      actual = actual->sig;
+    }while (actual != head);
+  }
+
+}
+
+
 void agregarDenuncia(struct Fiscal *fiscal) {
   struct NodoDenuncias *nodo;
   struct Denuncia *denuncia;
@@ -425,18 +547,21 @@ void agregarDenuncia(struct Fiscal *fiscal) {
 
   nodo = (struct NodoDenuncias *)malloc(sizeof(struct NodoDenuncias));
   nodo ->denuncia = denuncia;
+  /*Si el nodo esta vacio*/
   if (fiscal->denuncias == NULL) {
     fiscal->denuncias = nodo;
 
     nodo ->ant = nodo;
     nodo ->sig = nodo;
   }else {
+    /*Si Solo existe un nodo*/
     if (fiscal->denuncias->sig == fiscal->denuncias) {
       fiscal->denuncias->sig = nodo;
       fiscal->denuncias -> ant = nodo;
       nodo->sig = fiscal->denuncias;
       nodo->ant = fiscal->denuncias;
     }else {
+      /*Si existen 2 nodos o más*/
       nodo ->ant = fiscal->denuncias->ant;
       nodo ->sig = fiscal->denuncias;
       fiscal->denuncias->ant->sig = nodo;
@@ -447,6 +572,20 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   
 }
 
+void listarDenuncias(struct Fiscal *fiscal) {
+  struct NodoDenuncias *head = fiscal->denuncias, *actual;
+  limpiarPantalla();
+  if (head == NULL) {
+
+    printf("No se ha ingresado ninguna Denuncia al sistema\n");
+
+  }else {
+    actual = head;
+    do {
+      printDenuncia(actual->denuncia);
+    }while (actual!=head);
+  }
+}
 
 
 /*---------------------FUNCIONES SOBRE CARPETAS----------------*/
@@ -1394,8 +1533,8 @@ void menuDenuncias(struct Fiscal *fiscal) {
 
     switch(opcion) {
       case 1: agregarDenuncia(fiscal); break;
-      case 2: /* función buscar denuncia RUC */ break;
-      case 3: /* funcion buscar denuncia Estado*/ break;
+      case 2: buscarDenunciaRUC(fiscal); break;
+      case 3: buscarDenunciaEstado(fiscal); break;
       case 4: /* función modificar denuncia */ break;
       case 5: /* función eliminar denuncia */ break;
       case 6: /* función listar denuncias */ break;
@@ -1514,7 +1653,7 @@ void menuCausas() {
   } while(opcion != 0);
 }
 
-void menuSentenciasResoluciones() {
+void menuSentenciasResoluciones(*fiscal) {
   int opcion;
   do {
     printf("\n--- Gestión de Sentencias y Resoluciones ---\n");
@@ -1531,7 +1670,7 @@ void menuSentenciasResoluciones() {
 
     switch(opcion) {
       case 1: /* función agregar sentencia */ break;
-      case 2: /* función agregar resolucion */ break;
+      case 2: agregarResolucion(fiscal); break;
       case 3: /* función buscar resolución por causa */ break;
       case 4: /* función buscar resolución por imputado */ break;
       case 5: /* función buscar resolución por tipo */ break;
