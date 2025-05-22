@@ -304,6 +304,7 @@ void esperarEnter() {
 struct Denuncia* BUSCARDENUNCIA(struct Fiscal *fiscal, char *ruc) {
   struct NodoDenuncias *actual = fiscal->denuncias,*head;
   head = actual;
+  if (fiscal -> denuncias == NULL) return NULL;
   do{
     if (strcmp(actual->denuncia->ruc, ruc) == 0) {
       return actual->denuncia;
@@ -333,6 +334,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
 
   do {
     limpiarPantalla();
+    limpiarBuffer();
     printf("---------------CREAR DEMANDA-------------------\n");
     printf("Ingrese el RUC de la denuncia (formato: 123456789-2025): \n");
     fgets(ruc, RUC, stdin);
@@ -347,7 +349,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
       limpiarBuffer();
 
       if (opcion == 2) {
-        return; // Salir de la función si el usuario elige volver
+        return; /* Salir de la función si el usuario elige volver*/
       }
     }else {
       if(BUSCARDENUNCIA(fiscal,ruc) != NULL) {
@@ -358,7 +360,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
         scanf("%d", &opcion);
         limpiarBuffer();
         if (opcion == 2) {
-          return; // Salir de la función si el usuario elige volver
+          return;  /*Salir de la función si el usuario elige volver*/
         }
       }else {
         break;
@@ -374,7 +376,8 @@ void agregarDenuncia(struct Fiscal *fiscal) {
     printf("Quien esta haciendo la Denuncia?\n");
     printf("0 = Victima , 1 = Testigo, 2 = Tercero , 3 = Carabineros , 4 = PDI\n");
     scanf("%d", &denuncia->origenDenunciante);
-    if (denuncia->origenDenunciante == 1 || denuncia->origenDenunciante == 2 || denuncia->origenDenunciante == 3 || denuncia->origenDenunciante == 4) {
+    limpiarBuffer();
+    if (denuncia -> origenDenunciante == 0 || denuncia->origenDenunciante == 1 || denuncia->origenDenunciante == 2 || denuncia->origenDenunciante == 3 || denuncia->origenDenunciante == 4) {
       break;
     }
   }while (1);
@@ -383,15 +386,17 @@ void agregarDenuncia(struct Fiscal *fiscal) {
     /*Pendiente: Como verificar que un rut sea correcto*/
     limpiarPantalla();
     printf("Ingrese Su Rut:\n");
+    limpiarBuffer();
     fgets(denuncia ->rutDenunciante, 14, stdin);
     denuncia-> rutDenunciante[strcspn(denuncia -> rutDenunciante, "\n")] = 0;
     break;
   }while (1);
 
   do {
-    limpiarPantalla();
+    limpiarBuffer();
     printf("Ingrese Fecha: (Formato: 01/01/2000 )\n");
     fgets(denuncia ->fecha, FECHA, stdin);
+    limpiarPantalla();
     if (revisarEspacios(denuncia->fecha) == 1 || denuncia->fecha[2]!= '/'|| denuncia->fecha[5] != '/') {
       printf("Formato Equivocado:\n");
     }else {
@@ -412,6 +417,8 @@ void agregarDenuncia(struct Fiscal *fiscal) {
     }
   }while (1);
 
+  limpiarBuffer();
+  printf("Ingrese la descripcion de su Denuncia\n");
   fgets(denuncia->descripcion, TEXTO , stdin);
   denuncia->descripcion[strcspn(denuncia->descripcion, "\n")] = 0;
   denuncia->estadoDenuncia = -1;
@@ -557,7 +564,7 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   char rucCarpeta[14];
 
   limpiarPantalla();
-  getchar();
+  limpiarBuffer();
 
   if (fiscal -> carpetas == NULL) {
     printf("No hay carpetas a las que pueda agregarle una Declaracion");
@@ -578,7 +585,7 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
     esperarEnter();
     return;
   }
-
+  limpiarBuffer();
   printf("Ingrese RUT del declarante: \n");
   fgets(nuevo -> rut, RUT, stdin);
   nuevo-> rut[strcspn(nuevo -> rut, "\n")] = 0;
@@ -1401,6 +1408,7 @@ void menuDenuncias(struct Fiscal *fiscal) {
 void menuCarpetas(struct Fiscal *fiscal) {
   int opcion;
   limpiarPantalla();
+  limpiarBuffer();
 
   do {
     printf("\n === Gestion de Carpetas investigativas.\n");
@@ -1608,7 +1616,8 @@ void inicializarDatosPrueba(struct MinisterioPublico *mp) {
     /* Enlazar denuncia */
     nodoDenuncia = (struct NodoDenuncias*)malloc(sizeof(struct NodoDenuncias));
     nodoDenuncia->denuncia = denuncia;
-    nodoDenuncia->sig = NULL;
+    nodoDenuncia->sig = nodoDenuncia;
+    nodoDenuncia->ant = nodoDenuncia;
     fiscal->denuncias = nodoDenuncia;
 
     /* Crear carpeta */
