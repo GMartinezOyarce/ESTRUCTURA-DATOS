@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TEXTO 1000 /*ESTOS NOMBRES CREO QUE HAY QUE CAMBIARLOS*/
+#define TEXTO 1000
 #define RUC 15
 #define FECHA 11
 #define RUT 11
@@ -201,6 +201,7 @@ struct Denuncia{
    */
   int causa;
   /*Posibles Estados de Denuncia:
+   *Si estado == -1 Todavia no se inicia la investigacion
   *Si estado == 0 En investigacion
   *Si estado == 1 Juicio Oral
   *Si estado == 2 Archivada
@@ -213,9 +214,10 @@ struct Denuncia{
 
  };
 
+/*Lista Circular Doblemente Enlazada*/
 struct NodoDenuncias {
   struct Denuncia *denuncia;
-  struct NodoDenuncias *sig;
+  struct NodoDenuncias *sig,*ant;
 };
 
 
@@ -310,7 +312,7 @@ struct Denuncia* BUSCARDENUNCIA(struct Fiscal *fiscal, char *ruc) {
   return NULL;
 }
 
-int revisarEspacios(const char *str) {
+int revisarEspacios( char *str) {
   int i;
   for (i = 0; str[i] != '\0'; i++) {
     if (str[i] == ' ') {
@@ -384,12 +386,44 @@ void agregarDenuncia(struct Fiscal *fiscal) {
     break;
   }while (1);
 
+  do {
+    limpiarPantalla();
+    printf("Ingrese Fecha: (Formato: 01/01/2000 )\n");
+    fgets(denuncia ->fecha, FECHA, stdin);
+    if (revisarEspacios(denuncia->fecha) == 1 || denuncia->fecha[2]!= '/'|| denuncia->fecha[5] != '/') {
+      printf("Formato Equivocado:\n");
+    }else {
+      break;
+    }
+  }while (1);
+
+  do {
+    limpiarPantalla();
+    printf("Ingrese La Causa:\n");
+    printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
+    printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
+    printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
+    scanf("%d", &denuncia->causa);
+    limpiarBuffer();
+    if (denuncia-> causa == 0 || denuncia-> causa == 1 || denuncia-> causa == 2) {
+      break;
+    }
+  }while (1);
+
+  fgets(denuncia->descripcion, TEXTO , stdin);
+  denuncia->descripcion[strcspn(denuncia->descripcion, "\n")] = 0;
+  denuncia->estadoDenuncia = -1;
+
 
   if (fiscal->denuncias == NULL) {
 
   }
 
 }
+
+
+
+
 /*---------------------FUNCIONES SOBRE CARPETAS----------------*/
 
 /*---------------------FUNCION CREAR CARPETA
