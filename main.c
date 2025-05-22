@@ -558,8 +558,8 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
     return;
   }
 
-  printf("Ingrese RUT del declarante: ");
-  fgets(nuevo -> rut, 14, stdin);
+  printf("Ingrese RUT del declarante: \n");
+  fgets(nuevo -> rut, RUT, stdin);
   nuevo-> rut[strcspn(nuevo -> rut, "\n")] = 0;
 
   printf("Ingrese origen (0: Víctima, 1: Testigo, 2: Imputado): ");
@@ -916,7 +916,7 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol){
   if(imputado != NULL){
     printf("\n--- IMPUTADO ---\n");
     printf("RUT: %s\n", imputado->rut);
-    printf("Causa: %s\n", imputado->causa);
+    printf("Causa: %d\n", imputado->causa);
     printf("Medidas Cautelares: %s\n", imputado->medidasCautelares);
     printf("RUC Carpeta: %s\n", nodoArbol->carpetaInvestigativa->ruc);
   }
@@ -1380,7 +1380,6 @@ void menuDenuncias(struct Fiscal *fiscal) {
 void menuCarpetas(struct Fiscal *fiscal) {
   int opcion;
   limpiarPantalla();
-  getchar();
 
   do {
     printf("\n === Gestion de Carpetas investigativas.\n");
