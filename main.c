@@ -302,13 +302,14 @@ void esperarEnter() {
 
 /*Función para buscar una denuncia por RUC en la lista de denuncias del fiscal*/
 struct Denuncia* BUSCARDENUNCIA(struct Fiscal *fiscal, char *ruc) {
-  struct NodoDenuncias *actual = fiscal->denuncias;
-  while (actual != NULL) {
+  struct NodoDenuncias *actual = fiscal->denuncias,*head;
+  head = actual;
+  do{
     if (strcmp(actual->denuncia->ruc, ruc) == 0) {
       return actual->denuncia;
     }
     actual = actual->sig;
-  }
+  }while (actual != head);
   return NULL;
 }
 
@@ -325,6 +326,7 @@ int revisarEspacios( char *str) {
 
 /*-----------------------FUNCIONES DE DENUNCIAS----------------------------*/
 void agregarDenuncia(struct Fiscal *fiscal) {
+  struct NodoDenuncias *nodo;
   struct Denuncia *denuncia;
   int opcion;
   char ruc[RUC];
@@ -414,13 +416,29 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   denuncia->descripcion[strcspn(denuncia->descripcion, "\n")] = 0;
   denuncia->estadoDenuncia = -1;
 
-
+  nodo = (struct NodoDenuncias *)malloc(sizeof(struct NodoDenuncias));
+  nodo ->denuncia = denuncia;
   if (fiscal->denuncias == NULL) {
+    fiscal->denuncias = nodo;
 
+    nodo ->ant = nodo;
+    nodo ->sig = nodo;
+  }else {
+    if (fiscal->denuncias->sig == fiscal->denuncias) {
+      fiscal->denuncias->sig = nodo;
+      fiscal->denuncias -> ant = nodo;
+      nodo->sig = fiscal->denuncias;
+      nodo->ant = fiscal->denuncias;
+    }else {
+      nodo ->ant = fiscal->denuncias->ant;
+      nodo ->sig = fiscal->denuncias;
+      fiscal->denuncias->ant->sig = nodo;
+      fiscal->denuncias->ant = nodo;
+    }
   }
-
+  printf("Se ha Agregado Su denuncia\n");
+  
 }
-
 
 
 
@@ -445,7 +463,10 @@ void CrearCarpeta(struct Fiscal *fiscal) {
         printf("Ingrese el RUC de la denuncia asociada (formato: 123456789-2025): ");
         fgets(rucBusqueda, RUC, stdin);
         rucBusqueda[strcspn(rucBusqueda, "\n")] = 0;
-
+        if (fiscal->denuncias == NULL) {
+          printf("No Existen Denuncias\n");
+          return;
+        }
         denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
 
         if (denunciaEncontrada == NULL) {
