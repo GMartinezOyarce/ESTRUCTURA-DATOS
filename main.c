@@ -934,73 +934,9 @@ void mostrarTodosImputados(struct Fiscal *fiscal){
   mostrarTodosLosImputados(fiscal->carpetas);
 }
 
-/-----------------------------------------------------------------------/
+/*-----------------------------------------------------------------------*/
 
-/--------Funciones MenuDiligencias------------------------/
-
-void agregarDiligencia(struct Fiscal *fiscal){
-  char *ruc[MIN];
-  struct CarpetaInvestigativa *carpeta;
-  struct NodoDiligencias *actual = fiscal->carpetas->carpetaInvestigativa->diligencias;
-  struct Diligencia *nueva;
-  struct NodoDiligencias *nodo;
-
-  if(fiscal->carpetas == NULL) {
-    printf("No hay carpetas registradas.\n");
-    return;
-  }
-
-  limpiarPantalla();
-  printf("=== AGREGAR DILIGENCIA A UNA CARPETA ===\n");
-  printf("Ingrese el RUC de la carpeta investigativa: ");
-  fgets(ruc, MIN, stdin);
-  ruc[strcspn(ruc, "\n")]= 0;
-
-  carpeta = BUSCARCARPETA(fiscal->carpetas, ruc);
-  if (carpeta == NULL) {
-    printf("No se encontró una carpeta con ese RUC. \n");
-    return;
-  }
-
-  nueva = (struct Diligencia* )malloc(sizeof(struct Diligencia));
-  nodo = (struct NodoDiligencias*)malloc(sizeof(struct NodoDiligencias));
-
-  printf("Origen de la diligencia (0: Fiscal, 1: Víctima, 2: Imputado): ");
-  scanf("%d", &nueva->OrigenDiligencia);
-  getchar();
-
-  printf("Tipo de diligencia: ");
-  fgets(nueva->tipoDiligencia, MAX, stdin);
-  nueva->tipoDiligencia[strcspn(nueva->descripcionDiligencia, "\n")]= 0;
-
-  printf("Fecha (dd/mm/aaaa): ");
-  fgets(nueva->fechaDiligencia, MIN, stdin);
-  nueva->fechaDiligencia[strcspn(nueva->fechaDiligencia, "\n")] = 0;
-
-  printf("Decisión (1: Aprobada, 0: Rechazada): ");
-  scanf("%d", &nueva->decicion);
-
-  printf("Nivel de urgencia (1: Baja, 2: Media, 3: Alta): ");
-  scanf("%d", &nueva->urgencia);
-
-  printf("Nivel de impacto (1: Bajo, 2:Medio, 3:Alto): ");
-  scanf("%d", &nueva->impacto);
-
-  nodo->diligencia = nueva;
-  nodo->sig = NULL;
-
-  if (carpeta->diligencias == NULL) {
-    carpeta->diligencias = nodo;
-  } else {
-    actual = carpeta->diligencias;
-    while (actual->sig != NULL) {
-      actual = actual->sig;
-    }
-    actual>sig = nodo;
-  }
-
-  printf("\nDiligencia agregada exitosamente.\n");
-
+/*--------Funciones MenuDiligencias------------------------*/
 
 
 void ListarCausas(struct Fiscal *fiscal) {
