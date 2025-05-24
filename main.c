@@ -190,6 +190,9 @@ struct arbolCarpetas {
   struct arbolCarpetas *izq, *der;
 };
 
+struct RutVictima {
+  char rut[RUT];
+};
 
 struct Denuncia{
   /* RUC Para identificar la denuncia*/
@@ -217,6 +220,7 @@ struct Denuncia{
   */
   int estadoDenuncia;
 
+  struct RutVictima **rutVictimas;
 
  };
 
@@ -511,7 +515,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   do {
 
     /*Usar Funcion Agregar Causa*/
-    
+
     limpiarPantalla();
     printf("Ingrese La Causa:\n");
     printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
