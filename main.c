@@ -304,6 +304,108 @@ int revisarEspacios( char *str) {
   return 0; /*no contiene espacios*/
 }
 
+/*Revisar si funciona*/
+char *ingresarRuc() {
+  char ruc[RUC];
+  char *vacio = NULL;
+  char *ret;
+  int opcion;
+  do {
+    printf("Ingrese RUC de la denuncia:\n");
+    limpiarBuffer();
+    fgets(ruc, RUC, stdin);
+    ruc[strcspn(ruc, "\n")] = 0;
+    if (ruc[9] != '-' || revisarEspacios(ruc) == 1) {
+      printf("Formato Equivocado\n");
+      printf("1. Intentar nuevamente\n");
+      printf("2. Volver al menu anterior\n");
+      printf("Seleccione una opcion: \n");
+      limpiarBuffer();
+      scanf("%d", &opcion);
+      if (opcion == 2) {
+        return vacio;
+      }
+    }else {
+      break;
+    }
+  }while (1);
+  ret = malloc(RUC);
+  if (ret != NULL) {
+    strcpy(ret, ruc);
+  }
+  return ret;
+}
+
+void AGREGARCAUSAS(struct Fiscal *fiscal) {
+  char rucBusqueda[RUC];
+  char *rucTemp;
+  struct Denuncia *denunciaEncontrada=NULL;
+  int opcion;
+  struct NodoCausas *nuevoNodo = NULL,*head;
+
+  if (fiscal->denuncias== NULL) {
+    printf("No hay denuncias en el Sistema");
+    return;
+  }
+
+  do {
+    rucTemp = ingresarRuc();
+    if (rucTemp == NULL) {
+      return; /*Si retorna NUll el usuario quiere volver al menu Principal*/
+    }
+    strcpy(rucBusqueda, rucTemp);
+    denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
+
+
+    if (denunciaEncontrada == NULL) {
+      printf("\nNo se encontró ninguna denuncia con el RUC %s\n", rucBusqueda);
+      printf("1. Intentar nuevamente\n");
+      printf("2. Volver al menú anterior\n");
+      printf("Seleccione una opción: ");
+
+
+      scanf("%d", &opcion);
+      getchar();
+
+
+      if (opcion == 2) {
+        return; // Salir de la función si el usuario elige volver
+      }
+    }
+  }while (denunciaEncontrada == NULL);
+
+  limpiarPantalla();
+  nuevoNodo = (struct NodoCausas *)malloc(sizeof(struct NodoCausas));
+
+  do {
+    limpiarPantalla();
+    printf("Ingrese La Causa:\n");
+    printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
+    printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
+    printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
+    scanf("%d", &nuevoNodo->causa->tipoCausa);
+    limpiarBuffer();
+    if (nuevoNodo-> causa->tipoCausa == 0 || nuevoNodo->causa->tipoCausa == 1 || nuevoNodo-> causa->tipoCausa == 2) {
+      printf("Ingrese la descripcion de su Denuncia\n");
+      scanf("%s",&nuevoNodo->causa->descripcionCausa);
+      break;
+    }
+  }while (1);
+
+  head = denunciaEncontrada->causas;
+  if (head == NULL) {
+    nuevoNodo = head;
+  }else {
+    while (head != NULL) {
+      if (head->sig == NULL) {
+        head->sig = denunciaEncontrada;
+      }
+      head = head->sig;
+    }
+  }
+
+
+}
 
 /*-----------------------FUNCIONES DE DENUNCIAS----------------------------*/
 void printDenuncia (struct Denuncia *denuncia) {
@@ -1132,103 +1234,31 @@ void ListarCausas(struct Fiscal *fiscal) {
   getchar();
 }
 
-void AgregarCausa(struct Fiscal *fiscal) {
-  char rucBusqueda[RUC];
-  int nuevaCausa;
-  struct Denuncia *denunciaEncontrada=NULL;
-  int opcion;
-  struct CarpetaInvestigativa *carpetaEncontrada=NULL;
 
 
-  do {
-    limpiarPantalla();
-    printf("---------------AGREGAR CAUSA-------------------\n");
-    printf("Ingrese el RUC de la denuncia asociada (formato: 123456789-2025): ");
-    fgets(rucBusqueda, RUC, stdin);
-    rucBusqueda[strcspn(rucBusqueda, "\n")] = 0;
 
-    if (fiscal -> carpetas == NULL) {
-      printf("No hay carpetas a las que pueda agregarle una Declaracion");
-      printf("Presione Enter para continuar");
-      getchar();
-      return;
-    }
-
-    denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
-    carpetaEncontrada = BUSCARCARPETA(fiscal->carpetas, rucBusqueda);
-
-    if (denunciaEncontrada == NULL) {
-      printf("\nNo se encontró ninguna denuncia con el RUC %s\n", rucBusqueda);
-      printf("1. Intentar nuevamente\n");
-      printf("2. Volver al menú anterior\n");
-      printf("Seleccione una opción: ");
-
-
-      scanf("%d", &opcion);
-      getchar();
-
-
-      if (opcion == 2) {
-        return; // Salir de la función si el usuario elige volver
-      }
-    }
-  } while (denunciaEncontrada == NULL);
-
+void agregarCausa(struct Fiscal *fiscal) {
   limpiarPantalla();
+  int contador = 0,opcion;
+  printf("Agregar Causas: \n\n");
 
-  if (denunciaEncontrada->causa>=0 && denunciaEncontrada->causa<=2){
-    printf("\nLa denuncia con el RUC %s ya presenta una causa\n", rucBusqueda);
-    if (denunciaEncontrada->causa==0) {
-      printf("CAUSA ACTUAL: Crimen\n");
-    }
-    else if(denunciaEncontrada->causa==1) {
-      printf("CAUSA ACTUAL: Delito\n");
-    }
-    else{
-      printf("CAUSA ACTUAL: Falta\n");
-    }
-    if (carpetaEncontrada!=NULL && carpetaEncontrada->imputado!=NULL) {
-      if (carpetaEncontrada->imputado->causa!=denunciaEncontrada->causa) {
-        printf("\n Nota: Se ha actualizado la causa del Imputado con la causa de la denuncia.");
-        carpetaEncontrada->imputado->causa=denunciaEncontrada->causa;
+  while (1) {
+    if (contador > 0) {
+      printf("Desea Agregar otra Causa: \n");
+      printf("0: Agregar otra Causa \n");
+      printf("Cualquier otra tecla: Volver Al Menu Principal  \n");
+      limpiarBuffer();
+      scanf("%d", &opcion);
+      limpiarBuffer();
+      if (opcion == 0) {
+        AGREGARCAUSAS(fiscal);
+      }else {
+        return;
       }
+    }else {
+      AGREGARCAUSAS(fiscal);
     }
-  }
-
-  else {
-    printf("\nDefina la causa para la denuncia con el RUC %s\n\n", rucBusqueda);
-    printf("Formato:\n");
-    printf("0: Causa: Crimen\n");
-    printf("1: Causa: Delito\n");
-    printf("2: Causa: Falta\n");
-    printf("3: Cancelar\n\n");
-    printf("Ingrese un número: ");
-
-    do {
-      scanf("%d", &nuevaCausa);
-      if(nuevaCausa>=0 && nuevaCausa<=2) {
-        denunciaEncontrada->causa=nuevaCausa;
-        if (carpetaEncontrada!=NULL && carpetaEncontrada->imputado!=NULL) {
-          carpetaEncontrada->imputado->causa=nuevaCausa;
-        }
-        printf("\n\nSe ha definido con éxito una causa.\n");
-        getchar();
-      }
-
-      else if(nuevaCausa==3) {
-        printf("\n\nCancelado. Volviendo al menú anterior.\n");
-      }
-
-      else {
-        printf("\n\nNúmero Ingresado inválido. Inténtelo nuevamente\n\n");
-        printf("Formato:\n");
-        printf("0: Causa: Crimen\n");
-        printf("1: Causa: Delito\n");
-        printf("2: Causa: Falta\n");
-        printf("3: Cancelar\n\n");
-        printf("Ingrese un número: ");
-      }
-    }while (nuevaCausa<0 || nuevaCausa>3);
+    contador++;
   }
 }
 
