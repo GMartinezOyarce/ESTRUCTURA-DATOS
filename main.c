@@ -123,7 +123,7 @@ struct Causa {
   char descripcionCausa[TEXTO];
 };
 
-struct NodocCausas {
+struct NodoCausas {
   struct Causa *causa;
   struct NodoCausas *sig;
 };
@@ -148,7 +148,7 @@ struct Imputado {
   char medidasCautelares[TEXTO];
 
   /*Lista Simple con todas las Causas que se le acusan al imputado*/
-  struct NodocCausas *causas;
+  struct NodoCausas *causas;
 
 };
 
@@ -207,7 +207,7 @@ struct Denuncia{
   char fecha[FECHA];
 
   /*Lista con las Causas por las cuales que se esta haciendo la denuncia*/
-  struct NodocCausas *causas;
+  struct NodoCausas *causas;
   /*Posibles Estados de Denuncia:
    *Si estado == -1 Todavia no se inicia la investigacion
   *Si estado == 0 En investigacion
@@ -303,8 +303,8 @@ int revisarEspacios( char *str) {
 
 /*-----------------------FUNCIONES DE DENUNCIAS----------------------------*/
 void printDenuncia (struct Denuncia *denuncia) {
-  struct NodoCausas *head = denuncia->causas,*rec;
-  rec = head;
+  struct NodoCausas *head = denuncia->causas,*rec = denuncia->causas;
+
   printf("\n\n");
   printf("RUC: %s\n\n",denuncia->ruc);
   /*Print de quien hizo la denuncia*/
@@ -330,18 +330,18 @@ void printDenuncia (struct Denuncia *denuncia) {
     /*Print de las causas*/
     if (rec->causa->tipoCausa == 0) {
       printf("Causa por la cual se esta denunciando: Crimen");
-      printf("Descripcion: %s\n\n",denuncia->causas->causa->descripcionCausa);
+      printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
     }
-    if (denuncia->causas->causa->tipoCausa == 1) {
+    if (rec->causa->tipoCausa == 1) {
       printf("Causa por la cual se esta denunciando: Delito");
-      printf("Descripcion: %s\n\n",denuncia->causas->causa->descripcionCausa);
+      printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
     }
-    if (denuncia->causa == 2) {
+    if (rec->causa->tipoCausa == 2) {
       printf("Causa por la cual se esta denunciando: Infraccion");
+      printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
     }
     rec = rec->sig;
   }while (rec != head);
-  printf("Descripcion: %s\n\n",denuncia->descripcion);
 
   printf("Fecha en la cual se hizo la denuncia: %s\n\n",denuncia->fecha);
 
@@ -509,6 +509,9 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   }while (1);
 
   do {
+
+    /*Usar Funcion Agregar Causa*/
+    
     limpiarPantalla();
     printf("Ingrese La Causa:\n");
     printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
@@ -517,6 +520,8 @@ void agregarDenuncia(struct Fiscal *fiscal) {
     scanf("%d", &denuncia->causa);
     limpiarBuffer();
     if (denuncia-> causa == 0 || denuncia-> causa == 1 || denuncia-> causa == 2) {
+      printf("Ingrese la descripcion de su Denuncia\n");
+
       break;
     }
   }while (1);
