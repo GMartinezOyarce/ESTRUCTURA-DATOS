@@ -343,10 +343,6 @@ void AGREGARCAUSAS(struct Fiscal *fiscal) {
   int opcion;
   struct NodoCausas *nuevoNodo = NULL,*head;
 
-  if (fiscal->denuncias== NULL) {
-    printf("No hay denuncias en el Sistema");
-    return;
-  }
 
   do {
     rucTemp = ingresarRuc();
@@ -387,14 +383,14 @@ void AGREGARCAUSAS(struct Fiscal *fiscal) {
     limpiarBuffer();
     if (nuevoNodo-> causa->tipoCausa == 0 || nuevoNodo->causa->tipoCausa == 1 || nuevoNodo-> causa->tipoCausa == 2) {
       printf("Ingrese la descripcion de su Denuncia\n");
-      scanf("%s",&nuevoNodo->causa->descripcionCausa);
+      fgets(nuevoNodo->causa->descripcionCausa, TEXTO, stdin);
       break;
     }
   }while (1);
 
   head = denunciaEncontrada->causas;
   if (head == NULL) {
-    nuevoNodo = head;
+    head = nuevoNodo;
   }else {
     while (head != NULL) {
       if (head->sig == NULL) {
@@ -541,42 +537,33 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   struct Denuncia *denuncia;
   int opcion;
   char ruc[RUC];
+  char *temporal;
+  printf("---------------CREAR DEMANDA-------------------\n");
+  temporal = ingresarRuc();
+  if (temporal == NULL) {
+    return;
+  }
+  strcpy(ruc, temporal);
 
   do {
-    limpiarPantalla();
-    limpiarBuffer();
-    printf("---------------CREAR DEMANDA-------------------\n");
-    printf("Ingrese el RUC de la denuncia (formato: 123456789-2025): \n");
-    fgets(ruc, RUC, stdin);
-    ruc[strcspn(ruc, "\n")] = 0;
-
-    if (ruc[9] != '-' || revisarEspacios(ruc) == 1) {
-      printf("Formato Equivocado\n");
+    temporal = ingresarRuc();
+    if (temporal == NULL) {
+      return;
+    }
+    strcpy(ruc, temporal);
+    if(BUSCARDENUNCIA(fiscal,ruc) != NULL) {
+      limpiarPantalla();
+      printf("Este RUC ya existe dentro del sistema\n");
       printf("1. Intentar nuevamente\n");
       printf("2. Volver al menu anterior\n");
-      printf("Seleccione una opcion: \n");
       scanf("%d", &opcion);
       limpiarBuffer();
-
       if (opcion == 2) {
-        return; /* Salir de la función si el usuario elige volver*/
+        return;  /*Salir de la función si el usuario elige volver*/
       }
     }else {
-      if(BUSCARDENUNCIA(fiscal,ruc) != NULL) {
-        limpiarPantalla();
-        printf("Este RUC ya existe dentro del sistema\n");
-        printf("1. Intentar nuevamente\n");
-        printf("2. Volver al menu anterior\n");
-        scanf("%d", &opcion);
-        limpiarBuffer();
-        if (opcion == 2) {
-          return;  /*Salir de la función si el usuario elige volver*/
-        }
-      }else {
-        break;
-      }
+      break;
     }
-
   }while(1);
 
   denuncia = (struct Denuncia *)malloc(sizeof(struct Denuncia));
@@ -615,27 +602,18 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   }while (1);
 
   do {
-
-    /*Usar Funcion Agregar Causa*/
-
-    limpiarPantalla();
-    printf("Ingrese La Causa:\n");
-    printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
-    printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
-    printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
-    scanf("%d", &denuncia->causa);
+    AGREGARCAUSAS(fiscal);
+    printf("Desea Agregar Otra Causa a su denuncia?\n");
+    printf("1 = SI , Cualquier otra tecla = NO");
     limpiarBuffer();
-    if (denuncia-> causa == 0 || denuncia-> causa == 1 || denuncia-> causa == 2) {
-      printf("Ingrese la descripcion de su Denuncia\n");
-
+    scanf("%d", &opcion);
+    if (opcion == 1) {
       break;
     }
   }while (1);
 
   limpiarBuffer();
-  printf("Ingrese la descripcion de su Denuncia\n");
-  fgets(denuncia->descripcion, TEXTO , stdin);
-  denuncia->descripcion[strcspn(denuncia->descripcion, "\n")] = 0;
+
   denuncia->estadoDenuncia = -1;
 
   nodo = (struct NodoDenuncias *)malloc(sizeof(struct NodoDenuncias));
@@ -1240,6 +1218,12 @@ void ListarCausas(struct Fiscal *fiscal) {
 void agregarCausa(struct Fiscal *fiscal) {
   limpiarPantalla();
   int contador = 0,opcion;
+
+  if (fiscal->denuncias== NULL) {
+    printf("No hay denuncias en el Sistema");
+    return;
+  }
+
   printf("Agregar Causas: \n\n");
 
   while (1) {
