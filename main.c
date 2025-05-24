@@ -7,25 +7,6 @@
 #define FECHA 11
 #define RUT 11
 
-struct JuicioOral {
-  /*Si sentencia == 0 es Condenatoria
-   *Si sentencia == 1 es Absolutoria*/
-  int sentencia;
-  char descripcionSentencia[TEXTO];
-
-  /*si tipoDeJuicio == 0, es un juicio publico
-   * si tipodeJuicio == 1, es un juicio privado
-   */
-  int tipoDeJuicio;
-
-  struct CarpetaInvestigativa *investigacion;
-};
-
-/*Lista Simplemente Enlazada*/
-struct NodoJuicioOral {
-  struct JuicioOral *juicio;
-  struct NodoJuicioOral *sig;
-};
 
 struct Prueba {
   /*Si Tipo Prueba == 0 es un informe Pericial
@@ -46,7 +27,8 @@ struct NodoPruebas {
 
 
 struct Resolucion {
-  /*Si Tipo Resolucion == 0 es Sentencia
+  char rutJuez[TEXTO];
+  /*Si Tipo Resolucion == 0 es Sentencia o Fallo
    * si Tipo Resolucion == 1 es Autorizacion para diligencias
    * si Tipo Resolucion == 2 es una medida Cautelar
    * si tipo Resolucion == 3 es un sobreseimiento
@@ -72,7 +54,7 @@ struct Diligencia {
   /*La persona que pidio la diligencia
    *Si Origen Diligencia == 0 lo pidio El fiscal
    *Si origen == 1 lo pidio la victima,
-   *Si origen == 2 lo pidioel imputado
+   *Si origen == 2 lo pidio el imputado
    */
   int OrigenDiligencia;
 
@@ -91,10 +73,10 @@ struct Diligencia {
   /*Si quien pide la diligencia no es el fiscal,
    * la diligencia queda como rechazada pero igualmente se guarda
    * dentro de la carpeta investigativa
-   * si declaracion == 1, aprobada
-   * si declaracion == 0, rechazada
+   * si aprobacion == 1, aprobada
+   * si aprobacion == 0, rechazada
    */
-  int decicion;
+  int aprobacion;
   /*Si urgencia == 1, es urgencia baja
    * Si urgencia == 2, es urgencia media
    * Si urgencia == 3, es urgencia Alta
@@ -131,23 +113,49 @@ struct NodoDeclaraciones{
   struct NodoDeclaraciones *sig;
 };
 
-struct Imputado{
-  /*Rut del imputado*/
-  char rut[RUT];
+struct Causa {
   /*Tipo de causa por la que de esta demandando
    * si causa == 0 es un crimen (Infraccion grave)
    * si causa == 1 es un delito simple (Ejemplo:Hurto, estafa)
    * si causa == 2 es una falta (Ejemplo: Infracciones de transito)
    */
-  int causa;
+  int tipoCausa;
+  char descripcionCausa[TEXTO];
+};
+
+struct NodocCausas {
+  struct Causa *causa;
+  struct NodoCausas *sig;
+};
+
+struct Imputado {
+  /*Rut del imputado*/
+  char rut[RUT];
+
   /*Medidas que se tomo para controlar al imputado,
    * como prision preventiva o arraigo
    */
+  /*Si sentencia == 0 es Condenatoria
+  *Si sentencia == 1 es Absolutoria*/
+  int tipoSentencia;
+
+  /*Si se hace un sobresimiento, un acuerdo reparatorio,
+   *escribir aca la desripcion de la decision,
+   * si se hace una sentencia hacer una descripcion, etc.
+   */
+  char descripcionSentencia[TEXTO];
+
   char medidasCautelares[TEXTO];
 
+  /*Lista Simple con todas las Causas que se le acusan al imputado*/
+  struct NodocCausas *causas;
 
 };
 
+struct NodoImputados {
+  struct Imputado *imputado;
+  struct NodoImputados *sig;
+};
 
 struct CarpetaInvestigativa {
   char ruc[RUC];
@@ -158,10 +166,14 @@ struct CarpetaInvestigativa {
    *Si estado == 3 Cerrada
    */
   int estadoCarpeta;
-  /*Si se hace un sobresimiento, un acuerdo reparatorio, escribir aca la desripcion de la decision*/
-  char descripcionEstadoCarpeta[TEXTO];
+
+  /*si tipoDeJuicio == 0, es un juicio publico
+   * si tipodeJuicio == 1, es un juicio privado
+   */
+  int tipoDeJuicio;
+
   struct Denuncia *denuncia;
-  struct Imputado *imputado;
+  struct NodoImputado *imputado;
   /*Lista Simplemente enlazada*/
   struct NodoDeclaraciones *declaraciones;
   /*Lista Simplemente enlazada*/
@@ -194,12 +206,8 @@ struct Denuncia{
   /*Fecha en la que se hizo la denuncia*/
   char fecha[FECHA];
 
-  /*Tipo de causa por la que de esta demandando
-   * si causa == 0 es un crimen (Infraccion grave)
-   * si causa == 1 es un delito simple (Ejemplo:Hurto, estafa)
-   * si causa == 2 es una falta (Ejemplo: Infracciones de transito)
-   */
-  int causa;
+  /*Lista con las Causas por las cuales que se esta haciendo la denuncia*/
+  struct NodocCausas *causas;
   /*Posibles Estados de Denuncia:
    *Si estado == -1 Todavia no se inicia la investigacion
   *Si estado == 0 En investigacion
@@ -208,8 +216,6 @@ struct Denuncia{
   *Si estado == 3 Cerrada
   */
   int estadoDenuncia;
-  /*Descripcion del Caso*/
-  char descripcion[TEXTO];
 
 
  };
@@ -218,36 +224,6 @@ struct Denuncia{
 struct NodoDenuncias {
   struct Denuncia *denuncia;
   struct NodoDenuncias *sig,*ant;
-};
-
-
-struct Peticion {
-  char ruc[RUC];
-  char rut[RUT];
-
-  /*Quien pidio la peticion
-   Si origen == 0 la Victima o su abogado hizo la peticion
-   Si origen == 1 el imputado o su abogado hizo la peticion*/
-  int origenPeticion;
-
-  /*Tipos de solicitudes:
-   * Si tipo Solicitud == 0, es para revicion de la carpeta
-   * Si tipo Solicitud == 1, es para solicitar diligencias adicionales
-   */
-  int tipoSolicitud;
-
-  char descripcionSolicitud[TEXTO];
-
-  /*Si aprobacion == 0, la peticion todavia no se ha revisado
-   * Si aprobacion == 1, la peticion se ha aprobado
-   * si aprobacion == -1, la peticion se ha rechazado
-   */
-  int aprobacion;
-};
-/*Lista Simple con nodo Fantasma*/
-struct NodoPeticiones {
-  struct Peticion *peticion;
-  struct NodoPeticiones *sig;
 };
 
 struct Fiscal {
@@ -259,10 +235,10 @@ struct Fiscal {
    * porque en este caso solo se agregan denuncias, no se eliminan
    */
   struct NodoDenuncias *denuncias;
-  /*lista simplemente enlazada juicios*/
-  struct NodoJuicioOral *juicios;
   /*arbol binario con carpetas de investigacion*/
   struct arbolCarpetas *carpetas;
+  /*Lista Simple con los imputados*/
+  struct NodoImputados *imputados;
 };
 
 /*Struct principal con un arreglo fiscales de tamaño TamFiscal*/
@@ -327,6 +303,8 @@ int revisarEspacios( char *str) {
 
 /*-----------------------FUNCIONES DE DENUNCIAS----------------------------*/
 void printDenuncia (struct Denuncia *denuncia) {
+  struct NodoCausas *head = denuncia->causas,*rec;
+  rec = head;
   printf("\n\n");
   printf("RUC: %s\n\n",denuncia->ruc);
   /*Print de quien hizo la denuncia*/
@@ -347,18 +325,22 @@ void printDenuncia (struct Denuncia *denuncia) {
   }
 
   printf("Rut Denunciante: %s\n\n",denuncia->rutDenunciante);
-
-  /*Print de las causas*/
-  if (denuncia->causa == 0) {
-    printf("Causa por la cual se esta denunciando: Crimen\n\n");
-  }
-  if (denuncia->causa == 1) {
-    printf("Causa por la cual se esta denunciando: Delito\n\n");
-  }
-  if (denuncia->causa == 2) {
-    printf("Causa por la cual se esta denunciando: Infraccion\n\n");
-  }
-
+  /*No es necesario revisar si esta vacio, pues, siempre tiene que haber al menos 1 en el nodo Causas*/
+  do {
+    /*Print de las causas*/
+    if (rec->causa->tipoCausa == 0) {
+      printf("Causa por la cual se esta denunciando: Crimen");
+      printf("Descripcion: %s\n\n",denuncia->causas->causa->descripcionCausa);
+    }
+    if (denuncia->causas->causa->tipoCausa == 1) {
+      printf("Causa por la cual se esta denunciando: Delito");
+      printf("Descripcion: %s\n\n",denuncia->causas->causa->descripcionCausa);
+    }
+    if (denuncia->causa == 2) {
+      printf("Causa por la cual se esta denunciando: Infraccion");
+    }
+    rec = rec->sig;
+  }while (rec != head);
   printf("Descripcion: %s\n\n",denuncia->descripcion);
 
   printf("Fecha en la cual se hizo la denuncia: %s\n\n",denuncia->fecha);
