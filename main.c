@@ -1179,6 +1179,7 @@ void mostrarTodosImputados(struct Fiscal *fiscal){
 
 void ListarCausas(struct Fiscal *fiscal) {
   int i;
+  struct NodoCausas *rec=NULL;
   struct NodoDenuncias *denuncias=NULL;
   limpiarPantalla();
   printf("\n--- Causas de Denuncias ---\n\n\n");
@@ -1186,23 +1187,35 @@ void ListarCausas(struct Fiscal *fiscal) {
 
   while (denuncias!=NULL) {
     if (denuncias->denuncia!=NULL) {
+      rec=denuncias->denuncia->causas;
+      i=1;
       if (denuncias->denuncia->ruc==NULL) {
         printf("RUC: NO ENCONTRADO\n");
       }
       else {
         printf("RUC: %s\n",denuncias->denuncia->ruc);
       }
-      if (denuncias->denuncia->causa==0) {
-        printf("CAUSA: Crimen\n");
-      }
-      else if(denuncias->denuncia->causa==1) {
-        printf("CAUSA: Delito Simple\n");
-      }
-      else if(denuncias->denuncia->causa==2) {
-        printf("CAUSA: Falta\n");
-      }
-      else{
-        printf("CAUSA: NO SE PRESENTA UNA CAUSA");
+      while (rec!=NULL) {
+        if (rec->causa!=NULL && rec->causa->tipoCausa==0) {
+          printf("CAUSA %d: Crimen\n",i);
+        }
+        else if(rec->causa!=NULL && rec->causa->tipoCausa==1) {
+          printf("CAUSA %d: Delito Simple\n",i);
+        }
+        else if(rec->causa!=NULL && rec->causa->tipoCausa==2) {
+          printf("CAUSA %d: Falta\n",i);
+        }
+        else{
+          printf("CAUSA %d: NO SE PRESENTA UNA CAUSA",i);
+        }
+        if (rec->causa!=NULL && rec->causa->descripcionCausa!=NULL) {
+          printf("Descripción de la Causa %d: %s\n",i,rec->causa->descripcionCausa);
+        }
+        else {
+          printf("Descripción de la Causa %d: NO HAY.",i);
+        }
+        rec=rec->sig;
+        i++;
       }
     }
     denuncias=denuncias->sig;
@@ -1247,64 +1260,64 @@ void agregarCausa(struct Fiscal *fiscal) {
 }
 
 void ListarSentencias (struct Fiscal *fiscal) {
-  struct NodoJuicioOral *juicios=NULL;
+  struct NodoImputados *imputados=NULL;
 
   limpiarPantalla();
   printf("---------------LISTADO DE SENTENCIAS-------------------\n\n");
 
-  juicios=fiscal->juicios;
+  imputados=fiscal->imputados;
 
-  while (juicios!=NULL) {
-    if (juicios->juicio!=NULL) {
-      if (juicios->juicio->investigacion!=NULL && juicios->juicio->investigacion->ruc!=NULL) {
-        printf("RUC: %s\n",juicios->juicio->investigacion->ruc);
+  while (imputados!=NULL) {
+    if (imputados->imputado!=NULL) {
+
+      if (imputados->imputado->rut!=NULL) {
+        printf("RUT del Imputado: %s\n",imputados->imputado->rut);
       }
       else {
-        printf("RUC: NO DISPONIBLE\n");
+        printf("RUT del Imputado: NO DISPONIBLE\n");
       }
 
-
-      if (juicios->juicio->sentencia==1) {
+      if (imputados->imputado->tipoSentencia==1) {
         printf("Tipo de Sentencia: Absolutoria\n");
       }
-      else if (juicios->juicio->sentencia==2) {
+      else if (imputados->imputado->tipoSentencia==0) {
         printf("Tipo de Sentencia: Condenatoria\n");
       }
       else {
         printf("No existe un tipo de sentencia\n");
       }
-
-
-      if (juicios->juicio->descripcionSentencia!=NULL) {
-        printf("Descripción de la Sentencia: %s\n\n",juicios->juicio->descripcionSentencia);
+      if (imputados->imputado->descripcionSentencia!=NULL) {
+        printf("Descripción de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
       }
       else {
         printf("No se presenta Descripción de la Sentencia\n\n");
       }
     }
-    juicios=juicios->sig;
+    imputados=imputados->sig;
   }
   getchar();
 }
 
+//A
+
 void AgregarSentencia (struct Fiscal *fiscal) {
-  char rucBusqueda[RUC];
-  struct NodoJuicioOral *juicios=NULL;
+  char rutBusqueda[RUT];
+  struct NodoImputados *imputados=NULL;
   int nuevaSentencia=3;
   char nuevaDescripcionSentencia[TEXTO];
   int cambio=2;
 
   while (cambio!=1) {
     limpiarPantalla();
-    printf("Ingrese el RUC de la Sentencia que desea Agregar (formato: 123456789-2025): ");
-    fgets(rucBusqueda, RUC, stdin);
-    rucBusqueda[strcspn(rucBusqueda, "\n")] = 0;
+    printf("Ingrese el RUT del Imputado con la Sentencia que desea Agregar (formato: 123456789-2025): ");
+    fgets(rutBusqueda, RUT, stdin);
+    rutBusqueda[strcspn(rutBusqueda, "\n")] = 0;
 
-    juicios=fiscal->juicios;
-    while (juicios!=NULL) {
-      if (juicios->juicio!=NULL && juicios->juicio->investigacion!=NULL && juicios->juicio->investigacion->ruc!=NULL) {
-        if (strcmp(juicios->juicio->investigacion->ruc,rucBusqueda)==0) {
-          if (juicios->juicio->sentencia==0 || juicios->juicio->sentencia==1) {
+    imputados=fiscal->imputados;
+    while (imputados!=NULL) {
+      if (imputados->imputado!=NULL && imputados->imputado->rut!=NULL) {
+        if (strcmp(imputados->imputado->rut,rutBusqueda)==0) {
+          if (imputados->imputado->tipoSentencia==0 || imputados->imputado->tipoSentencia==1) {
             printf("Esta sentencia ya existe.");
             cambio=1;
           }
@@ -1323,17 +1336,17 @@ void AgregarSentencia (struct Fiscal *fiscal) {
               }
             }while (nuevaSentencia<0 || nuevaSentencia>2);
 
-            juicios->juicio->sentencia=nuevaSentencia;
+            imputados->imputado->tipoSentencia=nuevaSentencia;
             printf("Ingrese la Descripción de la Sentencia: ");
             fgets(nuevaDescripcionSentencia, TEXTO, stdin);
             nuevaDescripcionSentencia[strcspn(nuevaDescripcionSentencia, "\n")] = 0;
-            strcpy(juicios->juicio->descripcionSentencia,nuevaDescripcionSentencia);
+            strcpy(imputados->imputado->descripcionSentencia,nuevaDescripcionSentencia);
             cambio=1;
             break;
           }
         }
       }
-      juicios=juicios->sig;
+      imputados=imputados->sig;
     }
 
     if (cambio!=1) {
