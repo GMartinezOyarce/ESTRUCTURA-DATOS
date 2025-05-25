@@ -336,6 +336,38 @@ char *ingresarRuc() {
   return ret;
 }
 
+
+char *ingresarFecha() {
+  char fecha[FECHA];
+  char *vacio = NULL;
+  char *ret;
+  int opcion;
+  do {
+    limpiarBuffer();
+    printf("Ingrese Fecha: (Formato: 01/01/2000 )\n");
+    fgets(fecha, FECHA, stdin);
+    limpiarPantalla();
+    if (revisarEspacios(fecha) == 1 || fecha[2]!= '/'|| fecha[5] != '/') {
+      printf("Formato Equivocado:\n");
+      printf("1. Intentar nuevamente\n");
+      printf("2. Volver al menu anterior\n");
+      printf("Seleccione una opcion: \n");
+      limpiarBuffer();
+      scanf("%d", &opcion);
+      if (opcion == 2) {
+        return vacio;
+      }
+    }else {
+      break;
+    }
+  }while (1);
+  ret = malloc(FECHA);
+  if (ret != NULL) {
+    strcpy(ret, fecha);
+  }
+  return ret;
+}
+
 void AGREGARCAUSAS(struct Fiscal *fiscal) {
   char rucBusqueda[RUC];
   char *rucTemp;
@@ -469,20 +501,16 @@ void buscarDenunciaRUC(struct Fiscal *fiscal) {
   int opcion;
   struct Denuncia *denuncia;
   char ruc[RUC];
+  char *temporal;
+  if (fiscal->denuncias == NULL) {
+    printf("No Hay Denuncias En el Sistema\n");
+  }
   do {
-    printf("Ingrese RUC de la denuncia:\n");
-    limpiarBuffer();
-    fgets(ruc, RUC, stdin);
-    ruc[strcspn(ruc, "\n")] = 0;
-    if (ruc[9] != '-' || revisarEspacios(ruc) == 1) {
-      printf("Formato Equivocado\n");
-      printf("1. Intentar nuevamente\n");
-      printf("2. Volver al menu anterior\n");
-      printf("Seleccione una opcion: \n");
-      limpiarBuffer();
-      scanf("%d", &opcion);
-
+    temporal = ingresarRuc();
+    if (temporal == NULL) {
+      return;
     }else {
+      strcpy(ruc, temporal);
       break;
     }
   }while (1);
@@ -501,9 +529,7 @@ void buscarDenunciaEstado(struct Fiscal *fiscal) {
   struct NodoDenuncias *head = fiscal->denuncias, *actual;
   limpiarPantalla();
   if (head == NULL) {
-
     printf("No se ha ingresado ninguna Denuncia al sistema\n");
-
   }else {
     do {
       printf("Ingrese el numero de estado de Denuncia:\n");
@@ -589,17 +615,12 @@ void agregarDenuncia(struct Fiscal *fiscal) {
     break;
   }while (1);
 
-  do {
-    limpiarBuffer();
-    printf("Ingrese Fecha: (Formato: 01/01/2000 )\n");
-    fgets(denuncia ->fecha, FECHA, stdin);
-    limpiarPantalla();
-    if (revisarEspacios(denuncia->fecha) == 1 || denuncia->fecha[2]!= '/'|| denuncia->fecha[5] != '/') {
-      printf("Formato Equivocado:\n");
-    }else {
-      break;
-    }
-  }while (1);
+  /*Se ingresa la fecha*/
+  temporal = ingresarFecha();
+  if (temporal == NULL) {
+    return;
+  }
+  strcpy(denuncia->fecha, temporal);
 
   do {
     AGREGARCAUSAS(fiscal);
