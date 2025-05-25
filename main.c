@@ -173,7 +173,7 @@ struct CarpetaInvestigativa {
   int tipoDeJuicio;
 
   struct Denuncia *denuncia;
-  struct NodoImputado *imputado;
+  struct NodoImputados *imputado;
   /*Lista Simplemente enlazada*/
   struct NodoDeclaraciones *declaraciones;
   /*Lista Simplemente enlazada*/
@@ -898,6 +898,10 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   esperarEnter();
 }
 
+/*---------funcion para asignar prioridad a las diligencias--------*/
+
+
+
 /*---------FUNCION AGREGAR RESOLUCION----------------*/
 void agregarResolucion(struct Fiscal *fiscal) {
   struct NodoResoluciones *nodo;
@@ -964,9 +968,11 @@ void agregarResolucion(struct Fiscal *fiscal) {
 }
 /*-------------------------FUNCION AGREGAR IMPUTADO-----------------------------------------*/
 void agregarImputado(struct Fiscal *fiscal) {
+  struct NodoImputados *nuevoNodo;
   struct Imputado *nuevoImputado;
   struct CarpetaInvestigativa *carpeta;
   char rucCarpeta[RUC];
+
   limpiarPantalla();
 
   printf("Ingrese el RUC de su Imputado");
@@ -999,7 +1005,13 @@ void agregarImputado(struct Fiscal *fiscal) {
   fgets(nuevoImputado->medidasCautelares, TEXTO, stdin);
   nuevoImputado->medidasCautelares[strcspn(nuevoImputado-> medidasCautelares, "\n")] = 0;
 
-  carpeta -> imputado = nuevoImputado;
+  nuevoNodo = (struct NodoImputados*)malloc(sizeof(struct NodoImputados));
+  nuevoNodo->imputado = nuevoImputado;
+  nuevoNodo->sig = NULL;
+
+  nuevoNodo->sig = carpeta->listaImputados;
+
+  carpeta->listaImputados = nuevoNodo; /*actualizo inicio de la lista para que comience ahora desde el nuevo ndo creado*/
 
   printf("Imputado Agregar Correctamente.");
   esperarEnter();
@@ -1111,20 +1123,23 @@ void listarCarpetas(struct Fiscal *fiscal) {
 /*--------Función recorrerRut--------*/
 
 void recorrerBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
-  if (nodoArbol == NULL) {
+  struct nodoImputados *actual;
+  if (nodoArbol == NULL && nodoArbol->carpetaInvestigativa == NULL) { /*Mostrar en pantalla la razón del por que falla*/
+      printf("NO SE ENCONTRÓ LA CARPETA QUE BUSCABA");
       return;
   }
   recorrerBuscarRUT(nodoArbol->izq, rutBuscado);
 
-  if(nodoArbol->carpetaInvestigativa->imputado != NULL){
-    struct Imputado *imputado = nodoArbol->carpetaInvestigativa->imputado;
-    if (strcmp(imputado->rut, rutBuscado) == 0) {
+  actual = nodoArbol->carpetaInvestigativa->imputado;
+  while (actual!=NULL) {
+    if (strcmp(actual->imputado->rut, rutBuscado) == 0) {
       printf("\n--- Imputado Encontrado ---\n");
-      printf("RUT: %s\n", imputado->rut);
-      printf("Causa: %s\n", imputado->causa);
-      printf("Medidas cautelares: %s\n", imputado->medidasCautelares);
+      printf("RUT: %s\n", actual->imputado->rut);
+      printf("Causa: %s\n", actual->imputado->causas);
+      printf("Medidas cautelares: %s\n", actual->imputado->medidasCautelares);
       printf("RUC de la carpeta: %s\n", nodoArbol->carpetaInvestigativa->ruc);
     }
+    actual = actual->sig;
   }
   recorrerBuscarRUT(nodoArbol->der, rutBuscado);
 }
@@ -1145,18 +1160,22 @@ void buscarImputadoPorRut(struct Fiscal *fiscal){
 }
 
 void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol){
-  if(nodoArbol == NULL) {
+  struct NodoImputados *actual;
+  if(nodoArbol == NULL && nodoArbol->carpetaInvestigativa == NULL) {
     return;
   }
 
   mostrarTodosLosImputados(nodoArbol->izq);
-  struct Imputado *imputado = nodoArbol->carpetaInvestigativa->imputado;
-  if(imputado != NULL){
+  actual = nodoArbol->CarpetaInvestigativa->imputado;
+  while (actual!=NULL) {
+    struct Imputado *imputado = actual->imputado;
     printf("\n--- IMPUTADO ---\n");
     printf("RUT: %s\n", imputado->rut);
     printf("Causa: %d\n", imputado->causa);
     printf("Medidas Cautelares: %s\n", imputado->medidasCautelares);
     printf("RUC Carpeta: %s\n", nodoArbol->carpetaInvestigativa->ruc);
+
+    actual = actual->sig;
   }
   mostrarTodosLosImputados(nodoArbol->der);
 }
@@ -1613,7 +1632,7 @@ void menuImputados(struct Fiscal *fiscal){
 
     switch(opcion) {
       case 1: agregarImputado(fiscal); break;
-      case 2: /* función modificautadorImp */ break;
+      case 2: /* función modificarImputado */ break;
       case 3: agregarDeclaracion(fiscal); break;
       case 4: buscarImputadoPorRut(fiscal); break;
       case 5: mostrarTodosImputados(fiscal); break;
@@ -1636,12 +1655,12 @@ void menuDiligencias(){
     scanf("%d", &opcion);
 
     switch(opcion) {
-      case 1: /* función agregar diligencias */ break;
+      case 1: agregarDiligencia(fiscal); break;
       case 2: /* función para asignar prioridad a diligencia dependiendo urgencia o impacto */ break;
       case 3: /* función para ver diligencias pendientes */ break;
       case 4: /* función para ver diligencias ordenadas por prioridad dependiendo urgencia o impacto */ break;
       case 0: break;
-      default: printf("Opciónnn inválida.\n");
+      default: printf("Opción inválida.\n");
     }
   }while(opcion != 0);
 }
