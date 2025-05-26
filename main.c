@@ -891,7 +891,7 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   limpiarBuffer();
 
   printf("Ingrese decisión (1: Aprobada, 0: Rechazada): ");
-  scanf("%d", &nueva->decicion);
+  scanf("%d", &nueva->aprobacion);
   limpiarBuffer();
 
   printf("Ingrese urgencia (1: Baja, 2: Media, 3: Alta): ");
@@ -991,8 +991,15 @@ void agregarResolucion(struct Fiscal *fiscal) {
 void agregarImputado(struct Fiscal *fiscal) {
   struct NodoImputados *nuevoNodo;
   struct Imputado *nuevoImputado;
+  struct NodoImputados *recImputado;
+  struct NodoCausas *recCausas;
+  struct NodoCausas *nodoCausas;
+  struct Causa *nuevaCausa;
   struct CarpetaInvestigativa *carpeta;
   char rucCarpeta[RUC];
+  int opcion;
+  int causas;
+  char descripcion[TEXTO];
 
   limpiarPantalla();
 
@@ -1009,32 +1016,76 @@ void agregarImputado(struct Fiscal *fiscal) {
 
   limpiarPantalla();
 
+  /*Asignacion de memoria para las variables a las que se les ingresaran datos*/
   nuevoImputado = (struct Imputado*)malloc(sizeof(struct Imputado));
-
-  printf("Ingrese el RUT del imputado(123456789-8)/n");
-  fgets(nuevoImputado-> rut, RUT, stdin);
-  nuevoImputado->rut[strcspn(nuevoImputado->rut, "\n")] = 0;
-
-  printf("Ingrese la Causa (Solamente un numero)/n");
-  printf("0. Crimen (Infraccion grave)/n");
-  printf("1. Delito Simple (Ejemplo: Hurto, estafa)");
-  printf("2. Falta (Ejemplo: Infracciones de transito)");
-  scanf("%d", nuevoImputado-> causa);
-  limpiarBuffer();
-
-  printf("Ingrese las Medidas Cautelares (MAX 1000 caracteres)");
-  fgets(nuevoImputado->medidasCautelares, TEXTO, stdin);
-  nuevoImputado->medidasCautelares[strcspn(nuevoImputado-> medidasCautelares, "\n")] = 0;
-
+  nuevaCausa = (struct Causa*)malloc(sizeof(struct Causa));
+  nodoCausas = (struct NodoCausas*)malloc(sizeof(struct NodoCausas));
   nuevoNodo = (struct NodoImputados*)malloc(sizeof(struct NodoImputados));
-  nuevoNodo->imputado = nuevoImputado;
-  nuevoNodo->sig = NULL;
 
-  nuevoNodo->sig = carpeta->listaImputados;
+  recCausas = nuevoImputado-> causas;
 
-  carpeta->listaImputados = nuevoNodo; /*actualizo inicio de la lista para que comience ahora desde el nuevo ndo creado*/
+  do {
+    printf("Ingrese el RUT del imputado(123456789-8)\n");
+    fgets(nuevoImputado-> rut, RUT, stdin);
+    nuevoImputado->rut[strcspn(nuevoImputado->rut, "\n")] = 0;
 
-  printf("Imputado Agregar Correctamente.");
+    printf("Ingrese las Medidas Cautelares (MAX 1000 caracteres)\n");
+    fgets(descripcion, TEXTO, stdin);
+    nuevoImputado->medidasCautelares[strcspn(nuevoImputado ->medidasCautelares, "\n")] = 0;
+
+    printf("Ingrese la Causa (Solamente un numero) \n");
+    printf("0. Crimen (Infraccion grave) \n");
+    printf("1. Delito Simple (Ejemplo: Hurto, estafan) \n");
+    printf("2. Falta (Ejemplo: Infracciones de transito)\n");
+    scanf("%d", causas);
+    limpiarBuffer();
+
+    printf("Ingrese la descripcion de su causa \n");
+    fgets(descripcion, TEXTO, stdin);
+    descripcion[strcspn(descripcion, "\n")] = 0;
+
+    nuevaCausa -> tipoCausa = causas;
+    strcpy(nuevaCausa -> descripcionCausa, descripcion);
+
+    nodoCausas -> causa= nuevaCausa;
+    nodoCausas -> sig= NULL;
+
+    if (nuevoImputado-> causas == NULL) {
+      nuevoImputado -> causas = nodoCausas;
+    }
+    else {
+      while (recCausas -> sig != NULL) {
+        if (recCausas -> sig == NULL) {
+          recCausas -> sig = nodoCausas;
+        }
+        recCausas = recCausas -> sig;
+      }
+    }
+
+    printf("Ingrese algun numero DISTINTO de 0 si desea agregar alguna otra causa \n");
+    scanf("%d", &opcion);
+    limpiarBuffer();
+
+    limpiarPantalla();
+  }while (opcion != 0);
+
+  nuevoNodo -> imputado = nuevoImputado;
+  nuevoNodo -> sig = NULL;
+
+  recImputado = carpeta -> imputado;
+
+  if (carpeta -> imputado == NULL) {
+    carpeta -> imputado = nuevoNodo;
+  }
+  else {
+    while (recImputado -> sig != NULL) {
+      if (recImputado -> sig == NULL) {
+        recImputado -> sig = nuevoNodo;
+      }
+    }
+  }
+
+  printf("El imputado se agrego correctamente.\n");
   esperarEnter();
 }
 
@@ -1093,7 +1144,7 @@ void agregarPrueba(struct Fiscal *fiscal) {
 }
 void listarCarpetasRecursivo(struct arbolCarpetas *raiz) {
   struct CarpetaInvestigativa *carpeta;
-
+  struct NodoImputados *recImputado = NULL;
   /*CASOS BASE*/
   if (raiz == NULL) {
     return;
@@ -1112,9 +1163,15 @@ void listarCarpetasRecursivo(struct arbolCarpetas *raiz) {
     case 3: printf("Cerrada\n"); break;
     default: printf("Desconocido\n"); break;
   }
-  printf("Descripción Estado: %s\n", carpeta->descripcionEstadoCarpeta);
-  if (carpeta->imputado)
-    printf("RUT Imputado: %s\n", carpeta->imputado->rut);
+
+  /*se recorre la lista de imputados para mostrar cada imputado de la carpeta*/
+  recImputado = carpeta -> imputado;
+  if (recImputado != NULL) {
+    while (recImputado != NULL) {
+      printf("RUT Imputado: %s\n", recImputado->imputado->rut);
+      recImputado = recImputado -> sig;
+    }
+  }
   else
     printf("Sin imputado asignado\n");
 
@@ -1144,7 +1201,7 @@ void listarCarpetas(struct Fiscal *fiscal) {
 /*--------Función recorrerRut--------*/
 
 void recorrerBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
-  struct nodoImputados *actual;
+  struct NodoImputados *actual;
   if (nodoArbol == NULL && nodoArbol->carpetaInvestigativa == NULL) { /*Mostrar en pantalla la razón del por que falla*/
       printf("NO SE ENCONTRÓ LA CARPETA QUE BUSCABA");
       return;
@@ -1187,7 +1244,7 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol){
   }
 
   mostrarTodosLosImputados(nodoArbol->izq);
-  actual = nodoArbol->CarpetaInvestigativa->imputado;
+  actual = nodoArbol->carpetaInvestigativa->imputado;
   while (actual!=NULL) {
     struct Imputado *imputado = actual->imputado;
     printf("\n--- IMPUTADO ---\n");
@@ -1663,7 +1720,7 @@ void menuImputados(struct Fiscal *fiscal){
   }while(opcion != 0);
 }
 
-void menuDiligencias(){
+void menuDiligencias(struct Fiscal *fiscal){
   int opcion;
   do{
     printf("--- Gestión de Diligencias ---\n");
@@ -1761,7 +1818,7 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
       case 1: menuDenuncias(fiscal); break;
       case 2: menuCarpetas(fiscal); break;
       case 3: menuImputados(fiscal); break;
-      case 4: menuDiligencias(); break;
+      case 4: menuDiligencias(fiscal); break;
       case 5: menuCausas(); break;
       case 6: menuSentenciasResoluciones(); break;
       case 7: /*generarReportes()*/; break;
