@@ -397,7 +397,7 @@ void AGREGARCAUSAS(struct Fiscal *fiscal) {
 
 
       if (opcion == 2) {
-        return; // Salir de la función si el usuario elige volver
+        return; /* Salir de la función si el usuario elige volver*/
       }
     }
   }while (denunciaEncontrada == NULL);
@@ -426,7 +426,7 @@ void AGREGARCAUSAS(struct Fiscal *fiscal) {
   }else {
     while (head != NULL) {
       if (head->sig == NULL) {
-        head->sig = denunciaEncontrada;
+        head->sig = nuevoNodo;
       }
       head = head->sig;
     }
@@ -515,7 +515,7 @@ void buscarDenunciaRUC(struct Fiscal *fiscal) {
     }
   }while (1);
 
-  denuncia = BUSCARDENUNCIA(fiscal,&ruc);
+  denuncia = BUSCARDENUNCIA(fiscal,ruc);
   if (denuncia == NULL) {
     printf("No se ha encontrado su Denuncia\n");
   }else {
@@ -693,6 +693,8 @@ void CrearCarpeta(struct Fiscal *fiscal) {
     struct arbolCarpetas *actual = NULL;
     struct arbolCarpetas *nuevoNodo = NULL;
     int opcion;
+
+
 
     /* Paso 1: Buscar la denuncia por RUC*/
     do {
@@ -1249,7 +1251,7 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol){
     struct Imputado *imputado = actual->imputado;
     printf("\n--- IMPUTADO ---\n");
     printf("RUT: %s\n", imputado->rut);
-    printf("Causa: %d\n", imputado->causa);
+    /*printf("Causa: %d\n", imputado->causa);*/
     printf("Medidas Cautelares: %s\n", imputado->medidasCautelares);
     printf("RUC Carpeta: %s\n", nodoArbol->carpetaInvestigativa->ruc);
 
@@ -1768,7 +1770,7 @@ void menuCausas() {
   } while(opcion != 0);
 }
 
-void menuSentenciasResoluciones(*fiscal) {
+void menuSentenciasResoluciones(struct Fiscal *fiscal) {
   int opcion;
   do {
     printf("\n--- Gestión de Sentencias y Resoluciones ---\n");
@@ -1820,7 +1822,7 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
       case 3: menuImputados(fiscal); break;
       case 4: menuDiligencias(fiscal); break;
       case 5: menuCausas(); break;
-      case 6: menuSentenciasResoluciones(); break;
+      case 6: menuSentenciasResoluciones(fiscal); break;
       case 7: /*generarReportes()*/; break;
       case 0: return ;
       default: printf("Opción inválida. Intente nuevamente.\n");
@@ -1831,12 +1833,12 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
 /*PARA DATOS DE PRUEBA*/
 
 void inicializarDatosPrueba(struct MinisterioPublico *mp) {
-    /* Declarar todas las variables al inicio del bloque */
     struct Fiscal* fiscal;
     struct Denuncia* denuncia;
     struct NodoDenuncias* nodoDenuncia;
     struct CarpetaInvestigativa* carpeta;
     struct Imputado* imputado;
+    struct NodoImputados* nodoImputado;
     struct Declaracion* decl;
     struct NodoDeclaraciones* nodoDecl;
     struct Diligencia* dil;
@@ -1854,8 +1856,9 @@ void inicializarDatosPrueba(struct MinisterioPublico *mp) {
     strcpy(fiscal->rut, "12345678-9");
     strcpy(fiscal->contrasenia, "pass123");
     fiscal->peticiones = NULL;
-    fiscal->juicios = NULL;
+    fiscal->denuncias = NULL;
     fiscal->carpetas = NULL;
+    fiscal->imputados = NULL;
 
     /* Crear denuncia */
     denuncia = (struct Denuncia*)malloc(sizeof(struct Denuncia));
@@ -1863,11 +1866,11 @@ void inicializarDatosPrueba(struct MinisterioPublico *mp) {
     strcpy(denuncia->rutDenunciante, "98765432-1");
     denuncia->origenDenunciante = 0;
     strcpy(denuncia->fecha, "01/01/2024");
-    denuncia->causa = 1;
     denuncia->estadoDenuncia = 0;
-    strcpy(denuncia->descripcion, "Robo de computador en oficina");
+    denuncia->causas = NULL;
+    denuncia->rutVictimas = NULL;
 
-    /* Enlazar denuncia */
+    /* Nodo de denuncia */
     nodoDenuncia = (struct NodoDenuncias*)malloc(sizeof(struct NodoDenuncias));
     nodoDenuncia->denuncia = denuncia;
     nodoDenuncia->sig = nodoDenuncia;
@@ -1878,21 +1881,28 @@ void inicializarDatosPrueba(struct MinisterioPublico *mp) {
     carpeta = (struct CarpetaInvestigativa*)malloc(sizeof(struct CarpetaInvestigativa));
     strcpy(carpeta->ruc, "123456789-2024");
     carpeta->estadoCarpeta = 0;
-    strcpy(carpeta->descripcionEstadoCarpeta, "En investigacion inicial");
+    carpeta->tipoDeJuicio = 0;
     carpeta->denuncia = denuncia;
     carpeta->declaraciones = NULL;
     carpeta->pruebas = NULL;
     carpeta->diligencias = NULL;
     carpeta->resoluciones = NULL;
+    carpeta->imputado = NULL;
 
-    /* Crear imputado */
+    /* Crear imputado y nodo */
     imputado = (struct Imputado*)malloc(sizeof(struct Imputado));
     strcpy(imputado->rut, "19283746-5");
-    imputado->causa = 1;
+    imputado->tipoSentencia = -1;  // aún no tiene sentencia
     strcpy(imputado->medidasCautelares, "Arraigo nacional");
-    carpeta->imputado = imputado;
+    strcpy(imputado->descripcionSentencia, "");
+    imputado->causas = NULL;
 
-    /* Crear declaracion */
+    nodoImputado = (struct NodoImputados*)malloc(sizeof(struct NodoImputados));
+    nodoImputado->imputado = imputado;
+    nodoImputado->sig = NULL;
+    carpeta->imputado = nodoImputado;
+
+    /* Declaración */
     decl = (struct Declaracion*)malloc(sizeof(struct Declaracion));
     strcpy(decl->rut, "11223344-5");
     decl->origenDeclaracion = 1;
@@ -1904,13 +1914,13 @@ void inicializarDatosPrueba(struct MinisterioPublico *mp) {
     nodoDecl->sig = NULL;
     carpeta->declaraciones = nodoDecl;
 
-    /* Crear diligencia */
+    /* Diligencia */
     dil = (struct Diligencia*)malloc(sizeof(struct Diligencia));
     dil->OrigenDiligencia = 0;
     strcpy(dil->tipoDiligencia, "Allanamiento");
     strcpy(dil->descripcionDiligencia, "Allanamiento domicilio sospechoso");
     strcpy(dil->fechaDiligencia, "03/01/2024");
-    dil->decicion = 1;
+    dil->aprobacion = 1;
     dil->urgencia = 3;
     dil->impacto = 3;
 
@@ -1919,11 +1929,12 @@ void inicializarDatosPrueba(struct MinisterioPublico *mp) {
     nodoDil->sig = NULL;
     carpeta->diligencias = nodoDil;
 
-    /* Crear resolucion */
+    /* Resolución */
     res = (struct Resolucion*)malloc(sizeof(struct Resolucion));
+    strcpy(res->rutJuez, "44556677-0");
     res->tipoResolucion = 1;
     res->origenResolucion = 0;
-    strcpy(res->descripcion, "Autorizacion para allanamiento");
+    strcpy(res->descripcion, "Autorización para allanamiento");
     strcpy(res->fecha, "02/01/2024");
 
     nodoRes = (struct NodoResoluciones*)malloc(sizeof(struct NodoResoluciones));
@@ -1931,16 +1942,16 @@ void inicializarDatosPrueba(struct MinisterioPublico *mp) {
     nodoRes->sig = NULL;
     carpeta->resoluciones = nodoRes;
 
-    /* Configurar arbol */
+    /* Insertar carpeta en árbol */
     arbol = (struct arbolCarpetas*)malloc(sizeof(struct arbolCarpetas));
     arbol->carpetaInvestigativa = carpeta;
     arbol->izq = NULL;
     arbol->der = NULL;
     fiscal->carpetas = arbol;
 
-    /* Asignar fiscal */
     mp->fiscales[0] = fiscal;
 }
+
 int main(){
   struct MinisterioPublico ministerioPublico;
   inicializarDatosPrueba(&ministerioPublico);
