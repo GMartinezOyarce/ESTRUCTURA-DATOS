@@ -69,6 +69,7 @@ include CMakeFiles/ESTRUCTURA_DATOS.dir/progress.make
 include CMakeFiles/ESTRUCTURA_DATOS.dir/flags.make
 
 CMakeFiles/ESTRUCTURA_DATOS.dir/main.c.obj: CMakeFiles/ESTRUCTURA_DATOS.dir/flags.make
+CMakeFiles/ESTRUCTURA_DATOS.dir/main.c.obj: CMakeFiles/ESTRUCTURA_DATOS.dir/includes_C.rsp
 CMakeFiles/ESTRUCTURA_DATOS.dir/main.c.obj: C:/Users/gabom/OneDrive/Escritorio/code/GIT/ESTRUCTURA-DATOS/main.c
 CMakeFiles/ESTRUCTURA_DATOS.dir/main.c.obj: CMakeFiles/ESTRUCTURA_DATOS.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\gabom\OneDrive\Escritorio\code\GIT\ESTRUCTURA-DATOS\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/ESTRUCTURA_DATOS.dir/main.c.obj"

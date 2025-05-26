@@ -1329,7 +1329,7 @@ void ListarCausas(struct Fiscal *fiscal) {
 
 void agregarCausa(struct Fiscal *fiscal) {
   limpiarPantalla();
-  int contador = 0,opcion;
+  int opcion;
 
   if (fiscal->denuncias== NULL) {
     printf("No hay denuncias en el Sistema");
@@ -1337,24 +1337,17 @@ void agregarCausa(struct Fiscal *fiscal) {
   }
 
   printf("Agregar Causas: \n\n");
-
+  AGREGARCAUSAS(fiscal);
   while (1) {
-    if (contador > 0) {
-      printf("Desea Agregar otra Causa: \n");
-      printf("0: Agregar otra Causa \n");
-      printf("Cualquier otra tecla: Volver Al Menu Principal  \n");
-      limpiarBuffer();
-      scanf("%d", &opcion);
-      limpiarBuffer();
-      if (opcion == 0) {
-        AGREGARCAUSAS(fiscal);
-      }else {
-        return;
-      }
-    }else {
+    printf("Desea Agregar otra Causa: \n");
+    printf("0: Agregar otra Causa \n");
+    printf("Cualquier otra numero: Volver Al Menu Principal  \n");
+    scanf("%d", &opcion);
+    limpiarBuffer();
+    if (opcion == 0) {
       AGREGARCAUSAS(fiscal);
-    }
-    contador++;
+    }else
+      return;
   }
 }
 
@@ -1745,7 +1738,7 @@ void menuDiligencias(struct Fiscal *fiscal){
   }while(opcion != 0);
 }
 
-void menuCausas() {
+void menuCausas(struct Fiscal *fiscal) {
   int opcion;
   do {
     printf("\n--- Gestión de Causas ---\n");
@@ -1759,7 +1752,7 @@ void menuCausas() {
     scanf("%d", &opcion);
 
     switch(opcion) {
-      case 1: /* función agregar causa */ break;
+      case 1: agregarCausa(fiscal); break;
       case 2: /* función buscar causa imputado */ break;
       case 3: /* función buscar causa denuncia */ break;
       case 4: /* función modificar causa */ break;
@@ -1821,7 +1814,7 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
       case 2: menuCarpetas(fiscal); break;
       case 3: menuImputados(fiscal); break;
       case 4: menuDiligencias(fiscal); break;
-      case 5: menuCausas(); break;
+      case 5: menuCausas(fiscal); break;
       case 6: menuSentenciasResoluciones(fiscal); break;
       case 7: /*generarReportes()*/; break;
       case 0: return ;
