@@ -1,0 +1,42 @@
+# Ignorar carpetas de construcción de CMake
+cmake-build-*/
+
+# Ignorar archivos generados por CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+CTestTestfile.cmake
+install_manifest.txt
+
+# Archivos de log o salida
+*.log
+*.out
+*.exe
+*.a
+*.so
+*.dll
+
+# Archivos temporales o del sistema
+*.swp
+*.swo
+*.bak
+*.tmp
+*.DS_Store
+Thumbs.db
+
+# Archivos de configuración específicos del IDE
+.idea/
+*.iml
+
+# Archivos de uso local de CLion
+*.user
+*.workspace
+
+# Archivos de depuración
+*.dSYM/
+*.gch
+*.obj
+*.pch
