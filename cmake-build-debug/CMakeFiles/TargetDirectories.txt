@@ -1,3 +1,0 @@
-C:/Users/ignac/CLionProjects/ESTRUCTURA-DATOS/cmake-build-debug/CMakeFiles/ESTRUCTURA_DATOS.dir
-C:/Users/ignac/CLionProjects/ESTRUCTURA-DATOS/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/ignac/CLionProjects/ESTRUCTURA-DATOS/cmake-build-debug/CMakeFiles/rebuild_cache.dir
