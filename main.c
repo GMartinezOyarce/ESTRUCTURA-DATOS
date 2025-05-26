@@ -1013,7 +1013,6 @@ void agregarImputado(struct Fiscal *fiscal) {
   fgets(descripcion, TEXTO, stdin);
   nuevoImputado->medidasCautelares[strcspn(nuevoImputado ->medidasCautelares, "\n")] = 0;
 
-
   do {
     recCausas = nuevoImputado-> causas;
     printf("Ingrese la Causa (Solamente un numero) \n");
@@ -1026,6 +1025,7 @@ void agregarImputado(struct Fiscal *fiscal) {
     printf("Ingrese la descripcion de su causa \n");
     fgets(descripcion, TEXTO, stdin);
     descripcion[strcspn(descripcion, "\n")] = 0;
+    strcpy(nuevoImputado->medidasCautelares, descripcion);
 
     nuevaCausa -> tipoCausa = causas;
     strcpy(nuevaCausa -> descripcionCausa, descripcion);
@@ -1039,8 +1039,8 @@ void agregarImputado(struct Fiscal *fiscal) {
     else {
       while (recCausas -> sig != NULL) {
         recCausas = recCausas -> sig;
-        recCausas -> sig = nodoCausas;
       }
+      recCausas -> sig = nodoCausas;
     }
 
     printf("Ingrese algun numero DISTINTO de 0 si desea agregar alguna otra causa \n");
@@ -1180,8 +1180,10 @@ void listarCarpetas(struct Fiscal *fiscal) {
 
 void recorrerBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
   struct NodoImputados *actual;
-  if (nodoArbol == NULL && nodoArbol->carpetaInvestigativa == NULL) { /*Mostrar en pantalla la razón del por que falla*/
-      printf("NO SE ENCONTRÓ LA CARPETA QUE BUSCABA");
+  struct NodoCausas *causaActual;
+  int numCausa = 1;
+  if (nodoArbol == NULL || nodoArbol->carpetaInvestigativa == NULL) {
+      printf("NO SE ENCONTRÓ LA CARPETA QUE BUSCABA\n");
       return;
   }
   recorrerBuscarRUT(nodoArbol->izq, rutBuscado);
@@ -1191,9 +1193,22 @@ void recorrerBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
     if (strcmp(actual->imputado->rut, rutBuscado) == 0) {
       printf("\n--- Imputado Encontrado ---\n");
       printf("RUT: %s\n", actual->imputado->rut);
-      printf("Causa: %s\n", actual->imputado->causas);
+      causaActual = actual->imputado->causas;
+      while (causaActual != NULL) {
+        printf("====== CAUSA: %d ======\n", numCausa++);
+        if (causaActual->causa->tipoCausa == 0) {
+          printf("Tipo: Crimen\n");
+        }
+        else if (causaActual->causa->tipoCausa == 1) {
+          printf("Tipo: Delito Simple\n");
+        }
+        else if (causaActual->causa->tipoCausa == 2) {
+          printf("Tipo:Falta\n");
+        }
+        causaActual = causaActual->sig;
+      }
       printf("Medidas cautelares: %s\n", actual->imputado->medidasCautelares);
-      printf("RUC de la carpeta: %s\n", nodoArbol->carpetaInvestigativa->ruc);
+      printf("RUC de la carpeta: %s\n\n", nodoArbol->carpetaInvestigativa->ruc);
     }
     actual = actual->sig;
   }
@@ -1210,12 +1225,14 @@ void buscarImputadoPorRut(struct Fiscal *fiscal){
   limpiarPantalla();
   printf("=== BUSCAR IMPUTADO POR RUT ===\n");
   printf("Ingrese el RUT del imputado: ");
+  limpiarBuffer();
   fgets(rut, RUT, stdin);
-  rut[strcspn(rut, "\n")]= 0;  /*saltar linea de posible espacio*/
+  rut[strcspn(rut, "\n")]= 0;
   recorrerBuscarRUT(fiscal->carpetas, rut);
+
 }
 
-void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol){
+void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol) {
   struct Imputado *imputado;
   struct NodoImputados *actual;
   struct NodoCausas *causaActual;
@@ -1233,8 +1250,8 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol){
     printf("Causas:\n");
     causaActual = imputado->causas;
     while (causaActual!=NULL) {
-      printf("Causa: %d\n", numCausa++);
-      printf("   Tipo: ");
+      printf("====== CAUSA: %d ======\n", numCausa++);
+      printf("Tipo: ");
       if (causaActual->causa->tipoCausa == 0) {
         printf("Crimen\n");
       }else if (causaActual->causa->tipoCausa == 1) {
@@ -1242,7 +1259,7 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol){
       }else if (causaActual->causa->tipoCausa == 2) {
         printf("Falta\n");
       }
-      printf("    Descripción: %s\n", causaActual->causa->descripcionCausa);
+      printf("Descripción: %s\n", causaActual->causa->descripcionCausa);
       causaActual = causaActual->sig;
     }
     printf("Medidas Cautelares: %s\n", imputado->medidasCautelares);
