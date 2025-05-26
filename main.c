@@ -1239,7 +1239,7 @@ void buscarImputadoPorRut(struct Fiscal *fiscal){
 }
 
 void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol){
-  struct imputado *imputado;
+  struct Imputado *imputado;
   struct NodoImputados *actual;
   struct NodoCausas *causaActual;
   int numCausa = 1;
@@ -1254,7 +1254,7 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol){
     printf("\n--- IMPUTADO ---\n");
     printf("RUT: %s\n", imputado->rut);
     printf("Causas:\n");
-    causaActual = nodoArbol->carpetaInvestigativa->imputado->causas;
+    causaActual = imputado->causas;
     while (causaActual!=NULL) {
       printf("Causa: %d\n", numCausa++);
       printf("   Tipo: ");
