@@ -1005,7 +1005,8 @@ void agregarImputado(struct Fiscal *fiscal) {
 
   limpiarPantalla();
 
-  printf("Ingrese el RUC de su Imputado");
+  limpiarBuffer();
+  printf("Ingrese el RUC de la CARPETA de su Imputado\n");
   fgets(rucCarpeta, RUC, stdin);
   rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
 
@@ -1024,22 +1025,25 @@ void agregarImputado(struct Fiscal *fiscal) {
   nodoCausas = (struct NodoCausas*)malloc(sizeof(struct NodoCausas));
   nuevoNodo = (struct NodoImputados*)malloc(sizeof(struct NodoImputados));
 
-  recCausas = nuevoImputado-> causas;
+
+  limpiarBuffer();
+  printf("Ingrese el RUT del imputado(123456789-8)\n");
+  fgets(nuevoImputado-> rut, RUT, stdin);
+  nuevoImputado->rut[strcspn(nuevoImputado->rut, "\n")] = 0;
+
+  limpiarBuffer();
+  printf("Ingrese las Medidas Cautelares (MAX 1000 caracteres)\n");
+  fgets(descripcion, TEXTO, stdin);
+  nuevoImputado->medidasCautelares[strcspn(nuevoImputado ->medidasCautelares, "\n")] = 0;
+
 
   do {
-    printf("Ingrese el RUT del imputado(123456789-8)\n");
-    fgets(nuevoImputado-> rut, RUT, stdin);
-    nuevoImputado->rut[strcspn(nuevoImputado->rut, "\n")] = 0;
-
-    printf("Ingrese las Medidas Cautelares (MAX 1000 caracteres)\n");
-    fgets(descripcion, TEXTO, stdin);
-    nuevoImputado->medidasCautelares[strcspn(nuevoImputado ->medidasCautelares, "\n")] = 0;
-
+    recCausas = nuevoImputado-> causas;
     printf("Ingrese la Causa (Solamente un numero) \n");
     printf("0. Crimen (Infraccion grave) \n");
     printf("1. Delito Simple (Ejemplo: Hurto, estafan) \n");
     printf("2. Falta (Ejemplo: Infracciones de transito)\n");
-    scanf("%d", causas);
+    scanf("%d", &causas);
     limpiarBuffer();
 
     printf("Ingrese la descripcion de su causa \n");
@@ -1057,10 +1061,8 @@ void agregarImputado(struct Fiscal *fiscal) {
     }
     else {
       while (recCausas -> sig != NULL) {
-        if (recCausas -> sig == NULL) {
-          recCausas -> sig = nodoCausas;
-        }
         recCausas = recCausas -> sig;
+        recCausas -> sig = nodoCausas;
       }
     }
 
@@ -1081,10 +1083,9 @@ void agregarImputado(struct Fiscal *fiscal) {
   }
   else {
     while (recImputado -> sig != NULL) {
-      if (recImputado -> sig == NULL) {
-        recImputado -> sig = nuevoNodo;
-      }
+      recImputado = recImputado->sig;
     }
+    recImputado -> sig = nuevoNodo;
   }
 
   printf("El imputado se agrego correctamente.\n");
@@ -1098,8 +1099,6 @@ void agregarPrueba(struct Fiscal *fiscal) {
   struct NodoPruebas *rec;
   struct CarpetaInvestigativa *carpeta;
   char rucCarpeta[RUC];
-  char enter[1];
-
   limpiarPantalla();
 
   printf("Ingrese el RUC de su Imputado ");
