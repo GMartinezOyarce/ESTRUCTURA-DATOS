@@ -1317,8 +1317,116 @@ void ListarCausas(struct Fiscal *fiscal) {
   getchar();
 }
 
+void CausaBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
+  struct NodoImputados *actual;
+  struct NodoCausas *rec;
+  int i=1;
+  if (nodoArbol == NULL || nodoArbol->carpetaInvestigativa == NULL) { /*Mostrar en pantalla la razón del por que falla*/
+    printf("NO SE ENCONTRÓ LA CARPETA QUE BUSCABA");
+    return;
+  }
+  recorrerBuscarRUT(nodoArbol->izq, rutBuscado);
 
+  actual = nodoArbol->carpetaInvestigativa->imputado;
+  while (actual!=NULL) {
+    if (strcmp(actual->imputado->rut, rutBuscado) == 0) {
+      printf("\n--- Imputado Encontrado ---\n");
+      printf("RUT: %s\n", actual->imputado->rut);
+      rec=actual->imputado->causas;
+      if (rec==NULL) printf("NO SE ENCONTRARON CAUSAS \n");
+      while (rec!=NULL) {
+        if (rec->causa!=NULL && rec->causa->tipoCausa==0) {
+          printf("CAUSA %d: Crimen\n",i);
+        }
+        else if(rec->causa!=NULL && rec->causa->tipoCausa==1) {
+          printf("CAUSA %d: Delito Simple\n",i);
+        }
+        else if(rec->causa!=NULL && rec->causa->tipoCausa==2) {
+          printf("CAUSA %d: Falta\n",i);
+        }
+        else{
+          printf("CAUSA %d: NO SE PRESENTA UNA CAUSA",i);
+        }
+        if (rec->causa!=NULL && rec->causa->descripcionCausa!=NULL) {
+          printf("Descripción de la Causa %d: %s\n",i,rec->causa->descripcionCausa);
+        }
+        else {
+          printf("Descripción de la Causa %d: NO HAY.",i);
+        }
+        rec=rec->sig;
+        i++;
+      }
+      break;
+    }
+    actual = actual->sig;
+  }
+  recorrerBuscarRUT(nodoArbol->der, rutBuscado);
+}
 
+void BuscarCausasPorImputado(struct Fiscal *fiscal) {
+  char rut[RUT];
+
+  if(fiscal->carpetas == NULL) {
+    printf("No hay carpetas registradas.\n");
+    return;
+  }
+  limpiarPantalla();
+  printf("=== BUSCAR CAUSA POR IMPUTADO ===\n");
+  printf("Ingrese el RUT del Imputado: ");
+  fgets(rut, RUT, stdin);
+  rut[strcspn(rut, "\n")]= 0;  /*saltar linea de posible espacio*/
+  recorrerBuscarRUT(fiscal->carpetas, rut);
+}
+
+void BuscarCausasDenuncia(struct Fiscal *fiscal) {
+  int i;
+  char ruc[RUC];
+  struct NodoCausas *rec=NULL;
+  struct NodoDenuncias *denuncias=NULL;
+  limpiarPantalla();
+  printf("=== BUSCAR CAUSA POR DENUNCIA ===\n");
+  printf("Ingrese el RUC de la Denuncia: ");
+  fgets(ruc, RUT, stdin);
+  ruc[strcspn(ruc, "\n")]= 0;  /*saltar linea de posible espacio*/
+
+  printf("\n\n--- Causas de Denuncias ---\n\n\n");
+  denuncias=fiscal->denuncias;
+
+  while (denuncias!=NULL) {
+    if (denuncias->denuncia!=NULL && denuncias->denuncia->ruc!=NULL && strcmp(denuncias->denuncia->ruc,ruc)==0) {
+      rec=denuncias->denuncia->causas;
+      i=1;
+      printf("RUC: %s\n",denuncias->denuncia->ruc);
+      while (rec!=NULL) {
+        if (rec->causa!=NULL && rec->causa->tipoCausa==0) {
+          printf("CAUSA %d: Crimen\n",i);
+        }
+        else if(rec->causa!=NULL && rec->causa->tipoCausa==1) {
+          printf("CAUSA %d: Delito Simple\n",i);
+        }
+        else if(rec->causa!=NULL && rec->causa->tipoCausa==2) {
+          printf("CAUSA %d: Falta\n",i);
+        }
+        else{
+          printf("CAUSA %d: NO SE PRESENTA UNA CAUSA",i);
+        }
+        if (rec->causa!=NULL && rec->causa->descripcionCausa!=NULL) {
+          printf("Descripción de la Causa %d: %s\n",i,rec->causa->descripcionCausa);
+        }
+        else {
+          printf("Descripción de la Causa %d: NO HAY.",i);
+        }
+        rec=rec->sig;
+        i++;
+      }
+      break;
+    }
+    denuncias=denuncias->sig;
+  }
+
+  printf("\nPresione Enter para continuar\n");
+  getchar();
+}
 
 void agregarCausa(struct Fiscal *fiscal) {
   limpiarPantalla();
@@ -1554,6 +1662,8 @@ void ListarResoluciones(struct Fiscal *fiscal) {
   printf("Presione Enter para continuar...");
   getchar();
 }
+
+
 
 void AgregarResolucion(struct Fiscal *fiscal) {
   char rucBusqueda[RUC];
