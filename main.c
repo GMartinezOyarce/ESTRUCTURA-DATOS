@@ -320,7 +320,6 @@ char *ingresarRuc() {
       printf("1. Intentar nuevamente\n");
       printf("2. Volver al menu anterior\n");
       printf("Seleccione una opcion: \n");
-      limpiarBuffer();
       scanf("%d", &opcion);
       if (opcion == 2) {
         return vacio;
@@ -343,17 +342,18 @@ char *ingresarFecha() {
   char *ret;
   int opcion;
   do {
-    limpiarBuffer();
+
     printf("Ingrese Fecha: (Formato: 01/01/2000 )\n");
     fgets(fecha, FECHA, stdin);
+    limpiarBuffer();
     limpiarPantalla();
     if (revisarEspacios(fecha) == 1 || fecha[2]!= '/'|| fecha[5] != '/') {
       printf("Formato Equivocado:\n");
       printf("1. Intentar nuevamente\n");
       printf("2. Volver al menu anterior\n");
       printf("Seleccione una opcion: \n");
-      limpiarBuffer();
       scanf("%d", &opcion);
+      limpiarBuffer();
       if (opcion == 2) {
         return vacio;
       }
@@ -368,43 +368,14 @@ char *ingresarFecha() {
   return ret;
 }
 
-void AGREGARCAUSAS(struct Fiscal *fiscal) {
-  char rucBusqueda[RUC];
-  char *rucTemp;
-  struct Denuncia *denunciaEncontrada=NULL;
-  int opcion;
+void AGREGARCAUSAS(struct Denuncia *denuncia) {
   struct NodoCausas *nuevoNodo = NULL,*head;
 
 
-  do {
-    rucTemp = ingresarRuc();
-    if (rucTemp == NULL) {
-      return; /*Si retorna NUll el usuario quiere volver al menu Principal*/
-    }
-    strcpy(rucBusqueda, rucTemp);
-    denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
-
-
-    if (denunciaEncontrada == NULL) {
-      printf("\nNo se encontró ninguna denuncia con el RUC %s\n", rucBusqueda);
-      printf("1. Intentar nuevamente\n");
-      printf("2. Volver al menú anterior\n");
-      printf("Seleccione una opción: ");
-
-
-      scanf("%d", &opcion);
-      getchar();
-
-
-      if (opcion == 2) {
-        return; /* Salir de la función si el usuario elige volver*/
-      }
-    }
-  }while (denunciaEncontrada == NULL);
-
   limpiarPantalla();
   nuevoNodo = (struct NodoCausas *)malloc(sizeof(struct NodoCausas));
-
+  nuevoNodo->causa = (struct Causa *)malloc(sizeof(struct Causa));
+  nuevoNodo->sig = NULL;
   do {
     limpiarPantalla();
     printf("Ingrese La Causa:\n");
@@ -420,20 +391,23 @@ void AGREGARCAUSAS(struct Fiscal *fiscal) {
     }
   }while (1);
 
-  head = denunciaEncontrada->causas;
-  if (head == NULL) {
-    head = nuevoNodo;
-  }else {
-    while (head != NULL) {
-      if (head->sig == NULL) {
-        head->sig = nuevoNodo;
-      }
+
+  if (denuncia->causas == NULL) {
+
+    denuncia->causas = nuevoNodo;
+
+  } else {
+
+    head = denuncia->causas;
+    while (head->sig != NULL) {
       head = head->sig;
     }
+    head->sig = nuevoNodo;
   }
-
-
 }
+
+
+
 
 /*-----------------------FUNCIONES DE DENUNCIAS----------------------------*/
 void printDenuncia (struct Denuncia *denuncia) {
@@ -460,23 +434,26 @@ void printDenuncia (struct Denuncia *denuncia) {
 
   printf("Rut Denunciante: %s\n\n",denuncia->rutDenunciante);
   /*No es necesario revisar si esta vacio, pues, siempre tiene que haber al menos 1 en el nodo Causas*/
-  do {
-    /*Print de las causas*/
-    if (rec->causa->tipoCausa == 0) {
-      printf("Causa por la cual se esta denunciando: Crimen");
-      printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
-    }
-    if (rec->causa->tipoCausa == 1) {
-      printf("Causa por la cual se esta denunciando: Delito");
-      printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
-    }
-    if (rec->causa->tipoCausa == 2) {
-      printf("Causa por la cual se esta denunciando: Infraccion");
-      printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
-    }
-    rec = rec->sig;
-  }while (rec != head);
-
+  if (rec == NULL) {
+    printf("NO HAY CAUSAS\n\n");
+  }else {
+    do {
+      /*Print de las causas*/
+      if (rec->causa->tipoCausa == 0) {
+        printf("Causa por la cual se esta denunciando: Crimen");
+        printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
+      }
+      if (rec->causa->tipoCausa == 1) {
+        printf("Causa por la cual se esta denunciando: Delito");
+        printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
+      }
+      if (rec->causa->tipoCausa == 2) {
+        printf("Causa por la cual se esta denunciando: Infraccion");
+        printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
+      }
+      rec = rec->sig;
+    }while (rec != head);
+  }
   printf("Fecha en la cual se hizo la denuncia: %s\n\n",denuncia->fecha);
 
   /*Print de estados de la denuncia*/
@@ -509,10 +486,10 @@ void buscarDenunciaRUC(struct Fiscal *fiscal) {
     temporal = ingresarRuc();
     if (temporal == NULL) {
       return;
-    }else {
-      strcpy(ruc, temporal);
-      break;
     }
+    strcpy(ruc, temporal);
+    break;
+
   }while (1);
 
   denuncia = BUSCARDENUNCIA(fiscal,ruc);
@@ -569,14 +546,10 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   if (temporal == NULL) {
     return;
   }
+
   strcpy(ruc, temporal);
 
   do {
-    temporal = ingresarRuc();
-    if (temporal == NULL) {
-      return;
-    }
-    strcpy(ruc, temporal);
     if(BUSCARDENUNCIA(fiscal,ruc) != NULL) {
       limpiarPantalla();
       printf("Este RUC ya existe dentro del sistema\n");
@@ -587,6 +560,8 @@ void agregarDenuncia(struct Fiscal *fiscal) {
       if (opcion == 2) {
         return;  /*Salir de la función si el usuario elige volver*/
       }
+      temporal = ingresarRuc();
+      strcpy(ruc, temporal);
     }else {
       break;
     }
@@ -622,18 +597,19 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   }
   strcpy(denuncia->fecha, temporal);
 
+  denuncia->causas = NULL;
   do {
-    AGREGARCAUSAS(fiscal);
+    AGREGARCAUSAS(denuncia);
     printf("Desea Agregar Otra Causa a su denuncia?\n");
     printf("1 = SI , Cualquier otra tecla = NO");
     limpiarBuffer();
     scanf("%d", &opcion);
-    if (opcion == 1) {
+    if (opcion != 1) {
       break;
     }
   }while (1);
 
-  limpiarBuffer();
+
 
   denuncia->estadoDenuncia = -1;
 
@@ -661,8 +637,9 @@ void agregarDenuncia(struct Fiscal *fiscal) {
     }
   }
   printf("Se ha Agregado Su denuncia\n");
-  
+
 }
+
 
 void listarDenuncias(struct Fiscal *fiscal) {
   struct NodoDenuncias *head = fiscal->denuncias, *actual;
@@ -1346,6 +1323,9 @@ void ListarCausas(struct Fiscal *fiscal) {
 void agregarCausa(struct Fiscal *fiscal) {
   limpiarPantalla();
   int opcion;
+  char *rucTemp;
+  char rucBusqueda[RUC];
+  struct Denuncias *denunciaEncontrada;
 
   if (fiscal->denuncias== NULL) {
     printf("No hay denuncias en el Sistema");
@@ -1353,8 +1333,32 @@ void agregarCausa(struct Fiscal *fiscal) {
   }
 
   printf("Agregar Causas: \n\n");
-  AGREGARCAUSAS(fiscal);
+  do {
+    rucTemp = ingresarRuc();
+    if (rucTemp == NULL) {
+      return; /*Si retorna NUll el usuario quiere volver al menu Principal*/
+    }
+    strcpy(rucBusqueda, rucTemp);
+    denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
+
+
+    if (denunciaEncontrada == NULL) {
+      printf("\nNo se encontró ninguna denuncia con el RUC %s\n", rucBusqueda);
+      printf("1. Intentar nuevamente\n");
+      printf("2. Volver al menú anterior\n");
+      printf("Seleccione una opción: ");
+
+      scanf("%d", &opcion);
+
+      if (opcion == 2) {
+        return; /* Salir de la función si el usuario elige volver*/
+      }
+    }
+  }while (denunciaEncontrada == NULL);
+
+  AGREGARCAUSAS(denunciaEncontrada);
   while (1) {
+
     printf("Desea Agregar otra Causa: \n");
     printf("0: Agregar otra Causa \n");
     printf("Cualquier otra numero: Volver Al Menu Principal  \n");
