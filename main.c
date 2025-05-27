@@ -1092,6 +1092,7 @@ void agregarImputado(struct Fiscal *fiscal) {
   printf("Ingrese las Medidas Cautelares (MAX 1000 caracteres)\n");
   fgets(descripcion, TEXTO, stdin);
   nuevoImputado->medidasCautelares[strcspn(nuevoImputado ->medidasCautelares, "\n")] = 0;
+  strcpy(nuevoImputado->medidasCautelares, descripcion);
 
   do {
     recCausas = nuevoImputado-> causas;
@@ -1105,7 +1106,8 @@ void agregarImputado(struct Fiscal *fiscal) {
     printf("Ingrese la descripcion de su causa \n");
     fgets(descripcion, TEXTO, stdin);
     descripcion[strcspn(descripcion, "\n")] = 0;
-    strcpy(nuevoImputado->medidasCautelares, descripcion);
+    strcpy(nuevaCausa->descripcionCausa, descripcion);
+
 
     nuevaCausa -> tipoCausa = causas;
     strcpy(nuevaCausa -> descripcionCausa, descripcion);
@@ -1271,7 +1273,7 @@ void recorrerBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
   actual = nodoArbol->carpetaInvestigativa->imputado;
   while (actual!=NULL) {
     if (strcmp(actual->imputado->rut, rutBuscado) == 0) {
-      printf("\n--- Imputado Encontrado ---\n");
+      printf("\n====== Imputado Encontrado ======\n");
       printf("RUT: %s\n", actual->imputado->rut);
       causaActual = actual->imputado->causas;
       while (causaActual != NULL) {
@@ -1285,9 +1287,9 @@ void recorrerBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
         else if (causaActual->causa->tipoCausa == 2) {
           printf("Tipo:Falta\n");
         }
+        printf("Descripcion: %s\n", causaActual->causa->descripcionCausa);
         causaActual = causaActual->sig;
       }
-      printf("Descripcion: %s\n", actual->imputado->descripcionSentencia);
       printf("Medidas cautelares: %s\n", actual->imputado->medidasCautelares);
       printf("RUC de la carpeta: %s\n\n", nodoArbol->carpetaInvestigativa->ruc);
     }
@@ -1318,7 +1320,7 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol) {
   struct NodoImputados *actual;
   struct NodoCausas *causaActual;
   int numCausa = 1;
-  if(nodoArbol == NULL && nodoArbol->carpetaInvestigativa == NULL) {
+  if(nodoArbol == NULL || nodoArbol->carpetaInvestigativa == NULL) {
     return;
   }
 
@@ -1326,7 +1328,7 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol) {
   actual = nodoArbol->carpetaInvestigativa->imputado;
   while (actual!=NULL) {
     imputado = actual->imputado;
-    printf("\n--- IMPUTADO ---\n");
+    printf("\n==== IMPUTADO ====\n");
     printf("RUT: %s\n", imputado->rut);
     printf("Causas:\n");
     causaActual = imputado->causas;
@@ -1340,7 +1342,7 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol) {
       }else if (causaActual->causa->tipoCausa == 2) {
         printf("Falta\n");
       }
-      printf("Descripción: %s\n", causaActual->causa->descripcionCausa);
+      printf("Descripcion: %s\n", causaActual->causa->descripcionCausa);
       causaActual = causaActual->sig;
     }
     printf("Medidas Cautelares: %s\n", imputado->medidasCautelares);
