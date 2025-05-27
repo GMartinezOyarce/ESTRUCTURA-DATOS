@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TEXTO 1000
+#define TEXTO 1001
 #define RUC 15
 #define FECHA 11
 #define RUT 11
@@ -311,7 +311,7 @@ char *ingresarRuc() {
   char *ret;
   int opcion;
   do {
-    printf("Ingrese RUC de la denuncia:\n");
+    printf("Ingrese RUC de la carpeta / denuncia:\n");
     limpiarBuffer();
     fgets(ruc, RUC, stdin);
     ruc[strcspn(ruc, "\n")] = 0;
@@ -475,7 +475,6 @@ void printDenuncia (struct Denuncia *denuncia) {
 
 }
 void buscarDenunciaRUC(struct Fiscal *fiscal) {
-  int opcion;
   struct Denuncia *denuncia;
   char ruc[RUC];
   char *temporal;
@@ -763,6 +762,84 @@ void CrearCarpeta(struct Fiscal *fiscal) {
     getchar();
 }
 
+/*-----------------------FUNCION BUSCAR CARPETA Y MOSTRARLA POR RUC-------------*/
+void buscarCarpetaRuc(struct Fiscal *fiscal) {
+  struct CarpetaInvestigativa *carpeta;
+  struct NodoImputados *recImputado;
+  struct NodoCausas *recCausas;
+  char *rucTemporal;
+  char ruc[RUC];
+  limpiarPantalla();
+  limpiarBuffer();
+
+  if (fiscal -> carpetas == NULL) {
+    printf("NO EXISTE NINGUNA CARPETA");
+    return;
+  }
+
+  printf("====================== BUSCAR CARPETA POR RUC ====================\n\n");
+
+  do {
+    rucTemporal = ingresarRuc();
+    if (rucTemporal == NULL)
+      return;
+    strcpy(ruc, rucTemporal);
+    break;
+  }while(1);
+
+  carpeta = BUSCARCARPETA(fiscal->carpetas, ruc);
+  printf("--------------------------------------------------\n");
+  printf("RUC: %s\n", carpeta->ruc);
+  printf("Estado: ");
+  switch (carpeta->estadoCarpeta) {
+    case 0: printf("En investigación\n"); break;
+    case 1: printf("Juicio Oral\n"); break;
+    case 2: printf("Archivada\n"); break;
+    case 3: printf("Cerrada\n"); break;
+    default: printf("Desconocido\n"); break;
+  }
+
+  /*Se muestra la denuncia de la carpeta*/
+  printf("-----------Denuncia que contiene la Carpeta----------\n");
+  printf("RUT DENUNCIANTE = %s\n", carpeta->denuncia->rutDenunciante);
+  printf("Origen de la denuncia :");
+  switch (carpeta->denuncia-> origenDenunciante) {
+    case 0: printf("Victima\n"); break;
+    case 1: printf("Testigo\n"); break;
+    case 2: printf("Tercero\n"); break;
+    case 3: printf("Carabineros de Chile\n"); break;
+    case 4: printf("PDI\n"); break;
+    default: printf("Desconocido\n"); break;
+  }
+  printf("Fecha: %s", carpeta->denuncia->fecha);
+
+  recCausas = carpeta->denuncia->causas;
+  if (recCausas == NULL)
+    printf("No hay Causas en la denuncia");
+  while (recCausas != NULL) {
+    printf("El tipo de Causa por la que esta demandado :");
+    switch (recCausas->causa->tipoCausa) {
+      case 0: printf("Victima\n"); break;
+
+    }
+  }
+
+
+  /*se recorre la lista de imputados para mostrar cada imputado de la carpeta*/
+  recImputado = carpeta -> imputado;
+  if (recImputado != NULL) {
+    while (recImputado != NULL) {
+      printf("RUT Imputado: %s\n", recImputado->imputado->rut);
+      recImputado = recImputado -> sig;
+    }
+  }
+  else
+    printf("Sin imputado asignado\n");
+
+  printf("CARPETA MOSTRADA CORRECTAMENTE\n");
+  esperarEnter();
+}
+
 
 /*-----------------------------FUNCION AGREGAR DECLARACION------------------*/
 
@@ -785,6 +862,8 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   nuevo = (struct Declaracion*)malloc(sizeof(struct Declaracion));
   nodo = (struct NodoDeclaraciones*)malloc(sizeof(struct NodoDeclaraciones));
 
+  limpiarBuffer();
+
   printf("Ingrese el RUC de su Carpeta\n");
   fgets(rucCarpeta, RUC, stdin);
   rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
@@ -800,15 +879,16 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   fgets(nuevo -> rut, RUT, stdin);
   nuevo-> rut[strcspn(nuevo -> rut, "\n")] = 0;
 
-  printf("Ingrese origen (0: Víctima, 1: Testigo, 2: Imputado): ");
+  printf("Ingrese origen (0: Víctima, 1: Testigo, 2: Imputado): \n");
   scanf("%d", &nuevo->origenDeclaracion);
   limpiarBuffer();
 
-  printf("Ingrese declaración: ");
+  printf("Ingrese declaracion (MAXIMO 1000 CARACTARES): \n");
   fgets(nuevo->declaracion, TEXTO, stdin);
   nuevo-> declaracion[strcspn(nuevo-> declaracion, "\n")] = 0;
 
-  printf("Ingrese fecha (dd/mm/aaaa): ");
+  limpiarBuffer();
+  printf("Ingrese fecha (dd/mm/aaaa): \n");
   fgets(nuevo->fecha, 14, stdin);
   nuevo-> fecha[strcspn(nuevo-> fecha, "\n")] = 0;
 
@@ -824,7 +904,7 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
     }
     rec->sig = nodo;
   }
-  printf("Declaración agregada con éxito\n");
+  printf("Declaracion agregada con exito\n");
   esperarEnter();
 }
 /*-------------------------FUNCION AGREGAR  DILIGENCIAS-----------------*/
@@ -1824,7 +1904,7 @@ void menuCarpetas(struct Fiscal *fiscal) {
 
     switch(opcion) {
       case 1: CrearCarpeta(fiscal); break;
-      case 2: /*funcion MODIFICAR carpeta RUC */ break;
+      case 2: buscarCarpetaRuc(fiscal); break;
       case 3: /*funcion MODIFICAR estado Carpeta*/ break;
       case 4: agregarDeclaracion(fiscal); break;
       case 5: agregarDiligencia(fiscal); break;
