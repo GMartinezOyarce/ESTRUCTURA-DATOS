@@ -385,7 +385,7 @@ void AGREGARCAUSAS(struct Denuncia *denuncia) {
     scanf("%d", &nuevoNodo->causa->tipoCausa);
     limpiarBuffer();
     if (nuevoNodo-> causa->tipoCausa == 0 || nuevoNodo->causa->tipoCausa == 1 || nuevoNodo-> causa->tipoCausa == 2) {
-      printf("Ingrese la descripcion de su Denuncia\n");
+      printf("Ingrese la descripcion de su Causa\n");
       fgets(nuevoNodo->causa->descripcionCausa, TEXTO, stdin);
       break;
     }
@@ -437,22 +437,22 @@ void printDenuncia (struct Denuncia *denuncia) {
   if (rec == NULL) {
     printf("NO HAY CAUSAS\n\n");
   }else {
-    do {
+    while (rec != NULL){
       /*Print de las causas*/
       if (rec->causa->tipoCausa == 0) {
-        printf("Causa por la cual se esta denunciando: Crimen");
+        printf("Causa: Crimen\n\n");
         printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
       }
       if (rec->causa->tipoCausa == 1) {
-        printf("Causa por la cual se esta denunciando: Delito");
+        printf("Causa: Delito\n\n");
         printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
       }
       if (rec->causa->tipoCausa == 2) {
-        printf("Causa por la cual se esta denunciando: Infraccion");
+        printf("Causa: Infraccion\n\n");
         printf("Descripcion: %s\n\n",rec->causa->descripcionCausa);
       }
       rec = rec->sig;
-    }while (rec != head);
+    }
   }
   printf("Fecha en la cual se hizo la denuncia: %s\n\n",denuncia->fecha);
 
@@ -497,7 +497,8 @@ void buscarDenunciaRUC(struct Fiscal *fiscal) {
   }else {
     printDenuncia(denuncia);
   }
-
+  esperarEnter();
+  return;
 }
 
 void buscarDenunciaEstado(struct Fiscal *fiscal) {
@@ -638,6 +639,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   printf("Se ha Agregado Su denuncia\n");
 
 }
+
 
 
 void listarDenuncias(struct Fiscal *fiscal) {
@@ -1554,7 +1556,7 @@ void agregarCausa(struct Fiscal *fiscal) {
       printf("\nNo se encontró ninguna denuncia con el RUC %s\n", rucBusqueda);
       printf("1. Intentar nuevamente\n");
       printf("2. Volver al menú anterior\n");
-      printf("Seleccione una opción: ");
+      printf("Seleccione una opción: \n");
 
       scanf("%d", &opcion);
 
@@ -1573,7 +1575,7 @@ void agregarCausa(struct Fiscal *fiscal) {
     scanf("%d", &opcion);
     limpiarBuffer();
     if (opcion == 0) {
-      AGREGARCAUSAS(fiscal);
+      AGREGARCAUSAS(denunciaEncontrada);
     }else
       return;
   }
