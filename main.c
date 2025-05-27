@@ -767,10 +767,16 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
   struct CarpetaInvestigativa *carpeta;
   struct NodoImputados *recImputado;
   struct NodoCausas *recCausas;
+  struct NodoDeclaraciones *recDeclaraciones;
+  struct NodoPruebas *recPruebas;
+  struct NodoDiligencias *recDiligencias;
+  struct NodoResoluciones *recResoluciones;
+
+
   char *rucTemporal;
   char ruc[RUC];
   limpiarPantalla();
-  limpiarBuffer();
+
 
   if (fiscal -> carpetas == NULL) {
     printf("NO EXISTE NINGUNA CARPETA");
@@ -788,11 +794,15 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
   }while(1);
 
   carpeta = BUSCARCARPETA(fiscal->carpetas, ruc);
+  if (carpeta == NULL) {
+    printf("No existe una carpeta con ese RUC");
+    return;
+  }
   printf("--------------------------------------------------\n");
   printf("RUC: %s\n", carpeta->ruc);
   printf("Estado: ");
   switch (carpeta->estadoCarpeta) {
-    case 0: printf("En investigación\n"); break;
+    case 0: printf("En investigacion\n"); break;
     case 1: printf("Juicio Oral\n"); break;
     case 2: printf("Archivada\n"); break;
     case 3: printf("Cerrada\n"); break;
@@ -800,7 +810,7 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
   }
 
   /*Se muestra la denuncia de la carpeta*/
-  printf("-----------Denuncia que contiene la Carpeta----------\n");
+  printf("\n-----------Denuncia que contiene la Carpeta----------\n");
   printf("RUT DENUNCIANTE = %s\n", carpeta->denuncia->rutDenunciante);
   printf("Origen de la denuncia :");
   switch (carpeta->denuncia-> origenDenunciante) {
@@ -811,35 +821,198 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
     case 4: printf("PDI\n"); break;
     default: printf("Desconocido\n"); break;
   }
-  printf("Fecha: %s", carpeta->denuncia->fecha);
+  printf("Fecha: %s\n", carpeta->denuncia->fecha);
 
+  /*Se recorren las Causas de la denuncia para poder mostrarlas*/
   recCausas = carpeta->denuncia->causas;
   if (recCausas == NULL)
-    printf("No hay Causas en la denuncia");
+    printf("No hay Causas en la denuncia\n");
   while (recCausas != NULL) {
     printf("El tipo de Causa por la que esta demandado :");
     switch (recCausas->causa->tipoCausa) {
-      case 0: printf("Victima\n"); break;
-
+      case 0: printf("Crimen(INFRACCION GRAVE)\n"); break;
+      case 1: printf("Delito simple(Ejemplo: Hurto, estafa)\n");break;
+      case 2: printf("falta(Ejemplo: infracciones de transito\n)");break;
+      default: printf("Desconocido\n"); break;
     }
+    printf("Descripcion de la Causa %s");
+    recCausas= recCausas->sig;
   }
 
-
   /*se recorre la lista de imputados para mostrar cada imputado de la carpeta*/
+  printf("\n-----------Imputados que contiene la Carpeta----------\n");
   recImputado = carpeta -> imputado;
   if (recImputado != NULL) {
     while (recImputado != NULL) {
       printf("RUT Imputado: %s\n", recImputado->imputado->rut);
+      printf("Tipo de la sentencia :");
+      switch (recImputado->imputado->tipoSentencia) {
+        case 0: printf("Condenatoria");break;
+        case 1: printf("Absolutoria");break;
+        default: printf("Desconocido\n"); break;
+      }
+
+      /*Verificacion de que si exiten las descripciones y medidas cautelares para ver si las imprimo o no*/
+      if (strcmp(recImputado->imputado->descripcionSentencia,"")==0)
+        printf("No hay descripcion de la sentencia\n");
+      else
+        printf("Descripcion de la sentencia : %s\n", recImputado-> imputado-> descripcionSentencia);
+      if (strcmp(recImputado->imputado->medidasCautelares,"")==0)
+        printf("No hay medidas cautelares\n");
+      else
+        printf("Las medidas Cautelares son: %s\n", recImputado-> imputado->medidasCautelares);
+
+
+      /*reciclo codigo anterior para mostrar Causas*/
+      recCausas = carpeta->denuncia->causas;
+      if (recCausas == NULL)
+        printf("No hay Causas en el Imputado\n");
+
+      while (recCausas != NULL) {
+        printf("El tipo de Causa por la que esta demandado :");
+        switch (recCausas->causa->tipoCausa) {
+          case 0: printf("Crimen(INFRACCION GRAVE)\n"); break;
+          case 1: printf("Delito simple(Ejemplo: Hurto, estafa)\n");break;
+          case 2: printf("falta(Ejemplo: infracciones de transito\n)");break;
+          default: printf("Desconocido\n"); break;
+        }
+        printf("Descripcion de la Causa %s\n");
+        recCausas= recCausas->sig;
+      }
+      printf("------------------------------\n");
       recImputado = recImputado -> sig;
     }
   }
   else
     printf("Sin imputado asignado\n");
 
-  printf("CARPETA MOSTRADA CORRECTAMENTE\n");
-  esperarEnter();
-}
+  /*Se recorre la lista de declaraciones para poder mostrarla por pantalla*/
+  printf("\n-----------Declaraciones que contiene la Carpeta----------\n");
+  recDeclaraciones = carpeta -> declaraciones;
+  if (recDeclaraciones != NULL) {
+    while (recDeclaraciones != NULL) {
+      printf("Rut del Declarante: %s\n", recDeclaraciones->declaracion->rut);
 
+      printf("Quien emitio la declaracion: ");
+      switch (recDeclaraciones->declaracion->origenDeclaracion) {
+        case 0: printf("Victima\n"); break;
+        case 1: printf("Testigo\n"); break;
+        case 2: printf("Imputado\n"); break;
+        default: printf("Desconocido\n"); break;
+      }
+      printf("Descripcion de la Declaracion %s\n", recDeclaraciones->declaracion->declaracion);
+      printf("Fecha de la declaracion : %s\n", recDeclaraciones->declaracion->fecha);
+      recDeclaraciones = recDeclaraciones-> sig;
+    }
+  }
+  else {
+    printf("No hay Declaraciones\n");
+  }
+  /*Se recorre la lista de pruebas para  mostrarlas en pantalla*/
+  printf("\n-----------Pruebas que contiene la Carpeta----------\n");
+  recPruebas = carpeta -> pruebas;
+  if (recPruebas != NULL) {\
+    while (recPruebas!=NULL) {
+      printf("Tipo de Prueba :");
+      switch (recPruebas->prueba->tipoDePrueba) {
+        case 0: printf("Informe Pericial\n"); break;
+        case 1: printf("Grabacion\n");break;
+        case 2: printf("Documento\n"); break;
+        case 3: printf("Prueba fisica\n");break;
+        default: printf("Desconocido\n"); break;
+      }
+      printf("Descripcion de la prueba %s\n", recPruebas->prueba->descripcionPrueba);
+      printf("Fecha en la que se ingreso la prueba: %s\n", recPruebas->prueba->fecha);
+      printf("----------------------------------------\n");
+
+      recPruebas = recPruebas-> sig;
+    }
+  }
+  else
+    printf("No hay Pruebas\n");
+
+  /*Se recorre la lista de diligencias para  mostrarlas en pantalla*/
+  printf("\n-----------diligencias que contiene la Carpeta----------\n");
+  recDiligencias = carpeta->diligencias;
+  if (recDiligencias != NULL) {
+    while (recDiligencias != NULL) {
+      printf("Origen de la diligencia :");
+      switch (recDiligencias->diligencia->OrigenDiligencia) {
+        case 0: printf("Pedido de Fiscal\n"); break;
+        case 1: printf("Victima\n"); break;
+        case 2: printf("imputado\n"); break;
+        default: printf("Desconocido\n"); break;
+      }
+      printf("tipo de la diligencia: %s\n", recDiligencias-> diligencia-> tipoDiligencia);
+      printf("Descripcion de las diligencias: %s\n",recDiligencias->diligencia->descripcionDiligencia);
+      printf("Fecha de ingreso de la diligencia: %s\n", recDiligencias ->diligencia->fechaDiligencia);
+
+      printf("Estado de la diligencia: ");
+      switch (recDiligencias->diligencia->aprobacion) {
+        case 0: printf("Rechazada\n"); break;
+        case 1: printf("Aprovada\n"); break;
+        default: printf("Desconocido\n"); break;
+      }
+
+
+      printf("Urgencia de la diligencia: ");
+      switch (recDiligencias-> diligencia-> urgencia) {
+        case 1: printf("Urgencia Baja\n"); break;
+        case 2: printf("Urgencia Media\n"); break;
+        case 3: printf("Urgencia Alta\n"); break;
+        default: printf("Desconocido\n"); break;
+      }
+
+      printf("Impacto de la Urgencia");
+      switch (recDiligencias->diligencia-> impacto) {
+        case 1: printf("Bajo impacto para la investigacion\n"); break;
+        case 2: printf("Medio impacto para la investigacion\n"); break;
+        case 3: printf("Alto impacto para la investgacion\n"); break;
+        default:printf("Desconocido\n"); break;
+      }
+      printf("----------------------------------------\n");
+      recDiligencias = recDiligencias-> sig;
+    }
+  }
+  else
+    printf("No hay Diligencias\n");
+
+  /*Se recorren las resoluciones para mostrar por pantalla*/
+  printf("\n-----------Resoluciones que contiene la Carpeta----------\n");
+  recResoluciones = carpeta->resoluciones;
+  if (recResoluciones !=NULL) {
+    while (recResoluciones !=NULL) {
+      printf("Rut del juez: %s\n", recResoluciones->resolucion->rutJuez);
+
+      printf("El tipo de resolucion es: ");
+      switch (recResoluciones-> resolucion -> tipoResolucion) {
+        case 0: printf("Sentencia o Fallo\n"); break;
+        case 1: printf("Autorizacion para diligencias\n"); break;
+        case 2: printf("Medidas Cautelares\n"); break;
+        case 3: printf("sobresimiento"); break;
+        default: printf("Desconocido\n");break;
+      }
+
+      printf("Origen de la Resolucion: ");
+      switch (recResoluciones-> resolucion-> origenResolucion) {
+        case 0: printf("Juez de Garantia\n"); break;
+        case 1: printf("Tribunal de Juicio Oral\n"); break;
+        default: printf("Desconocido\n"); break;
+      }
+
+      printf("Descripcion de la Resolucion: %s\n", recResoluciones-> resolucion-> descripcion);
+      printf("Fecha en la que se emitio la Resolucion: %s\n", recResoluciones-> resolucion-> fecha);
+
+      printf("----------------------------------------\n");
+      recResoluciones = recResoluciones-> sig;
+    }
+  }
+  else
+    printf("No hay Resoluciones\n");
+  printf("\nCARPETA MOSTRADA CORRECTAMENTE\n");
+  esperarEnter();
+  return;
+}
 
 /*-----------------------------FUNCION AGREGAR DECLARACION------------------*/
 
