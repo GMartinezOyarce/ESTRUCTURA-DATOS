@@ -1315,6 +1315,100 @@ void buscarImputadoPorRut(struct Fiscal *fiscal){
 
 }
 
+
+/*---------Funcion para modificar al imputado-------------*/
+
+void modificarImputado(struct Fiscal *fiscal) {
+  char rutBusqueda[RUT];
+  struct arbolCarpetas *nodoArbol = fiscal->carpetas;
+  struct NodoImputados *actual = NULL;
+  int encontrado = 0;
+  int opcion;
+
+  if (nodoArbol == NULL) {
+    printf("No hay carpetas registradas.\n");
+    return;
+  }
+
+  limpiarPantalla();
+  printf("=== MODIFICAR IMPUTADO ===\n");
+  printf("Ingrese el RUT del imputado: ");
+  limpiarBuffer();
+  fgets(rutBusqueda, RUT, stdin);
+  rutBusqueda[strcspn(rutBusqueda, "\n")] = 0;
+
+  while (nodoArbol != NULL) {
+    actual = nodoArbol->carpetaInvestigativa->imputado;
+    while (actual != NULL) {
+      if (strcmp(actual->imputado->rut, rutBusqueda) == 0) {
+        encontrado++;
+
+        printf("\n====== Imputado Encontrado ======\n");
+        printf("RUT: %s\n", actual->imputado->rut);
+        printf("Medidas actuales: %s\n", actual->imputado->medidasCautelares);
+        printf("Tipo de sentencia actual: %d\n", actual->imputado->tipoSentencia);
+        printf("Descripcion sentencia actual: %s\n", actual->imputado->descripcionSentencia);
+
+        printf("\nSeleccione que desea modificar:\n");
+        printf("1. Medidas Cautelares\n");
+        printf("2. Tipo de Sentencia (0: Condenatoria, 1: Absolutoria)\n");
+        printf("3. Descripcion de la Sentencia\n");
+        printf("4. Cancelar\n");
+        scanf("%d", &opcion);
+        limpiarBuffer();
+
+        switch (opcion) {
+          case 1:
+            printf("Ingrese nuevas medidas cautelares: ");
+            fgets(actual->imputado->medidasCautelares, TEXTO, stdin);
+            actual->imputado->medidasCautelares[strcspn(actual->imputado->medidasCautelares, "\n")] = 0;
+            printf("Medidas actualizadas correctamente.\n");
+            break;
+
+          case 2:
+            printf("Ingrese nuevo tipo de sentencia (0: Condenatoria, 1: Absolutoria): ");
+            scanf("%d", &actual->imputado->tipoSentencia);
+            limpiarBuffer();
+            printf("Tipo de sentencia actualizado correctamente.\n");
+            break;
+
+          case 3:
+            printf("Ingrese nueva descripcion de sentencia: ");
+            fgets(actual->imputado->descripcionSentencia, TEXTO, stdin);
+            actual->imputado->descripcionSentencia[strcspn(actual->imputado->descripcionSentencia, "\n")] = 0;
+            printf("Descripcion de sentencia actualizada correctamente.\n");
+            break;
+
+          case 4:
+            printf("Operacion cancelada.\n");
+            return;
+
+          default:
+            printf("Opcion invalida.\n");
+        }
+
+        esperarEnter();
+        return;
+      }
+      actual = actual->sig;
+    }
+
+    if (strcmp(rutBusqueda, nodoArbol->carpetaInvestigativa->ruc) < 0) {
+      nodoArbol = nodoArbol->izq;
+    } else {
+      nodoArbol = nodoArbol->der;
+    }
+  }
+
+  if (encontrado == 0) {
+    printf("No se encontro un imputado con el RUT ingresado.\n");
+    esperarEnter();
+  }
+}
+
+/*-----------funcion para mostrar todos los imputados---------------*/
+
+
 void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol) {
   struct Imputado *imputado;
   struct NodoImputados *actual;
@@ -1935,7 +2029,7 @@ void menuImputados(struct Fiscal *fiscal){
 
     switch(opcion) {
       case 1: agregarImputado(fiscal); break;
-      case 2: /* función modificarImputado */ break;
+      case 2: modificarImputado(fiscal); break;
       case 3: agregarDeclaracion(fiscal); break;
       case 4: buscarImputadoPorRut(fiscal); break;
       case 5: mostrarTodosImputados(fiscal); break;
