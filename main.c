@@ -771,8 +771,6 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
   struct NodoPruebas *recPruebas;
   struct NodoDiligencias *recDiligencias;
   struct NodoResoluciones *recResoluciones;
-
-
   char *rucTemporal;
   char ruc[RUC];
   limpiarPantalla();
@@ -790,14 +788,14 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
     if (rucTemporal == NULL)
       return;
     strcpy(ruc, rucTemporal);
-    break;
+    carpeta = BUSCARCARPETA(fiscal->carpetas, ruc);
+    if (carpeta == NULL) {
+      printf("No existe una carpeta con ese RUC INTENTE DENUEVO\n\n");
+    }
+    else
+      break;
   }while(1);
 
-  carpeta = BUSCARCARPETA(fiscal->carpetas, ruc);
-  if (carpeta == NULL) {
-    printf("No existe una carpeta con ese RUC");
-    return;
-  }
   printf("--------------------------------------------------\n");
   printf("RUC: %s\n", carpeta->ruc);
   printf("Estado: ");
@@ -830,12 +828,12 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
   while (recCausas != NULL) {
     printf("El tipo de Causa por la que esta demandado :");
     switch (recCausas->causa->tipoCausa) {
-      case 0: printf("Crimen(INFRACCION GRAVE)\n"); break;
-      case 1: printf("Delito simple(Ejemplo: Hurto, estafa)\n");break;
-      case 2: printf("falta(Ejemplo: infracciones de transito\n)");break;
+      case 0: printf("CRIMEN \n"); break;
+      case 1: printf("DELITO SIMPLE \n");break;
+      case 2: printf("FALTA\n");break;
       default: printf("Desconocido\n"); break;
     }
-    printf("Descripcion de la Causa %s");
+    printf("Descripcion de la Causa %s\n", recCausas-> causa-> descripcionCausa);
     recCausas= recCausas->sig;
   }
 
@@ -864,7 +862,7 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
 
 
       /*reciclo codigo anterior para mostrar Causas*/
-      recCausas = carpeta->denuncia->causas;
+      recCausas = recImputado->imputado->causas;
       if (recCausas == NULL)
         printf("No hay Causas en el Imputado\n");
 
@@ -876,7 +874,7 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
           case 2: printf("falta(Ejemplo: infracciones de transito\n)");break;
           default: printf("Desconocido\n"); break;
         }
-        printf("Descripcion de la Causa %s\n");
+        printf("Descripcion de la Causa %s\n",recCausas-> causa-> descripcionCausa);
         recCausas= recCausas->sig;
       }
       printf("------------------------------\n");
@@ -1021,32 +1019,32 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   struct NodoDeclaraciones *nodo = NULL;
   struct NodoDeclaraciones *rec = NULL;
   struct CarpetaInvestigativa *carpeta = NULL;
-  char rucCarpeta[14];
-
+  char *rucTemporal;
+  char rucCarpeta[RUC];
   limpiarPantalla();
-  limpiarBuffer();
 
   if (fiscal -> carpetas == NULL) {
-    printf("No hay carpetas a las que pueda agregarle una Declaracion");
-    esperarEnter();
+    printf("NO EXISTE NINGUNA CARPETA");
     return;
   }
+
+  do {
+    rucTemporal = ingresarRuc();
+    if (rucTemporal == NULL)
+      return;
+    strcpy(rucCarpeta, rucTemporal);
+    carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
+    if (carpeta == NULL) {
+      printf("No existe una carpeta con ese RUC INTENTE DENUEVO\n\n");
+    }
+    else
+      break;
+  }while(1);
+
 
   nuevo = (struct Declaracion*)malloc(sizeof(struct Declaracion));
   nodo = (struct NodoDeclaraciones*)malloc(sizeof(struct NodoDeclaraciones));
 
-  limpiarBuffer();
-
-  printf("Ingrese el RUC de su Carpeta\n");
-  fgets(rucCarpeta, RUC, stdin);
-  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
-
-  carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
-  if (carpeta == NULL) {
-    printf("No se ENCONTRO LA CARPETA");
-    esperarEnter();
-    return;
-  }
   limpiarBuffer();
   printf("Ingrese RUT del declarante: \n");
   fgets(nuevo -> rut, RUT, stdin);
@@ -1086,51 +1084,61 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   struct NodoDiligencias *nodo;
   struct CarpetaInvestigativa *carpeta;
   struct NodoDiligencias *rec= NULL;
-  char rucCarpeta[14];
+  char *rucTemporal;
+  char rucCarpeta[RUC];
 
+  limpiarPantalla();
 
+  if (fiscal -> carpetas == NULL) {
+    printf("NO EXISTE NINGUNA CARPETA");
+    return;
+  }
+
+  do {
+    rucTemporal = ingresarRuc();
+    if (rucTemporal == NULL)
+      return;
+    strcpy(rucCarpeta, rucTemporal);
+    carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
+    if (carpeta == NULL) {
+      printf("No existe una carpeta con ese RUC INTENTE DENUEVO\n\n");
+    }
+    else
+      break;
+  }while(1);
+  limpiarPantalla();
+  limpiarBuffer();
 
   nueva = (struct Diligencia*)malloc(sizeof(struct Diligencia));
   nodo = (struct NodoDiligencias*)malloc(sizeof(struct NodoDiligencias));
 
-  limpiarPantalla();
-
-  printf("Ingrese el RUC de su Carpeta");
-  fgets(rucCarpeta, RUC, stdin);
-  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
-
-  carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
-  if (carpeta == NULL) {
-    printf("No se ENCONTRO LA CARPETA");
-    esperarEnter();
-    return;
-  }
-
-  printf("Ingrese origen (0: Fiscal, 1: Víctima, 2: Imputado): ");
+  printf("Ingrese origen (0: Fiscal, 1: Víctima, 2: Imputado): \n");
   scanf("%d", &nueva->OrigenDiligencia);
   limpiarBuffer();
 
-  printf("Ingrese tipo de diligencia: ");
+  printf("Ingrese tipo de diligencia: \n");
   fgets(nueva->tipoDiligencia, TEXTO, stdin);
   nueva->tipoDiligencia[strcspn(nueva->tipoDiligencia, "\n")] = 0;
 
-  printf("Ingrese descripción: ");
+
+  printf("Ingrese descripción: \n");
   fgets(nueva->descripcionDiligencia, TEXTO, stdin);
   nueva->descripcionDiligencia[strcspn(nueva->descripcionDiligencia, "\n")] = 0;
 
-  printf("Ingrese fecha (dd/mm/aaaa): ");
-  scanf("%s", nueva->fechaDiligencia);
-  limpiarBuffer();
 
-  printf("Ingrese decisión (1: Aprobada, 0: Rechazada): ");
+  printf("Ingrese fecha (dd/mm/aaaa): \n");
+  fgets(nueva->fechaDiligencia, FECHA, stdin);
+  nueva->fechaDiligencia[strcspn(nueva->fechaDiligencia, "\n")] = 0;
+
+  printf("Ingrese decisión (1: Aprobada, 0: Rechazada): \n");
   scanf("%d", &nueva->aprobacion);
   limpiarBuffer();
 
-  printf("Ingrese urgencia (1: Baja, 2: Media, 3: Alta): ");
+  printf("Ingrese urgencia (1: Baja, 2: Media, 3: Alta): \n");
   scanf("%d", &nueva->urgencia);
   limpiarBuffer();
 
-  printf("Ingrese impacto (1: Bajo, 2: Medio, 3: Alto): ");
+  printf("Ingrese impacto (1: Bajo, 2: Medio, 3: Alto): \n");
   scanf("%d", &nueva->impacto);
   limpiarBuffer();
 
@@ -1149,6 +1157,7 @@ void agregarDiligencia(struct Fiscal *fiscal) {
 
   printf("\nDiligencia agregada correctamente.\n");
   esperarEnter();
+  return;
 }
 
 /*---------funcion para asignar prioridad a las diligencias--------*/
@@ -1161,46 +1170,50 @@ void agregarResolucion(struct Fiscal *fiscal) {
   struct NodoResoluciones *rec;
   struct Resolucion *nuevaResolucion;
   struct CarpetaInvestigativa *carpeta;
-  char rucCarpeta[14];
+  char *rucTemporal;
+  char rucCarpeta[RUC];
+  limpiarPantalla();
 
-  printf("Ingrese el RUC de la carpteta a la que desea agregar una Resolucion");
-  fgets(rucCarpeta, RUC, stdin);
-  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
-
-  carpeta = BUSCARCARPETA(fiscal-> carpetas, rucCarpeta);
-  if (carpeta == NULL) {
-    printf("CARPETA NO ENCONTRADA.");
-    esperarEnter();
-    return;
-  }
+  do {
+    rucTemporal = ingresarRuc();
+    if (rucTemporal == NULL)
+      return;
+    strcpy(rucCarpeta, rucTemporal);
+    carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
+    if (carpeta == NULL) {
+      printf("No existe una carpeta con ese RUC INTENTE DENUEVO\n\n");
+    }
+    else
+      break;
+  }while(1);
 
   nodo = (struct NodoResoluciones*)malloc(sizeof(struct NodoResoluciones));
   nuevaResolucion = (struct Resolucion*)malloc(sizeof(struct Resolucion));
   limpiarPantalla();
 
 
-  printf("/nÏngrese el tipo de resolución:/n ");
-  printf("0. Sentencia/n");
-  printf("1. Autorizacion para Diligancias/n");
-  printf("2. Medida Cautelar/n");
-  printf("3. Sobreseimiento/n");
+  printf("\nIngrese el tipo de resolución:\n");/*Tengo que agregar codigo para cada una de las opciones para agregarlo por sepradao a la carpeta*/
+  printf("0. Sentencia\n");
+  printf("1. Autorizacion para Diligancias\n");
+  printf("2. Medida Cautelar\n");
+  printf("3. Sobreseimiento\n");
   scanf("%d", &nuevaResolucion->tipoResolucion);
   limpiarBuffer();
 
   /*Si origen == 0 la resolucion fue emitida por el Juez de Garantia
    * Si origen == 1 la resolucion fue emitida por el tribunal de Juicio Oral
    */
-  printf("Ingrese el Origen de la Resolucion/n");
-  printf("0. Resolución emitida por Juez de Garantía/n");
-  printf("1. Resolución emitida por Tribunal De jucio Oral/n");
+  printf("Ingrese el Origen de la Resolucion\n");
+  printf("0. Resolucion emitida por Juez de Garantía\n");
+  printf("1. Resolucion emitida por Tribunal De jucio Oral\n");
   scanf("%d", &nuevaResolucion-> origenResolucion);
   limpiarBuffer();
 
-  printf("Ingrese la Descripcion de su Resolucion/n");
+  printf("Ingrese la Descripcion de su Resolucion\n");
   fgets(nuevaResolucion->descripcion, TEXTO, stdin);
   nuevaResolucion->descripcion[strcspn(nuevaResolucion->descripcion, "\n")] = 0;
 
-  printf("Ingrese la Fecha de su Resolucion/n");
+  printf("Ingrese la Fecha de su Resolucion\n");
   fgets(nuevaResolucion->fecha, FECHA, stdin);
   nuevaResolucion->fecha[strcspn(nuevaResolucion->fecha, "\n")] = 0;
 
@@ -1216,7 +1229,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
     }
     rec->sig = nodo;
   }
-  printf("Resolución agregada Correctamente");
+  printf("Resolucion agregada Correctamente\n");
   esperarEnter();
 }
 /*-------------------------FUNCION AGREGAR IMPUTADO-----------------------------------------*/
@@ -1228,31 +1241,33 @@ void agregarImputado(struct Fiscal *fiscal) {
   struct NodoCausas *nodoCausas;
   struct Causa *nuevaCausa;
   struct CarpetaInvestigativa *carpeta;
-  char rucCarpeta[RUC];
   int opcion;
   int causas;
   char descripcion[TEXTO];
-
+  char *rucTemporal;
+  char rucCarpeta[RUC];
   limpiarPantalla();
 
-  limpiarBuffer();
-  printf("Ingrese el RUC de la CARPETA de su Imputado\n");
-  fgets(rucCarpeta, RUC, stdin);
-  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
-
-  carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
-  if (carpeta == NULL) {
-    printf("CARPETA NO ENCONTRADA.\n");
-    esperarEnter();
+  if (fiscal->carpetas == NULL) {
+    printf("No existen Carpetas");
     return;
   }
 
-  limpiarPantalla();
+  do {
+    rucTemporal = ingresarRuc();
+    if (rucTemporal == NULL)
+      return;
+    strcpy(rucCarpeta, rucTemporal);
+    carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
+    if (carpeta == NULL) {
+      printf("No existe una carpeta con ese RUC INTENTE DENUEVO\n\n");
+    }
+    else
+      break;
+  }while(1);
 
   /*Asignacion de memoria para las variables a las que se les ingresaran datos*/
   nuevoImputado = (struct Imputado*)malloc(sizeof(struct Imputado));
-  nuevaCausa = (struct Causa*)malloc(sizeof(struct Causa));
-  nodoCausas = (struct NodoCausas*)malloc(sizeof(struct NodoCausas));
   nuevoNodo = (struct NodoImputados*)malloc(sizeof(struct NodoImputados));
 
 
@@ -1268,6 +1283,9 @@ void agregarImputado(struct Fiscal *fiscal) {
   strcpy(nuevoImputado->medidasCautelares, descripcion);
 
   do {
+
+    nuevaCausa = (struct Causa*)malloc(sizeof(struct Causa));
+    nodoCausas = (struct NodoCausas*)malloc(sizeof(struct NodoCausas));
     recCausas = nuevoImputado-> causas;
     printf("Ingrese la Causa (Solamente un numero) \n");
     printf("0. Crimen (Infraccion grave) \n");
@@ -1283,7 +1301,7 @@ void agregarImputado(struct Fiscal *fiscal) {
 
 
     nuevaCausa -> tipoCausa = causas;
-    strcpy(nuevaCausa -> descripcionCausa, descripcion);
+
 
     nodoCausas -> causa= nuevaCausa;
     nodoCausas -> sig= NULL;
@@ -1294,8 +1312,8 @@ void agregarImputado(struct Fiscal *fiscal) {
     else {
       while (recCausas -> sig != NULL) {
         recCausas = recCausas -> sig;
-        recCausas -> sig = nodoCausas;
       }
+      recCausas -> sig = nodoCausas;
     }
 
     printf("Ingrese algun numero DISTINTO de 0 si desea agregar alguna otra causa \n");
@@ -1330,19 +1348,27 @@ void agregarPrueba(struct Fiscal *fiscal) {
   struct NodoPruebas *nuevoNodo;
   struct NodoPruebas *rec;
   struct CarpetaInvestigativa *carpeta;
+  char *rucTemporal;
   char rucCarpeta[RUC];
   limpiarPantalla();
 
-  printf("Ingrese el RUC de su Imputado ");
-  fgets(rucCarpeta, RUC, stdin);
-  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
-
-  carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
-  if (carpeta == NULL) {
-    printf("CARPETA NO ENCONTRADA.\n");
-    esperarEnter();
+  if (fiscal->carpetas == NULL) {
+    printf("No existen Carpetas");
     return;
   }
+
+  do {
+    rucTemporal = ingresarRuc();
+    if (rucTemporal == NULL)
+      return;
+    strcpy(rucCarpeta, rucTemporal);
+    carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
+    if (carpeta == NULL) {
+      printf("No existe una carpeta con ese RUC INTENTE DENUEVO\n\n");
+    }
+    else
+      break;
+  }while(1);
   nuevaPrueba = (struct Prueba*)malloc(sizeof(struct Prueba));
   nuevoNodo = (struct NodoPruebas*)malloc(sizeof(struct NodoPruebas));
 
