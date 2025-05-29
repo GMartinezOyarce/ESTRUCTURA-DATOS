@@ -1953,7 +1953,111 @@ void ListarSentencias (struct Fiscal *fiscal) {
   getchar();
 }
 
-//A
+void ListarSentenciaPorImputado (struct Fiscal *fiscal) {
+  struct NodoImputados *imputados=NULL;
+  char rut[RUT];
+
+  limpiarPantalla();
+  printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Resoluciones: ");
+  fgets(rut, RUT, stdin);
+  rut[strcspn(rut, "\n")]= 0;
+
+  printf("---------------LISTADO DE SENTENCIAS-------------------\n\n");
+
+  imputados=fiscal->imputados;
+
+  while (imputados!=NULL) {
+    if (imputados->imputado!=NULL && imputados->imputado->rut!=NULL && strcmp(imputados->imputado->rut, rut)==0) {
+
+      if (imputados->imputado->rut!=NULL) {
+        printf("RUT del Imputado: %s\n",imputados->imputado->rut);
+      }
+      else {
+        printf("RUT del Imputado: NO DISPONIBLE\n");
+      }
+
+      if (imputados->imputado->tipoSentencia==1) {
+        printf("Tipo de Sentencia: Absolutoria\n");
+      }
+      else if (imputados->imputado->tipoSentencia==0) {
+        printf("Tipo de Sentencia: Condenatoria\n");
+      }
+      else {
+        printf("No existe un tipo de sentencia\n");
+      }
+      if (imputados->imputado->descripcionSentencia!=NULL) {
+        printf("Descripción de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
+      }
+      else {
+        printf("No se presenta Descripción de la Sentencia\n\n");
+      }
+      break;
+    }
+    imputados=imputados->sig;
+  }
+  getchar();
+}
+
+void ListarSentenciaPorCausa (struct Fiscal *fiscal) {
+  struct NodoImputados *imputados=NULL;
+  int tipoCausa;
+  struct NodoCausas *rec=NULL;
+  int CausaEncontrada;
+
+  limpiarPantalla();
+  printf("Ingrese el Tipo de Causa por el cual desea Filtrar las Resoluciones:\n\n");
+  printf("Formato:\n");
+  printf("0 Si es un Crimen (Infracción grave como Homicidio)\n");
+  printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
+  printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
+  printf("Ingrese un número:");
+  scanf("%d", &tipoCausa);
+  limpiarBuffer();
+
+  printf("---------------LISTADO DE SENTENCIAS-------------------\n\n");
+
+  imputados=fiscal->imputados;
+
+  while (imputados!=NULL) {
+    if (imputados->imputado!=NULL && imputados->imputado->causas!=NULL) {
+      CausaEncontrada=0;
+      rec=imputados->imputado->causas;
+      while (rec!=NULL) {
+        if (rec->causa!=NULL && rec->causa->tipoCausa==tipoCausa) {
+          CausaEncontrada=1;
+          break;
+        }
+        rec=rec->sig;
+      }
+      if (CausaEncontrada==1) {
+        if (imputados->imputado->rut!=NULL) {
+          printf("RUT del Imputado: %s\n",imputados->imputado->rut);
+        }
+        else {
+          printf("RUT del Imputado: NO DISPONIBLE\n");
+        }
+
+        if (imputados->imputado->tipoSentencia==1) {
+          printf("Tipo de Sentencia: Absolutoria\n");
+        }
+        else if (imputados->imputado->tipoSentencia==0) {
+          printf("Tipo de Sentencia: Condenatoria\n");
+        }
+        else {
+          printf("No existe un tipo de sentencia\n");
+        }
+        if (imputados->imputado->descripcionSentencia!=NULL) {
+          printf("Descripción de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
+        }
+        else {
+          printf("No se presenta Descripción de la Sentencia\n\n");
+        }
+      }
+    }
+    imputados=imputados->sig;
+  }
+  getchar();
+}
 
 void AgregarSentencia (struct Fiscal *fiscal) {
   char rutBusqueda[RUT];
@@ -2436,7 +2540,7 @@ void AgregarResolucion(struct Fiscal *fiscal) {
 
 
       scanf("%d", &opcion);
-      getchar();
+      limpiarBuffer();
 
 
       if (opcion == 2) {
@@ -2456,7 +2560,7 @@ void AgregarResolucion(struct Fiscal *fiscal) {
   printf("3: Sobreseimiento\n");
   printf("Ingrese un número: ");
   scanf("%d", &nuevo->tipoResolucion);
-  getchar();
+  limpiarBuffer();
 
   printf("\n\nIngrese el Origen de la Resolución\n\n");
   printf("Formato:\n");
@@ -2464,7 +2568,7 @@ void AgregarResolucion(struct Fiscal *fiscal) {
   printf("1: Emitida por el Tribunal de Juicio Oral\n");
   printf("Ingrese un número: ");
   scanf("%d", &nuevo->origenResolucion);
-  getchar();
+  limpiarBuffer();
 
   printf("\n\nIngrese la descripción de la Resolución:");
   fgets(nuevo->descripcion, TEXTO, stdin);
@@ -2623,10 +2727,10 @@ void menuCausas(struct Fiscal *fiscal) {
 
     switch(opcion) {
       case 1: agregarCausa(fiscal); break;
-      case 2: /* función buscar causa imputado */ break;
-      case 3: /* función buscar causa denuncia */ break;
+      case 2: BuscarCausasPorImputado(fiscal); break;
+      case 3: BuscarCausasDenuncia(fiscal); break;
       case 4: /* función modificar causa */ break;
-      case 5: /* función listar causa */ break;
+      case 5: ListarCausas(fiscal); break;
       case 0: return ;
       default: printf("Opción inválida.\n");
     }
@@ -2653,11 +2757,13 @@ void menuSentenciasResoluciones(struct Fiscal *fiscal) {
     switch(opcion) {
       case 1: /* función agregar sentencia */ break;
       case 2: agregarResolucion(fiscal); break;
-      case 3: /* función buscar resolución por causa */ break;
-      case 4: /* función buscar resolución por imputado */ break;
-      case 5: /* función buscar resolución por tipo */ break;
-      case 6: /* función listar todas las sentencias */ break;
-      case 7: /* función listar todas las resoluciones */ break;
+      case 3: ListarResolucionesPorCausa(fiscal); break;
+      case 4: ListarResolucionesPorImputado(fiscal); break;
+      case 5: ListarResolucionesPorTipo(fiscal); break;
+      case 6: ListarSentenciaPorCausa(fiscal); break;
+      case 7: ListarSentenciaPorImputado(fiscal); break;
+      case 8: ListarSentencias(fiscal); break;
+      case 9: ListarResoluciones(fiscal); break;
       case 0: return ;
       default: printf("Opción inválida.\n");
     }
