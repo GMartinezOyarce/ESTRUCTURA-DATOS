@@ -702,6 +702,8 @@ void CrearCarpeta(struct Fiscal *fiscal) {
         }
     } while (denunciaEncontrada == NULL);
 
+
+
     limpiarPantalla();
 
     /* Paso 2: Crear la nueva carpeta investigativa*/
@@ -709,7 +711,6 @@ void CrearCarpeta(struct Fiscal *fiscal) {
 
     /* Copiar el RUC de la denuncia*/
     strcpy(nuevaCarpeta->ruc, denunciaEncontrada->ruc);
-
     /* Asignar la denuncia encontrada*/
     nuevaCarpeta->denuncia = denunciaEncontrada;
 
@@ -758,8 +759,7 @@ void CrearCarpeta(struct Fiscal *fiscal) {
     }
 
     printf("\n¡Carpeta investigativa creada con exito!\n");
-    printf("Presione Enter para continuar...");
-    getchar();
+    esperarEnter();
 }
 
 /*-----------------------FUNCION BUSCAR CARPETA Y MOSTRARLA POR RUC-------------*/
@@ -919,7 +919,7 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
         case 3: printf("Prueba fisica\n");break;
         default: printf("Desconocido\n"); break;
       }
-      printf("Descripcion de la prueba %s\n", recPruebas->prueba->descripcionPrueba);
+      printf("Descripcion de la prueba:  %s\n", recPruebas->prueba->descripcionPrueba);
       printf("Fecha en la que se ingreso la prueba: %s\n", recPruebas->prueba->fecha);
       printf("----------------------------------------\n");
 
@@ -1010,6 +1010,48 @@ void buscarCarpetaRuc(struct Fiscal *fiscal) {
   printf("\nCARPETA MOSTRADA CORRECTAMENTE\n");
   esperarEnter();
   return;
+}
+
+/*-----------------------------FUNCION MODIFICAR ESTADO CARPETA-------------------------*/
+void modificarEstadoCarpeta(struct Fiscal *fiscal) {
+  struct CarpetaInvestigativa *carpeta;
+  char *rucTemporal;
+  char ruc[RUC];
+
+  limpiarPantalla();
+
+  /*Verificacion de que existe la CARPETA*/
+  if (fiscal -> carpetas == NULL) {
+    printf("NO EXISTE NINGUNA CARPETA");
+    return;
+  }
+
+  /*Se pide el Ruc de la carpeta*/
+  do {
+    rucTemporal = ingresarRuc();
+    if (rucTemporal == NULL)
+      return;
+    strcpy(ruc, rucTemporal);
+    carpeta = BUSCARCARPETA(fiscal->carpetas, ruc);
+    if (carpeta == NULL) {
+      printf("No existe una carpeta con ese RUC INTENTE DENUEVO\n\n");
+    }
+    else
+      break;
+  }while(1);
+
+  limpiarBuffer();
+  printf("Que estado desea ingresar a la carpeta investigativa?\n");
+  printf("0. En investigacion\n");
+  printf("1. Juicio Oral\n");
+  printf("2. Archivada\n");
+  printf("3. Cerrada\n");
+  printf("Ingrese un NUMERO segun el estado de carpeta que desea agregar: ");
+  scanf("%d", &carpeta->estadoCarpeta);
+  limpiarBuffer();
+
+  printf("ESTADO CAMBIADO CON EXITO\n");
+  esperarEnter();
 }
 
 /*-----------------------------FUNCION AGREGAR DECLARACION------------------*/
@@ -2179,10 +2221,11 @@ void menuDenuncias(struct Fiscal *fiscal) {
 
 void menuCarpetas(struct Fiscal *fiscal) {
   int opcion;
-  limpiarPantalla();
+
   limpiarBuffer();
 
   do {
+    limpiarPantalla();
     printf("\n === Gestion de Carpetas investigativas.\n");
     printf("1. Crear nueva Carpeta Investigativa.\n");
     printf("2. Buscar Carpeta Investigativa por RUC.\n");
@@ -2190,17 +2233,17 @@ void menuCarpetas(struct Fiscal *fiscal) {
     printf("4. Agregar declaración a Carpeta.\n");
     printf("5. Agregar diligencia a Carpeta.\n");
     printf("6. Agregar resolucion a Carpeta.\n");
-    printf("7. Agregar imputado a Carpeta;\n");
+    printf("7. Agregar imputado a Carpeta.\n");
     printf("8. Agregar Pruebas a Carpeta.\n");
-    printf("9. listar todas las Carpetas\n");
-    printf("0. Volver al Menu Principal\n");
+    printf("9. listar todas las Carpetas.\n");
+    printf("0. Volver al Menu Principal.\n");
 
     scanf("%d", &opcion);
 
     switch(opcion) {
       case 1: CrearCarpeta(fiscal); break;
       case 2: buscarCarpetaRuc(fiscal); break;
-      case 3: /*funcion MODIFICAR estado Carpeta*/ break;
+      case 3: modificarEstadoCarpeta(fiscal); break;
       case 4: agregarDeclaracion(fiscal); break;
       case 5: agregarDiligencia(fiscal); break;
       case 6: agregarResolucion(fiscal); break;
@@ -2208,7 +2251,7 @@ void menuCarpetas(struct Fiscal *fiscal) {
       case 8: agregarPrueba(fiscal); break;
       case 9: listarCarpetas(fiscal); break;
       case 0: /*volver al menu principal*/ break;
-      default: printf("Opcion Invalida. Intente Denuevo"); break;
+      default: printf("Opcion Invalida. Intente Denuevo.\n"); break;
     }
   }while (opcion != 0);
 }
