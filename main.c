@@ -75,6 +75,7 @@ struct Diligencia {
    * dentro de la carpeta investigativa
    * si aprobacion == 1, aprobada
    * si aprobacion == 0, rechazada
+   * si aprobacion == -1, en proceso
    */
   int aprobacion;
   /*Si urgencia == 1, es urgencia baja
@@ -1703,6 +1704,113 @@ void mostrarTodosImputados(struct Fiscal *fiscal){
 
 /*--------Funciones MenuDiligencias------------------------*/
 
+/*------funcion mostrar diligencias-------*/
+
+void mostrarDiligencias(struct Fiscal *fiscal) {
+  char rucCarpeta[RUC];
+  struct CarpetaInvestigativa *carpeta;
+  struct NodoDiligencias *head;
+
+  printf("Ingrese el RUC de la Carpeta Investigativa: ");
+  fgets(rucCarpeta, RUC, stdin);
+  rucCarpeta[strcspn(rucCarpeta, "\n")] = '\0';
+
+  carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
+  if (carpeta == NULL) {
+    printf("No se encontró la carpeta.\n");
+    return;
+  }
+
+  if (carpeta->diligencias == NULL) {
+    printf("La carpeta no tiene diligencias registradas.\n");
+    return;
+  }
+
+  printf("\n=== DILIGENCIAS REGISTRADAS ===\n");
+  head = carpeta->diligencias;
+  while (head != NULL) {
+    printf("- Urgencia: %d\n", head->diligencia->urgencia);
+    printf("  Origen: ");
+    switch (head->diligencia->OrigenDiligencia) {
+      case 0: printf("Fiscal\n"); break;
+      case 1: printf("Víctima\n"); break;
+      case 2: printf("Imputado\n"); break;
+      default: printf("Desconocido\n"); break;
+    }
+    printf("  Descripción: %s\n", head->diligencia->descripcionDiligencia);
+    printf("-----------------------------\n");
+    head = head->sig;
+  }
+}
+
+
+/*-----------mostrar y ordenar diligencias por prioridad---------*/
+void ordenarDiligenciasPorPrioridad(struct NodoDiligencias** head) {
+  struct NodoDiligencias *ordenada = NULL;
+  struct NodoDiligencias *actual;
+  struct NodoDiligencias *siguiente;
+  struct NodoDiligencias *temp;
+
+  if (*head == NULL)
+    return;
+
+  actual = *head;
+
+  while (actual != NULL) {
+    siguiente = actual->sig;
+    actual->sig = NULL;
+
+    if (ordenada == NULL || actual->diligencia->urgencia > ordenada->diligencia->urgencia) {
+      actual->sig = ordenada;
+      ordenada = actual;
+    } else {
+      temp = ordenada;
+      while (temp->sig != NULL && temp->sig->diligencia->urgencia >= actual->diligencia->urgencia) {
+        temp = temp->sig;
+      }
+      actual->sig = temp->sig;
+      temp->sig = actual;
+    }
+
+    actual = siguiente;
+  }
+
+  *head = ordenada;
+}
+
+
+void mostrarDiligenciasOrdenadas(struct Fiscal *fiscal) {
+  struct CarpetaInvestigativa *carpeta;
+  struct NodoDiligencias *head;
+  char rucCarpeta[RUC];
+
+  printf("Ingrese el RUC de la Carpeta Investigativa: ");
+  fgets(rucCarpeta, RUC, stdin);
+  rucCarpeta[strcspn(rucCarpeta, "\n")] = '\0';
+
+  carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
+  if (carpeta == NULL) {
+    printf("No se encontro la carpeta.\n");
+    return;
+  }
+
+  if (carpeta->diligencias == NULL) {
+    printf("La carpeta no tiene diligencias registradas.\n");
+    return;
+  }
+
+  ordenarDiligenciasPorPrioridad(&(carpeta->diligencias));
+
+  printf("=== Lista de Diligencias Ordenadas por Prioridad ===\n");
+  head = carpeta->diligencias;
+  while (head != NULL) {
+    printf("- Urgencia: %d\n", head->diligencia->urgencia);
+    printf("  Descripcion: %s\n", head->diligencia->descripcionDiligencia);
+    head = head->sig;
+  }
+}
+
+
 /*-----------Función listarDiligencias----------------*/
 
 /*verificar funcion por que solo imprime carpeta no encontrada*/
@@ -2763,18 +2871,18 @@ void menuDiligencias(struct Fiscal *fiscal){
   do{
     printf("--- Gestion de Diligencias ---\n");
     printf("1. Agregar diligencias\n");
-    printf("2. Asignar prioridad a Diligencia\n");
-    printf("3. Ver diligencias pendientes por carpeta\n");
-    printf("4. Ver diligencias ordenadas por Prioridad\n");
+    printf("2. Mostrar diligencias\n");
+    printf("3. Asignar prioridad a Diligencia y mostrar la lista\n");
+    printf("4. Ver diligencias pendientes por carpeta\n");
     printf("0. Volver al Menu Principal\n");
     printf("Seleccione una opcion: ");
     scanf("%d", &opcion);
 
     switch(opcion) {
       case 1: agregarDiligencia(fiscal); break;
-      case 2: /* función para asignar prioridad a diligencia dependiendo urgencia o impacto */ break;
-      case 3: listarDiligenciasPendientes(fiscal); break;
-      case 4: /* función para ver diligencias ordenadas por prioridad dependiendo urgencia o impacto */ break;
+      case 2 : mostrarDiligencias(fiscal); break;
+      case 3: mostrarDiligenciasOrdenadas(fiscal); break;
+      case 4: listarDiligenciasPendientes(fiscal); break;
       case 0: break;
       default: printf("Opcion invalida.\n");
     }
