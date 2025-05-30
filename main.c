@@ -1703,6 +1703,75 @@ void mostrarTodosImputados(struct Fiscal *fiscal){
 
 /*--------Funciones MenuDiligencias------------------------*/
 
+/*-----------Función listarDiligencias----------------*/
+
+/*verificar funcion por que solo imprime carpeta no encontrada*/
+
+void listarDiligenciasPendientes(struct Fiscal *fiscal) {
+  struct CarpetaInvestigativa *carpeta;
+  struct NodoDiligencias *actual;
+  char rucCarpeta[RUC];
+  int pendientes = 0;
+
+  limpiarPantalla();
+
+  if (fiscal->carpetas == NULL) {
+    printf("NO EXISTEN CARPETAS\n");
+    return;
+  }
+
+  printf("Ingrese el RUC de la carpeta: ");
+  limpiarPantalla();
+  fgets(rucCarpeta, RUC, stdin);
+  rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
+
+  carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
+  if (carpeta == NULL) {
+    printf("Carpeta no encontrada.\n");
+    return;
+  }
+
+  if(carpeta->diligencias == NULL) {
+    printf("Esta carpeta no tiene diligencias registradas.\n");
+    return;
+  }
+
+  printf("====== DILIGENCIAS PENDIENTES =======\n");
+
+  actual = carpeta->diligencias;
+  while (actual!=NULL) {
+    if (actual->diligencia->aprobacion == 0) {
+      pendientes++;
+      printf("--------------------------------------------------\n");
+      printf("Origen: ");
+      switch (actual->diligencia->OrigenDiligencia) {
+        case 0: printf("Fiscal\n"); break;
+        case 1: printf("Victima\n"); break;
+        case 2: printf("Imputado\n"); break;
+        default: printf("Desconocido\n"); break;
+      }
+
+      printf("Tipo: %s\n", actual->diligencia->tipoDiligencia);
+      printf("Descripcion: %s\n", actual->diligencia->descripcionDiligencia);
+      printf("Fecha: %s\n", actual->diligencia->fechaDiligencia);
+      printf("Urgencia: %d | Impacto: %d\n", actual->diligencia->urgencia, actual->diligencia->impacto);
+      printf("Estado: Rechazada\n");
+    }
+    actual = actual->sig;
+  }
+
+  if (pendientes == 0) {
+    printf("No hay diligencias pendientes en esta carpeta.\n");
+  }
+  esperarEnter();
+
+}
+
+
+/*----------------------------------------------------------------*/
+
+/*-----------funcion listarCausas---------------*/
+
 
 void ListarCausas(struct Fiscal *fiscal) {
   int i;
@@ -2697,14 +2766,14 @@ void menuDiligencias(struct Fiscal *fiscal){
     printf("2. Asignar prioridad a Diligencia\n");
     printf("3. Ver diligencias pendientes por carpeta\n");
     printf("4. Ver diligencias ordenadas por Prioridad\n");
-    printf("0. Volver al Menú Principal\n");
+    printf("0. Volver al Menu Principal\n");
     printf("Seleccione una opcion: ");
     scanf("%d", &opcion);
 
     switch(opcion) {
       case 1: agregarDiligencia(fiscal); break;
       case 2: /* función para asignar prioridad a diligencia dependiendo urgencia o impacto */ break;
-      case 3: /* función para ver diligencias pendientes */ break;
+      case 3: listarDiligenciasPendientes(fiscal); break;
       case 4: /* función para ver diligencias ordenadas por prioridad dependiendo urgencia o impacto */ break;
       case 0: break;
       default: printf("Opcion invalida.\n");
