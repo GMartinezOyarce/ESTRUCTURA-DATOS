@@ -2901,9 +2901,9 @@ void menuCarpetas(struct Fiscal *fiscal) {
   int opcion;
 
   limpiarBuffer();
+  limpiarPantalla();
 
   do {
-    limpiarPantalla();
     printf("\n === Gestion de Carpetas investigativas.\n");
     printf("1. Crear nueva Carpeta Investigativa.\n");
     printf("2. Buscar Carpeta Investigativa por RUC.\n");
@@ -2928,7 +2928,7 @@ void menuCarpetas(struct Fiscal *fiscal) {
       case 7: agregarImputado(fiscal); break;
       case 8: agregarPrueba(fiscal); break;
       case 9: listarCarpetas(fiscal); break;
-      case 0: /*volver al menu principal*/ break;
+      case 0: break;
       default: printf("Opcion Invalida. Intente Denuevo.\n"); break;
     }
   }while (opcion != 0);
@@ -3001,7 +3001,7 @@ void menuCausas(struct Fiscal *fiscal) {
       case 3: BuscarCausasDenuncia(fiscal); break;
       case 4: ModificarCausa(fiscal); break;
       case 5: ListarCausas(fiscal); break;
-      case 0: return ;
+      case 0: break;
       default: printf("Opción inválida.\n");
     }
   } while(opcion != 0);
@@ -3034,9 +3034,49 @@ void menuSentenciasResoluciones(struct Fiscal *fiscal) {
       case 7: ListarSentenciaPorImputado(fiscal); break;
       case 8: ListarSentencias(fiscal); break;
       case 9: ListarResoluciones(fiscal); break;
-      case 0: return ;
+      case 0: break;;
       default: printf("Opción inválida.\n");
     }
+  } while(opcion != 0);
+}
+void menuReportes(struct Fiscal *fiscal) {
+  int opcion;
+
+  do {
+    limpiarPantalla();
+    printf("========= MENU DE REPORTES =========\n");
+    printf("1. Listar todas las denuncias\n");
+    printf("2. Buscar denuncia por RUC\n");
+    printf("3. Buscar denuncias por estado\n");
+    printf("4. Listar todas las carpetas investigativas\n");
+    printf("5. Buscar carpeta por RUC\n");
+    printf("6. Mostrar todos los imputados\n");
+    printf("7. Buscar imputado por RUT\n");
+    printf("8. Listar causas de denuncias\n");
+    printf("9. Mostrar diligencias de carpeta\n");
+    printf("10. Mostrar diligencias ordenadas por urgencia\n");
+    printf("11. Listar diligencias pendientes\n");
+    printf("0. Volver al menu principal\n");
+    printf("Seleccione una opcion: ");
+    scanf("%d", &opcion);
+    limpiarBuffer();
+
+    switch(opcion) {
+      case 1: listarDenuncias(fiscal); break;
+      case 2: buscarDenunciaRUC(fiscal); break;
+      case 3: buscarDenunciaEstado(fiscal); break;
+      case 4: listarCarpetas(fiscal); break;
+      case 5: buscarCarpetaRuc(fiscal); break;
+      case 6: mostrarTodosImputados(fiscal); break;
+      case 7: buscarImputadoPorRut(fiscal); break;
+      case 8: ListarCausas(fiscal); break;
+      case 9: mostrarDiligencias(fiscal); break;
+      case 10: mostrarDiligenciasOrdenadas(fiscal); break;
+      case 11: listarDiligenciasPendientes(fiscal); break;
+      case 0: printf("Volviendo al menu principal...\n"); break;
+      default: printf("Opcion no valida.\n"); esperarEnter(); break;
+    }
+
   } while(opcion != 0);
 }
 
@@ -3056,6 +3096,7 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
     printf("0. Salir\n");
     printf("Seleccione una opcion: ");
     scanf("%d", &opcion);
+    limpiarBuffer();
 
     switch(opcion) {
       case 1: menuDenuncias(fiscal); break;
@@ -3064,7 +3105,7 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
       case 4: menuDiligencias(fiscal); break;
       case 5: menuCausas(fiscal); break;
       case 6: menuSentenciasResoluciones(fiscal); break;
-      case 7: /*generarReportes()*/; break;
+      case 7: menuReportes(fiscal); break;
       case 0: return ;
       default: printf("Opción inválida. Intente nuevamente.\n");
     }
