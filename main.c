@@ -1172,7 +1172,7 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   nueva = (struct Diligencia*)malloc(sizeof(struct Diligencia));
   nodo = (struct NodoDiligencias*)malloc(sizeof(struct NodoDiligencias));
 
-  printf("Ingrese origen (0: Fiscal, 1: Víctima, 2: Imputado): \n");
+  printf("Ingrese origen (0: Fiscal, 1: Victima, 2: Imputado): \n");
   scanf("%d", &nueva->OrigenDiligencia);
   limpiarBuffer();
 
@@ -1181,7 +1181,7 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   nueva->tipoDiligencia[strcspn(nueva->tipoDiligencia, "\n")] = 0;
 
 
-  printf("Ingrese descripción: \n");
+  printf("Ingrese descripcion: \n");
   fgets(nueva->descripcionDiligencia, TEXTO, stdin);
   nueva->descripcionDiligencia[strcspn(nueva->descripcionDiligencia, "\n")] = 0;
 
@@ -1190,7 +1190,7 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   if (fecha == NULL) return;
   strcpy(nueva->fechaDiligencia, fecha);
 
-  printf("Ingrese decisión (1: Aprobada, 0: Rechazada): \n");
+  printf("Ingrese decision (1: Aprobada, 0: Rechazada): \n");
   scanf("%d", &nueva->aprobacion);
   limpiarBuffer();
 
@@ -1734,13 +1734,14 @@ void mostrarDiligencias(struct Fiscal *fiscal) {
   struct CarpetaInvestigativa *carpeta;
   struct NodoDiligencias *head;
 
+  limpiarBuffer();
   printf("Ingrese el RUC de la Carpeta Investigativa: ");
   fgets(rucCarpeta, RUC, stdin);
   rucCarpeta[strcspn(rucCarpeta, "\n")] = '\0';
 
   carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
   if (carpeta == NULL) {
-    printf("No se encontró la carpeta.\n");
+    printf("No se encontro la carpeta.\n");
     return;
   }
 
@@ -1756,11 +1757,11 @@ void mostrarDiligencias(struct Fiscal *fiscal) {
     printf("  Origen: ");
     switch (head->diligencia->OrigenDiligencia) {
       case 0: printf("Fiscal\n"); break;
-      case 1: printf("Víctima\n"); break;
+      case 1: printf("Victima\n"); break;
       case 2: printf("Imputado\n"); break;
       default: printf("Desconocido\n"); break;
     }
-    printf("  Descripción: %s\n", head->diligencia->descripcionDiligencia);
+    printf("  Descripcion: %s\n", head->diligencia->descripcionDiligencia);
     printf("-----------------------------\n");
     head = head->sig;
   }
@@ -1807,6 +1808,7 @@ void mostrarDiligenciasOrdenadas(struct Fiscal *fiscal) {
   struct NodoDiligencias *head;
   char rucCarpeta[RUC];
 
+  limpiarBuffer();
   printf("Ingrese el RUC de la Carpeta Investigativa: ");
   fgets(rucCarpeta, RUC, stdin);
   rucCarpeta[strcspn(rucCarpeta, "\n")] = '\0';
@@ -1852,7 +1854,7 @@ void listarDiligenciasPendientes(struct Fiscal *fiscal) {
   }
 
   printf("Ingrese el RUC de la carpeta: ");
-  limpiarPantalla();
+  limpiarBuffer();
   fgets(rucCarpeta, RUC, stdin);
   rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
 
@@ -2235,10 +2237,10 @@ void ListarSentencias (struct Fiscal *fiscal) {
         printf("No existe un tipo de sentencia\n");
       }
       if (imputados->imputado->descripcionSentencia!=NULL) {
-        printf("Descripción de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
+        printf("Descripcion de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
       }
       else {
-        printf("No se presenta Descripción de la Sentencia\n\n");
+        printf("No se presenta Descripcion de la Sentencia\n\n");
       }
     }
     imputados=imputados->sig;
@@ -2279,10 +2281,10 @@ void ListarSentenciaPorImputado (struct Fiscal *fiscal) {
         printf("No existe un tipo de sentencia\n");
       }
       if (imputados->imputado->descripcionSentencia!=NULL) {
-        printf("Descripción de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
+        printf("Descripcion de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
       }
       else {
-        printf("No se presenta Descripción de la Sentencia\n\n");
+        printf("No se presenta Descripcion de la Sentencia\n\n");
       }
       break;
     }
@@ -2300,7 +2302,7 @@ void ListarSentenciaPorCausa (struct Fiscal *fiscal) {
   limpiarPantalla();
   printf("Ingrese el Tipo de Causa por el cual desea Filtrar las Resoluciones:\n\n");
   printf("Formato:\n");
-  printf("0 Si es un Crimen (Infracción grave como Homicidio)\n");
+  printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
   printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
   printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
   printf("Ingrese un número:");
@@ -2340,10 +2342,10 @@ void ListarSentenciaPorCausa (struct Fiscal *fiscal) {
           printf("No existe un tipo de sentencia\n");
         }
         if (imputados->imputado->descripcionSentencia!=NULL) {
-          printf("Descripción de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
+          printf("Descripcion de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
         }
         else {
-          printf("No se presenta Descripción de la Sentencia\n\n");
+          printf("No se presenta Descripcion de la Sentencia\n\n");
         }
       }
     }
