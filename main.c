@@ -665,6 +665,7 @@ void listarDenuncias(struct Fiscal *fiscal) {
 /* Función para crear una nueva carpeta investigativa*/
 void CrearCarpeta(struct Fiscal *fiscal) {
     char rucBusqueda[RUC];
+    char *rucTemporal;
     struct Denuncia *denunciaEncontrada = NULL;
     struct CarpetaInvestigativa *nuevaCarpeta = NULL;
     struct arbolCarpetas *actual = NULL;
@@ -672,95 +673,109 @@ void CrearCarpeta(struct Fiscal *fiscal) {
     int opcion;
 
 
-
     /* Paso 1: Buscar la denuncia por RUC*/
-    do {
-        limpiarPantalla();
-        printf("---------------CREAR CARPETA INVESTIGATIVA-------------------\n");
-        printf("Ingrese el RUC de la denuncia asociada (formato: 123456789-2025): ");
-        fgets(rucBusqueda, RUC, stdin);
-        rucBusqueda[strcspn(rucBusqueda, "\n")] = 0;
-        if (fiscal->denuncias == NULL) {
-          printf("No Existen Denuncias\n");
-          return;
-        }
-        denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
-
-        if (denunciaEncontrada == NULL) {
-            printf("\nNo se encontro ninguna denuncia con el RUC %s\n", rucBusqueda);
-            printf("1. Intentar nuevamente\n");
-            printf("2. Volver al menu anterior\n");
-            printf("Seleccione una opcion: ");
 
 
-            scanf("%d", &opcion);
-            limpiarBuffer();
-
-
-            if (opcion == 2) {
-                return; // Salir de la función si el usuario elige volver
-            }
-        }
-    } while (denunciaEncontrada == NULL);
-
-
-
+  do {
     limpiarPantalla();
+    printf("---------------CREAR CARPETA INVESTIGATIVA-------------------\n");
 
-    /* Paso 2: Crear la nueva carpeta investigativa*/
-    nuevaCarpeta = (struct CarpetaInvestigativa*)malloc(sizeof(struct CarpetaInvestigativa));
+    rucTemporal = ingresarRuc();
+    if (rucTemporal == NULL)
+      return;
+    strcpy(rucBusqueda, rucTemporal);
 
-    /* Copiar el RUC de la denuncia*/
-    strcpy(nuevaCarpeta->ruc, denunciaEncontrada->ruc);
-    /* Asignar la denuncia encontrada*/
-    nuevaCarpeta->denuncia = denunciaEncontrada;
-
-    /* Inicializar otros campos*/
-    nuevaCarpeta->declaraciones = NULL;
-    nuevaCarpeta->pruebas = NULL;
-    nuevaCarpeta->diligencias = NULL;
-    nuevaCarpeta->resoluciones = NULL;
-    nuevaCarpeta->imputado = NULL;
-    nuevaCarpeta-> estadoCarpeta = 0;
-
-
-    /* Paso 3: Insertar la carpeta en el árbol*/
-    if (fiscal -> carpetas == NULL) {
-        // Crear el árbol si no existe
-        fiscal -> carpetas = (struct arbolCarpetas*)malloc(sizeof(struct arbolCarpetas));
-        fiscal -> carpetas -> carpetaInvestigativa = nuevaCarpeta;
-        fiscal -> carpetas -> izq = NULL;
-        fiscal -> carpetas -> der = NULL;
+    if (fiscal->denuncias == NULL) {
+      printf("No Existen Denuncias\n");
+      return;
     }
-    else {
-        /* Insertar en el árbol binario ordenado por RUC*/
-        actual = fiscal -> carpetas;
-        nuevoNodo = (struct arbolCarpetas*)malloc(sizeof(struct arbolCarpetas));
-        nuevoNodo->carpetaInvestigativa = nuevaCarpeta;
-        nuevoNodo->izq = NULL;
-        nuevoNodo->der = NULL;
 
-        while (actual != NULL) {
-            if (strcmp(nuevaCarpeta->ruc, actual->carpetaInvestigativa->ruc) < 0) {
-                if (actual->izq == NULL) {
-                    actual->izq = nuevoNodo;
-                    break;
-                } else {
-                    actual = actual->izq;
-                }
-            } else {
-                if (actual->der == NULL) {
-                    actual->der = nuevoNodo;
-                    break;
-                } else {
-                    actual = actual->der;
-                }
-            }
+    denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
+
+    if (BUSCARCARPETA(fiscal->carpetas, denunciaEncontrada->ruc) != NULL) {
+      printf("Ya existe una carpeta asociada a esta denuncia.\n");
+      esperarEnter();
+      return;
+    }
+
+    if (denunciaEncontrada == NULL) {
+      printf("\nNo se encontro ninguna denuncia con el RUC %s\n", rucBusqueda);
+      printf("1. Intentar nuevamente\n");
+      printf("2. Volver al menu anterior\n");
+      printf("Seleccione una opcion: ");
+
+
+      scanf("%d", &opcion);
+      limpiarBuffer();
+
+
+      if (opcion == 2) {
+        return; // Salir de la función si el usuario elige volver
+
+      }
+    }
+  } while (denunciaEncontrada == NULL);
+
+
+
+  limpiarPantalla();
+
+  /* Paso 2: Crear la nueva carpeta investigativa*/
+  nuevaCarpeta = (struct CarpetaInvestigativa*)malloc(sizeof(struct CarpetaInvestigativa));
+
+  /* Copiar el RUC de la denuncia*/
+  strcpy(nuevaCarpeta->ruc, denunciaEncontrada->ruc);
+  /* Asignar la denuncia encontrada*/
+  nuevaCarpeta->denuncia = denunciaEncontrada;
+
+  /* Inicializar otros campos*/
+
+  nuevaCarpeta->declaraciones = NULL;
+  nuevaCarpeta->pruebas = NULL;
+  nuevaCarpeta->diligencias = NULL;
+  nuevaCarpeta->resoluciones = NULL;
+  nuevaCarpeta->imputado = NULL;
+  nuevaCarpeta-> estadoCarpeta = 0;
+
+
+  /* Paso 3: Insertar la carpeta en el árbol*/
+  if (fiscal -> carpetas == NULL) {
+    // Crear el árbol si no existe
+    fiscal -> carpetas = (struct arbolCarpetas*)malloc(sizeof(struct arbolCarpetas));
+    fiscal -> carpetas -> carpetaInvestigativa = nuevaCarpeta;
+    fiscal -> carpetas -> izq = NULL;
+    fiscal -> carpetas -> der = NULL;
+  }
+  else {
+    /* Insertar en el árbol binario ordenado por RUC*/
+    actual = fiscal -> carpetas;
+    nuevoNodo = (struct arbolCarpetas*)malloc(sizeof(struct arbolCarpetas));
+    nuevoNodo->carpetaInvestigativa = nuevaCarpeta;
+    nuevoNodo->izq = NULL;
+    nuevoNodo->der = NULL;
+
+    while (actual != NULL) {
+      if (strcmp(nuevaCarpeta->ruc, actual->carpetaInvestigativa->ruc) < 0) {
+        if (actual->izq == NULL) {
+          actual->izq = nuevoNodo;
+          break;
         }
+        else {
+          actual = actual->izq;
+        }
+      } else {
+        if (actual->der == NULL) {
+          actual->der = nuevoNodo;
+          break;
+        } else {
+          actual = actual->der;
+        }
+      }
     }
+  }
 
-    printf("\n¡Carpeta investigativa creada con exito!\n");
-    esperarEnter();
+  printf("\n¡Carpeta investigativa creada con exito!\n");
+  esperarEnter();
 }
 
 /*-----------------------FUNCION BUSCAR CARPETA Y MOSTRARLA POR RUC-------------*/
@@ -1064,7 +1079,9 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   struct CarpetaInvestigativa *carpeta = NULL;
   char *rucTemporal;
   char rucCarpeta[RUC];
+  char *fecha;
   limpiarPantalla();
+
 
   if (fiscal -> carpetas == NULL) {
     printf("NO EXISTE NINGUNA CARPETA");
@@ -1101,10 +1118,9 @@ void agregarDeclaracion(struct Fiscal *fiscal) {
   fgets(nuevo->declaracion, TEXTO, stdin);
   nuevo-> declaracion[strcspn(nuevo-> declaracion, "\n")] = 0;
 
-  limpiarBuffer();
-  printf("Ingrese fecha (dd/mm/aaaa): \n");
-  fgets(nuevo->fecha, 14, stdin);
-  nuevo-> fecha[strcspn(nuevo-> fecha, "\n")] = 0;
+  fecha = ingresarFecha();
+  if (fecha == NULL) return;
+  strcpy(nuevo->fecha, fecha);
 
   nodo->declaracion = nuevo;
   nodo->sig = NULL;
@@ -1127,6 +1143,7 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   struct NodoDiligencias *nodo;
   struct CarpetaInvestigativa *carpeta;
   struct NodoDiligencias *rec= NULL;
+  char *fecha;
   char *rucTemporal;
   char rucCarpeta[RUC];
 
@@ -1169,9 +1186,9 @@ void agregarDiligencia(struct Fiscal *fiscal) {
   nueva->descripcionDiligencia[strcspn(nueva->descripcionDiligencia, "\n")] = 0;
 
 
-  printf("Ingrese fecha (dd/mm/aaaa): \n");
-  fgets(nueva->fechaDiligencia, FECHA, stdin);
-  nueva->fechaDiligencia[strcspn(nueva->fechaDiligencia, "\n")] = 0;
+  fecha = ingresarFecha();
+  if (fecha == NULL) return;
+  strcpy(nueva->fechaDiligencia, fecha);
 
   printf("Ingrese decisión (1: Aprobada, 0: Rechazada): \n");
   scanf("%d", &nueva->aprobacion);
@@ -1213,9 +1230,15 @@ void agregarResolucion(struct Fiscal *fiscal) {
   struct NodoResoluciones *rec;
   struct Resolucion *nuevaResolucion;
   struct CarpetaInvestigativa *carpeta;
+  char *fecha;
   char *rucTemporal;
   char rucCarpeta[RUC];
   limpiarPantalla();
+
+  if (fiscal -> carpetas == NULL) {
+    printf("NO EXISTE NINGUNA CARPETA");
+    return;
+  }
 
   do {
     rucTemporal = ingresarRuc();
@@ -1256,9 +1279,9 @@ void agregarResolucion(struct Fiscal *fiscal) {
   fgets(nuevaResolucion->descripcion, TEXTO, stdin);
   nuevaResolucion->descripcion[strcspn(nuevaResolucion->descripcion, "\n")] = 0;
 
-  printf("Ingrese la Fecha de su Resolucion\n");
-  fgets(nuevaResolucion->fecha, FECHA, stdin);
-  nuevaResolucion->fecha[strcspn(nuevaResolucion->fecha, "\n")] = 0;
+  fecha = ingresarFecha();
+  if (fecha == NULL) return;
+  strcpy(nuevaResolucion->fecha, fecha);
 
   nodo->resolucion = nuevaResolucion;
   nodo->sig = NULL;
@@ -2900,7 +2923,6 @@ void menuDenuncias(struct Fiscal *fiscal) {
 void menuCarpetas(struct Fiscal *fiscal) {
   int opcion;
 
-  limpiarBuffer();
   limpiarPantalla();
 
   do {
@@ -2908,13 +2930,15 @@ void menuCarpetas(struct Fiscal *fiscal) {
     printf("1. Crear nueva Carpeta Investigativa.\n");
     printf("2. Buscar Carpeta Investigativa por RUC.\n");
     printf("3. Modificar Estado de Carpeta.\n");
-    printf("4. Agregar declaración a Carpeta.\n");
+    printf("4. Agregar declaracion a Carpeta.\n");
     printf("5. Agregar diligencia a Carpeta.\n");
     printf("6. Agregar resolucion a Carpeta.\n");
     printf("7. Agregar imputado a Carpeta.\n");
     printf("8. Agregar Pruebas a Carpeta.\n");
     printf("9. listar todas las Carpetas.\n");
     printf("0. Volver al Menu Principal.\n");
+
+    printf("INGRESE SU OPCION:  ");
 
     scanf("%d", &opcion);
 
