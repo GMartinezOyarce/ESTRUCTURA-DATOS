@@ -6,7 +6,7 @@
 #define RUC 15
 #define FECHA 11
 #define RUT 11
-
+#define MAXVICTIMAS 1000
 
 struct Prueba {
   /*Si Tipo Prueba == 0 es un informe Pericial
@@ -222,6 +222,7 @@ struct Denuncia{
   int estadoDenuncia;
 
   struct RutVictima **rutVictimas;
+  int pLibreRutVictimas;
 
  };
 
@@ -388,6 +389,7 @@ void AGREGARCAUSAS(struct Denuncia *denuncia) {
     if (nuevoNodo-> causa->tipoCausa == 0 || nuevoNodo->causa->tipoCausa == 1 || nuevoNodo-> causa->tipoCausa == 2) {
       printf("Ingrese la descripcion de su Causa\n");
       fgets(nuevoNodo->causa->descripcionCausa, TEXTO, stdin);
+      nuevoNodo->causa->descripcionCausa[strcspn(nuevoNodo->causa->descripcionCausa, "\n")] = 0;
       break;
     }
   }while (1);
@@ -413,7 +415,7 @@ void AGREGARCAUSAS(struct Denuncia *denuncia) {
 /*-----------------------FUNCIONES DE DENUNCIAS----------------------------*/
 void printDenuncia (struct Denuncia *denuncia) {
   struct NodoCausas *head = denuncia->causas,*rec = denuncia->causas;
-
+  int i;
   printf("\n\n");
   printf("RUC: %s\n\n",denuncia->ruc);
   /*Print de quien hizo la denuncia*/
@@ -472,6 +474,15 @@ void printDenuncia (struct Denuncia *denuncia) {
   }
   if (denuncia->estadoDenuncia == 3) {
     printf("Estado: Denuncia ha sido cerrada de forma permanente\n\n");
+  }
+
+  printf("Rut de Victimas: ");
+  for (i = 0; i <= denuncia->pLibreRutVictimas;i++) {
+    if (i == denuncia->pLibreRutVictimas) {
+      printf("%s.\n\n",denuncia->rutVictimas[i]);
+    }else {
+      printf("%s , ",denuncia->rutVictimas[i]);
+    }
   }
 
 }
@@ -610,6 +621,22 @@ void agregarDenuncia(struct Fiscal *fiscal) {
     }
   }while (1);
 
+  denuncia->rutVictimas = (struct RutVictima**)malloc(1000*sizeof(struct RutVictima*));
+  denuncia->pLibreRutVictimas = 0;
+  limpiarPantalla();
+  do {
+    denuncia->rutVictimas[denuncia->pLibreRutVictimas] = (struct RutVictima*)malloc(sizeof(struct RutVictima));
+    printf("Ingrese Rut de la victima: \n");
+    fgets(denuncia->rutVictimas[denuncia->pLibreRutVictimas]->rut, RUT, stdin);
+    ruc[strcspn(ruc, "\n")] = 0;
+    limpiarBuffer();
+    printf("Desea Agregar otra Victima? \n");
+    printf("1 = Si , Cualquier otro numero: NO\n");
+    scanf("%d", &opcion);
+    if (opcion != 1) {
+      break;
+    }
+  }while (1);
 
 
   denuncia->estadoDenuncia = -1;
@@ -2916,8 +2943,7 @@ void menuDenuncias(struct Fiscal *fiscal) {
       case 2: buscarDenunciaRUC(fiscal); break;
       case 3: buscarDenunciaEstado(fiscal); break;
       case 4: /* función modificar denuncia */ break;
-      case 5: /* función eliminar denuncia */ break;
-      case 6: /* función listar denuncias */ break;
+      case 5: listarDenuncias(fiscal); break;
       case 0: break;
       default: printf("Opción inválida.\n");
     }
