@@ -1345,7 +1345,7 @@ void agregarImputado(struct Fiscal *fiscal) {
   limpiarBuffer();
   printf("Ingrese las Medidas Cautelares (MAX 1000 caracteres)\n");
   fgets(descripcion, TEXTO, stdin);
-  nuevoImputado->medidasCautelares[strcspn(nuevoImputado ->medidasCautelares, "\n")] = 0;
+  descripcion[strcspn(descripcion, "\n")] = 0;
   strcpy(nuevoImputado->medidasCautelares, descripcion);
 
   do {
@@ -1530,7 +1530,6 @@ void recorrerBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
   struct NodoCausas *causaActual;
   int numCausa = 1;
   if (nodoArbol == NULL || nodoArbol->carpetaInvestigativa == NULL) {
-      printf("NO SE ENCONTRO LA CARPETA QUE BUSCABA\n");
       return;
   }
   recorrerBuscarRUT(nodoArbol->izq, rutBuscado);
@@ -1678,6 +1677,7 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol) {
   struct Imputado *imputado;
   struct NodoImputados *actual;
   struct NodoCausas *causaActual;
+  int numImputados = 1;
   int numCausa = 1;
   if(nodoArbol == NULL || nodoArbol->carpetaInvestigativa == NULL) {
     return;
@@ -1687,9 +1687,8 @@ void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol) {
   actual = nodoArbol->carpetaInvestigativa->imputado;
   while (actual!=NULL) {
     imputado = actual->imputado;
-    printf("\n==== IMPUTADO ====\n");
+    printf("\n==== IMPUTADO %d ====\n", numImputados++);
     printf("RUT: %s\n", imputado->rut);
-    printf("Causas:\n");
     causaActual = imputado->causas;
     while (causaActual!=NULL) {
       printf("====== CAUSA: %d ======\n", numCausa++);
@@ -1733,6 +1732,7 @@ void mostrarDiligencias(struct Fiscal *fiscal) {
   char rucCarpeta[RUC];
   struct CarpetaInvestigativa *carpeta;
   struct NodoDiligencias *head;
+  int numDiligencia = 1;
 
   limpiarBuffer();
   printf("Ingrese el RUC de la Carpeta Investigativa: ");
@@ -1753,6 +1753,7 @@ void mostrarDiligencias(struct Fiscal *fiscal) {
   printf("\n=== DILIGENCIAS REGISTRADAS ===\n");
   head = carpeta->diligencias;
   while (head != NULL) {
+    printf("====== DILIGENCIA %d ======\n", numDiligencia++);
     printf("- Urgencia: %d\n", head->diligencia->urgencia);
     printf("  Origen: ");
     switch (head->diligencia->OrigenDiligencia) {
@@ -1807,6 +1808,7 @@ void mostrarDiligenciasOrdenadas(struct Fiscal *fiscal) {
   struct CarpetaInvestigativa *carpeta;
   struct NodoDiligencias *head;
   char rucCarpeta[RUC];
+  int numDiligencia = 1;
 
   limpiarBuffer();
   printf("Ingrese el RUC de la Carpeta Investigativa: ");
@@ -1829,8 +1831,9 @@ void mostrarDiligenciasOrdenadas(struct Fiscal *fiscal) {
   printf("=== Lista de Diligencias Ordenadas por Prioridad ===\n");
   head = carpeta->diligencias;
   while (head != NULL) {
+    printf("====== DILIGENCIA %d ======\n", numDiligencia++);
     printf("- Urgencia: %d\n", head->diligencia->urgencia);
-    printf("  Descripcion: %s\n", head->diligencia->descripcionDiligencia);
+    printf("  Descripcion: %s\n\n", head->diligencia->descripcionDiligencia);
     head = head->sig;
   }
 }
@@ -1838,13 +1841,12 @@ void mostrarDiligenciasOrdenadas(struct Fiscal *fiscal) {
 
 /*-----------Función listarDiligencias----------------*/
 
-/*verificar funcion por que solo imprime carpeta no encontrada*/
-
 void listarDiligenciasPendientes(struct Fiscal *fiscal) {
   struct CarpetaInvestigativa *carpeta;
   struct NodoDiligencias *actual;
   char rucCarpeta[RUC];
   int pendientes = 0;
+  int numDiligencia = 1;
 
   limpiarPantalla();
 
@@ -1876,6 +1878,7 @@ void listarDiligenciasPendientes(struct Fiscal *fiscal) {
     if (actual->diligencia->aprobacion == 0) {
       pendientes++;
       printf("--------------------------------------------------\n");
+      printf("====== DILIGENCIA %d ======\n", numDiligencia++);
       printf("Origen: ");
       switch (actual->diligencia->OrigenDiligencia) {
         case 0: printf("Fiscal\n"); break;
