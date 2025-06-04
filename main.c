@@ -2247,97 +2247,213 @@ void ModificarCausa(struct Fiscal *fiscal) {
   }
 }
 
-void ListarSentencias (struct Fiscal *fiscal) {
-  struct NodoImputados *imputados=NULL;
 
-  limpiarPantalla();
-  printf("---------------LISTADO DE SENTENCIAS-------------------\n\n");
-
-  imputados=fiscal->imputados;
-
-  while (imputados!=NULL) {
-    if (imputados->imputado!=NULL) {
-
-      if (imputados->imputado->rut!=NULL) {
-        printf("RUT del Imputado: %s\n",imputados->imputado->rut);
-      }
-      else {
-        printf("RUT del Imputado: NO DISPONIBLE\n");
-      }
-
-      if (imputados->imputado->tipoSentencia==1) {
-        printf("Tipo de Sentencia: Absolutoria\n");
-      }
-      else if (imputados->imputado->tipoSentencia==0) {
-        printf("Tipo de Sentencia: Condenatoria\n");
-      }
-      else {
-        printf("No existe un tipo de sentencia\n");
-      }
-      if (imputados->imputado->descripcionSentencia!=NULL) {
-        printf("Descripcion de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
-      }
-      else {
-        printf("No se presenta Descripcion de la Sentencia\n\n");
-      }
-    }
-    imputados=imputados->sig;
+void listarSentenciasRecursivo(struct arbolCarpetas *raiz) {
+  struct CarpetaInvestigativa *carpeta;
+  struct NodoImputados *recImputado = NULL;
+  /*CASOS BASE*/
+  if (raiz == NULL) {
+    return;
   }
-  getchar();
+  /*SE RECORRE DE MANERA IN-ORDER*/
+  /*se recorre la parte izquierda de la raiz*/
+  listarSentenciasRecursivo(raiz-> izq);
+  carpeta = raiz -> carpetaInvestigativa;
+  printf("--------------------------------------------------\n");
+  printf("RUC: %s\n", carpeta->ruc);
+
+  /*se recorre la lista de imputados para mostrar cada imputado de la carpeta*/
+  recImputado = carpeta -> imputado;
+  if (recImputado != NULL) {
+    while (recImputado != NULL) {
+      if (recImputado->imputado!=NULL) {
+
+        if (recImputado->imputado->rut!=NULL) {
+          printf("RUT del Imputado: %s\n",recImputado->imputado->rut);
+        }
+        else {
+          printf("RUT del Imputado: NO DISPONIBLE\n");
+        }
+
+        if (recImputado->imputado->tipoSentencia==1) {
+          printf("Tipo de Sentencia: Absolutoria\n");
+        }
+        else if (recImputado->imputado->tipoSentencia==0) {
+          printf("Tipo de Sentencia: Condenatoria\n");
+        }
+        else {
+          printf("No existe un tipo de sentencia\n");
+        }
+        if (recImputado->imputado->descripcionSentencia!=NULL) {
+          printf("Descripcion de la Sentencia: %s\n\n",recImputado->imputado->descripcionSentencia);
+        }
+        else {
+          printf("No se presenta Descripcion de la Sentencia\n\n");
+        }
+      }
+      recImputado=recImputado->sig;
+    }
+  }
+  else{
+  printf("Sin imputados asignados\n");
+  }
+  // 3. Recorre subárbol derecho
+  listarSentenciasRecursivo(raiz->der);
 }
 
-void ListarSentenciaPorImputado (struct Fiscal *fiscal) {
-  struct NodoImputados *imputados=NULL;
-  char rut[RUT];
 
+void listarSentencias(struct Fiscal *fiscal) {
   limpiarPantalla();
-  printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Resoluciones: ");
+  printf("=============== LISTADO DE SENTENCIAS =============");
+  if (fiscal-> carpetas == NULL) {
+    printf("NO HAY SENTENCIAS REGISTRADAS");
+    return;
+  }
+  /*el listar Carpetas solo se puede hacer recursivo*/
+  listarSentenciasRecursivo(fiscal-> carpetas);
+
+  esperarEnter();
+}
+
+void listarSentenciasPorImputadoRecursivo(struct arbolCarpetas *raiz, char *rut) {
+  struct CarpetaInvestigativa *carpeta;
+  struct NodoImputados *recImputado = NULL;
+  /*CASOS BASE*/
+  if (raiz == NULL) {
+    return;
+  }
+  /*SE RECORRE DE MANERA IN-ORDER*/
+  /*se recorre la parte izquierda de la raiz*/
+  listarSentenciasPorImputadoRecursivo(raiz-> izq, rut);
+  carpeta = raiz -> carpetaInvestigativa;
+  printf("--------------------------------------------------\n");
+  printf("RUC: %s\n", carpeta->ruc);
+
+  /*se recorre la lista de imputados para mostrar cada imputado de la carpeta*/
+  recImputado = carpeta -> imputado;
+  if (recImputado != NULL) {
+    while (recImputado != NULL) {
+      if (recImputado->imputado!=NULL && recImputado->imputado->rut!=NULL && strcmp(recImputado->imputado->rut,rut)==0) {
+        printf("RUT del Imputado: %s\n",recImputado->imputado->rut);
+
+        if (recImputado->imputado->tipoSentencia==1) {
+          printf("Tipo de Sentencia: Absolutoria\n");
+        }
+        else if (recImputado->imputado->tipoSentencia==0) {
+          printf("Tipo de Sentencia: Condenatoria\n");
+        }
+        else {
+          printf("No existe un tipo de sentencia\n");
+        }
+        if (recImputado->imputado->descripcionSentencia!=NULL) {
+          printf("Descripcion de la Sentencia: %s\n\n",recImputado->imputado->descripcionSentencia);
+        }
+        else {
+          printf("No se presenta Descripcion de la Sentencia\n\n");
+        }
+        break;
+      }
+      recImputado=recImputado->sig;
+    }
+  }
+  else{
+  printf("Sin imputados asignados\n");
+  }
+  // 3. Recorre subárbol derecho
+  listarSentenciasPorImputadoRecursivo(raiz->der, rut);
+}
+
+
+void listarSentenciasPorImputado(struct Fiscal *fiscal) {
+  char rut[RUT];
+  limpiarPantalla();
+
+  limpiarBuffer();
+  printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Sentencias: ");
   fgets(rut, RUT, stdin);
   rut[strcspn(rut, "\n")]= 0;
 
-  printf("---------------LISTADO DE SENTENCIAS-------------------\n\n");
 
-  imputados=fiscal->imputados;
-
-  while (imputados!=NULL) {
-    if (imputados->imputado!=NULL && imputados->imputado->rut!=NULL && strcmp(imputados->imputado->rut, rut)==0) {
-
-      if (imputados->imputado->rut!=NULL) {
-        printf("RUT del Imputado: %s\n",imputados->imputado->rut);
-      }
-      else {
-        printf("RUT del Imputado: NO DISPONIBLE\n");
-      }
-
-      if (imputados->imputado->tipoSentencia==1) {
-        printf("Tipo de Sentencia: Absolutoria\n");
-      }
-      else if (imputados->imputado->tipoSentencia==0) {
-        printf("Tipo de Sentencia: Condenatoria\n");
-      }
-      else {
-        printf("No existe un tipo de sentencia\n");
-      }
-      if (imputados->imputado->descripcionSentencia!=NULL) {
-        printf("Descripcion de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
-      }
-      else {
-        printf("No se presenta Descripcion de la Sentencia\n\n");
-      }
-      break;
-    }
-    imputados=imputados->sig;
+  printf("\n\n=============== LISTADO DE SENTENCIAS =============\n\n");
+  if (fiscal-> carpetas == NULL) {
+    printf("NO HAY SENTENCIAS REGISTRADAS");
+    return;
   }
-  getchar();
+  /*el listar Carpetas solo se puede hacer recursivo*/
+  listarSentenciasPorImputadoRecursivo(fiscal-> carpetas,rut);
+
+  esperarEnter();
 }
 
-void ListarSentenciaPorCausa (struct Fiscal *fiscal) {
-  struct NodoImputados *imputados=NULL;
-  int tipoCausa;
-  struct NodoCausas *rec=NULL;
-  int CausaEncontrada;
+void listarSentenciasPorCausaRecursivo(struct arbolCarpetas *raiz,int tipoCausa) {
+  struct CarpetaInvestigativa *carpeta;
+  struct NodoImputados *recImputado = NULL;
+  struct NodoCausas *rec = NULL;
+  int CausaEncontrada=0;
+  /*CASOS BASE*/
+  if (raiz == NULL) {
+    return;
+  }
+  /*SE RECORRE DE MANERA IN-ORDER*/
+  /*se recorre la parte izquierda de la raiz*/
+  listarSentenciasPorCausaRecursivo(raiz-> izq, tipoCausa);
+  carpeta = raiz -> carpetaInvestigativa;
+  printf("--------------------------------------------------\n");
+  printf("RUC: %s\n", carpeta->ruc);
 
+  /*se recorre la lista de imputados para mostrar cada imputado de la carpeta*/
+  recImputado = carpeta -> imputado;
+  if (recImputado != NULL) {
+    while (recImputado != NULL) {
+      CausaEncontrada=0;
+      rec=recImputado->imputado->causas;
+      while (rec!=NULL) {
+        if (rec->causa!=NULL && rec->causa->tipoCausa==tipoCausa) {
+          CausaEncontrada=1;
+          break;
+        }
+        rec=rec->sig;
+      }
+      if (recImputado->imputado!=NULL && CausaEncontrada==1) {
+
+        if (recImputado->imputado->rut!=NULL) {
+          printf("RUT del Imputado: %s\n",recImputado->imputado->rut);
+        }
+        else {
+          printf("RUT del Imputado: NO DISPONIBLE\n");
+        }
+
+        if (recImputado->imputado->tipoSentencia==1) {
+          printf("Tipo de Sentencia: Absolutoria\n");
+        }
+        else if (recImputado->imputado->tipoSentencia==0) {
+          printf("Tipo de Sentencia: Condenatoria\n");
+        }
+        else {
+          printf("No existe un tipo de sentencia\n");
+        }
+        if (recImputado->imputado->descripcionSentencia!=NULL) {
+          printf("Descripcion de la Sentencia: %s\n\n",recImputado->imputado->descripcionSentencia);
+        }
+        else {
+          printf("No se presenta Descripcion de la Sentencia\n\n");
+        }
+      }
+      recImputado=recImputado->sig;
+    }
+  }
+  else{
+  printf("Sin imputados asignados\n");
+  }
+  // 3. Recorre subárbol derecho
+  listarSentenciasPorCausaRecursivo(raiz->der,tipoCausa);
+}
+
+
+void listarSentenciasPorCausa(struct Fiscal *fiscal) {
+  int tipoCausa;
   limpiarPantalla();
+
   printf("Ingrese el Tipo de Causa por el cual desea Filtrar las Resoluciones:\n\n");
   printf("Formato:\n");
   printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
@@ -2347,109 +2463,96 @@ void ListarSentenciaPorCausa (struct Fiscal *fiscal) {
   scanf("%d", &tipoCausa);
   limpiarBuffer();
 
-  printf("---------------LISTADO DE SENTENCIAS-------------------\n\n");
-
-  imputados=fiscal->imputados;
-
-  while (imputados!=NULL) {
-    if (imputados->imputado!=NULL && imputados->imputado->causas!=NULL) {
-      CausaEncontrada=0;
-      rec=imputados->imputado->causas;
-      while (rec!=NULL) {
-        if (rec->causa!=NULL && rec->causa->tipoCausa==tipoCausa) {
-          CausaEncontrada=1;
-          break;
-        }
-        rec=rec->sig;
-      }
-      if (CausaEncontrada==1) {
-        if (imputados->imputado->rut!=NULL) {
-          printf("RUT del Imputado: %s\n",imputados->imputado->rut);
-        }
-        else {
-          printf("RUT del Imputado: NO DISPONIBLE\n");
-        }
-
-        if (imputados->imputado->tipoSentencia==1) {
-          printf("Tipo de Sentencia: Absolutoria\n");
-        }
-        else if (imputados->imputado->tipoSentencia==0) {
-          printf("Tipo de Sentencia: Condenatoria\n");
-        }
-        else {
-          printf("No existe un tipo de sentencia\n");
-        }
-        if (imputados->imputado->descripcionSentencia!=NULL) {
-          printf("Descripcion de la Sentencia: %s\n\n",imputados->imputado->descripcionSentencia);
-        }
-        else {
-          printf("No se presenta Descripcion de la Sentencia\n\n");
-        }
-      }
-    }
-    imputados=imputados->sig;
+  printf("=============== LISTADO DE SENTENCIAS =============");
+  if (fiscal-> carpetas == NULL) {
+    printf("NO HAY SENTENCIAS REGISTRADAS");
+    return;
   }
-  getchar();
+  /*el listar Carpetas solo se puede hacer recursivo*/
+  listarSentenciasPorCausaRecursivo(fiscal-> carpetas, tipoCausa);
+
+  esperarEnter();
 }
 
-void AgregarSentencia (struct Fiscal *fiscal) {
-  char rutBusqueda[RUT];
-  struct NodoImputados *imputados=NULL;
-  int nuevaSentencia=3;
+void agregarSentenciaRecursivo(struct arbolCarpetas *raiz, char *rut,int cambio) {
+  struct CarpetaInvestigativa *carpeta;
+  struct NodoImputados *recImputado = NULL;
   char nuevaDescripcionSentencia[TEXTO];
-  int cambio=2;
+  int nuevaSentencia=3;
 
-  while (cambio!=1) {
-    limpiarPantalla();
-    printf("Ingrese el RUT del Imputado con la Sentencia que desea Agregar (formato: 123456789-2025): ");
-    fgets(rutBusqueda, RUT, stdin);
-    rutBusqueda[strcspn(rutBusqueda, "\n")] = 0;
+  /*CASOS BASE*/
+  if (raiz == NULL) {
+    return;
+  }
+  /*SE RECORRE DE MANERA IN-ORDER*/
+  /*se recorre la parte izquierda de la raiz*/
+  if (cambio!=1) agregarSentenciaRecursivo(raiz-> izq, rut,cambio);
+  carpeta = raiz -> carpetaInvestigativa;
+  printf("--------------------------------------------------\n");
+  printf("RUC: %s\n", carpeta->ruc);
 
-    imputados=fiscal->imputados;
-    while (imputados!=NULL) {
-      if (imputados->imputado!=NULL && imputados->imputado->rut!=NULL) {
-        if (strcmp(imputados->imputado->rut,rutBusqueda)==0) {
-          if (imputados->imputado->tipoSentencia==0 || imputados->imputado->tipoSentencia==1) {
-            printf("Esta sentencia ya existe.");
-            cambio=1;
-          }
-          else {
-            do {
-              printf("\n\nIngresa el tipo de sentencia\n\n");
-              printf("Formato:\n");
-              printf("0: Condenatoria\n");
-              printf("1: Absolutoria\n");
-              printf("2: Cancelar\n");
-              printf("Ingrese un número: ");
-              scanf("%d", &nuevaSentencia);
-              getchar();
-              if (nuevaSentencia<0 || nuevaSentencia>2) {
-                printf("\n\nNúmero Inválido. Inténtelo nuevamente.");
-              }
-            }while (nuevaSentencia<0 || nuevaSentencia>2);
+  /*se recorre la lista de imputados para mostrar cada imputado de la carpeta*/
+  recImputado = carpeta -> imputado;
+  if (recImputado != NULL) {
+    while (recImputado != NULL && cambio!=1) {
+      if (recImputado->imputado!=NULL && recImputado->imputado->rut!=NULL && strcmp(recImputado->imputado->rut,rut)==0) {
+        if (recImputado->imputado->tipoSentencia==0 || recImputado->imputado->tipoSentencia==1) {
+          printf("Esta sentencia ya existe.");
+          cambio=1;
+        }
+        else {
+          do {
+            printf("\n\nIngresa el tipo de sentencia\n\n");
+            printf("Formato:\n");
+            printf("0: Condenatoria\n");
+            printf("1: Absolutoria\n");
+            printf("2: Cancelar\n");
+            printf("Ingrese un número: ");
+            scanf("%d", &nuevaSentencia);
+            getchar();
+            if (nuevaSentencia<0 || nuevaSentencia>2) {
+              printf("\n\nNúmero Inválido. Inténtelo nuevamente.");
+            }
+          }while (nuevaSentencia<0 || nuevaSentencia>2);
 
-            imputados->imputado->tipoSentencia=nuevaSentencia;
-            printf("Ingrese la Descripción de la Sentencia: ");
-            fgets(nuevaDescripcionSentencia, TEXTO, stdin);
-            nuevaDescripcionSentencia[strcspn(nuevaDescripcionSentencia, "\n")] = 0;
-            strcpy(imputados->imputado->descripcionSentencia,nuevaDescripcionSentencia);
-            cambio=1;
-            break;
-          }
+          recImputado->imputado->tipoSentencia=nuevaSentencia;
+          printf("Ingrese la Descripción de la Sentencia: ");
+          fgets(nuevaDescripcionSentencia, TEXTO, stdin);
+          nuevaDescripcionSentencia[strcspn(nuevaDescripcionSentencia, "\n")] = 0;
+          strcpy(recImputado->imputado->descripcionSentencia,nuevaDescripcionSentencia);
+          cambio=1;
+          break;
         }
       }
-      imputados=imputados->sig;
-    }
-
-    if (cambio!=1) {
-      printf("\n\nNo se ha encontrado el RUT especificado. Desea ingresar otro?\n");
-      printf("\nFormato:\n");
-      printf("0: Sí\n");
-      printf("1: No\n");
-      printf("Ingrese un número: ");
-      scanf("%d",&cambio);
+      recImputado=recImputado->sig;
     }
   }
+  else{
+  printf("Sin imputados asignados\n");
+  }
+  // 3. Recorre subárbol derecho
+  if (cambio==1) return;
+  agregarSentenciaRecursivo(raiz->der, rut, cambio);
+}
+
+void agregarSentencia(struct Fiscal *fiscal) {
+  char rut[RUT];
+  limpiarPantalla();
+  int cambio=2;
+
+  limpiarBuffer();
+  printf("Ingrese el RUT del Imputado al que quiera agregarle una Sentencia (formato: 123456789-2025): ");
+  fgets(rut, RUT, stdin);
+  rut[strcspn(rut, "\n")]= 0;
+
+  if (fiscal-> carpetas == NULL) {
+    printf("\n\nNO HAY SENTENCIAS REGISTRADAS");
+    return;
+  }
+  /*el listar Carpetas solo se puede hacer recursivo*/
+  agregarSentenciaRecursivo(fiscal-> carpetas,rut,cambio);
+
+  esperarEnter();
 }
 
 void listarResolucionesRecursivo(struct arbolCarpetas *raiz) {
@@ -3088,14 +3191,14 @@ void menuSentenciasResoluciones(struct Fiscal *fiscal) {
     scanf("%d", &opcion);
 
     switch(opcion) {
-      case 1: AgregarSentencia(fiscal); break;
+      case 1: agregarSentencia(fiscal); break;
       case 2: agregarResolucion(fiscal); break;
       case 3: ListarResolucionesPorCausa(fiscal); break;
       case 4: ListarResolucionesPorImputado(fiscal); break;
       case 5: ListarResolucionesPorTipo(fiscal); break;
-      case 6: ListarSentenciaPorCausa(fiscal); break;
-      case 7: ListarSentenciaPorImputado(fiscal); break;
-      case 8: ListarSentencias(fiscal); break;
+      case 6: listarSentenciasPorCausa(fiscal); break;
+      case 7: listarSentenciasPorImputado(fiscal); break;
+      case 8: listarSentencias(fiscal); break;
       case 9: ListarResoluciones(fiscal); break;
       case 0: break;;
       default: printf("Opción inválida.\n");
