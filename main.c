@@ -235,16 +235,13 @@ struct NodoDenuncias {
 struct Fiscal {
   char rut[RUT];
   char contrasenia[TEXTO];
-  /*Lista simplemente enlazada con nodo fantasma*/
-  struct NodoPeticiones *peticiones;
   /*lista simplemente enlazada, Posiblemente se cambie a circular doblemente enlazada,
    * porque en este caso solo se agregan denuncias, no se eliminan
    */
   struct NodoDenuncias *denuncias;
   /*arbol binario con carpetas de investigacion*/
   struct arbolCarpetas *carpetas;
-  /*Lista Simple con los imputados*/
-  struct NodoImputados *imputados;
+
 };
 
 /*Struct principal con un arreglo fiscales de tamaño TamFiscal*/
