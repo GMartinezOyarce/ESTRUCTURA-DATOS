@@ -181,7 +181,7 @@ struct CarpetaInvestigativa {
   struct NodoPruebas *pruebas;
   /*Lista Simplemente enlazada*/
   struct NodoDiligencias *diligencias;
-  /*Lista Circular*/
+  /*Lista Simplemente enlazada*/
   struct NodoResoluciones *resoluciones;
 };
 
@@ -3272,7 +3272,7 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
       case 5: menuCausas(fiscal); break;
       case 6: menuSentenciasResoluciones(fiscal); break;
       case 7: menuReportes(fiscal); break;
-      case 0: return ;
+      case 0: return;
       default: printf("Opción inválida. Intente nuevamente.\n");
     }
   } while(opcion != 0);
@@ -3280,7 +3280,7 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
 
 /*PARA DATOS DE PRUEBA*/
 
-void inicializarDatosPrueba(struct MinisterioPublico *mp) {
+void inicializarDatosPrueba(struct MinisterioPublico **mp) {
     struct Fiscal* fiscal;
     struct Denuncia* denuncia;
     struct NodoDenuncias* nodoDenuncia;
@@ -3296,17 +3296,15 @@ void inicializarDatosPrueba(struct MinisterioPublico *mp) {
     struct arbolCarpetas* arbol;
 
     /* Inicializar Ministerio Público */
-    mp->tamFiscal = 1;
-    mp->fiscales = (struct Fiscal**)malloc(sizeof(struct Fiscal*) * 1);
+    (*mp)->tamFiscal = 103;
+    (*mp)->fiscales = (struct Fiscal**)malloc(sizeof(struct Fiscal*) * 103);
 
     /* Crear fiscal */
     fiscal = (struct Fiscal*)malloc(sizeof(struct Fiscal));
     strcpy(fiscal->rut, "12345678-9");
     strcpy(fiscal->contrasenia, "pass123");
-    fiscal->peticiones = NULL;
     fiscal->denuncias = NULL;
     fiscal->carpetas = NULL;
-    fiscal->imputados = NULL;
 
     /* Crear denuncia */
     denuncia = (struct Denuncia*)malloc(sizeof(struct Denuncia));
@@ -3317,6 +3315,8 @@ void inicializarDatosPrueba(struct MinisterioPublico *mp) {
     denuncia->estadoDenuncia = 0;
     denuncia->causas = NULL;
     denuncia->rutVictimas = NULL;
+    denuncia -> rutVictimas = (struct rutVictimas **)malloc(40 * sizeof(struct rutVictimas*));
+    denuncia -> pLibreRutVictimas = -1;
 
     /* Nodo de denuncia */
     nodoDenuncia = (struct NodoDenuncias*)malloc(sizeof(struct NodoDenuncias));
@@ -3397,13 +3397,51 @@ void inicializarDatosPrueba(struct MinisterioPublico *mp) {
     arbol->der = NULL;
     fiscal->carpetas = arbol;
 
-    mp->fiscales[0] = fiscal;
+    (*mp)->fiscales[0] = fiscal;
 }
 
 int main(){
-  struct MinisterioPublico ministerioPublico;
+  struct MinisterioPublico *ministerioPublico = NULL;
+  int i;
+  char rut[RUT];
+  char contrasenia[TEXTO];
+  int flag;
+  int opcion;
+
+  ministerioPublico = (struct MinisterioPublico*)malloc(sizeof(struct MinisterioPublico));
+
   inicializarDatosPrueba(&ministerioPublico);
-  mostrarMenuPrincipal(ministerioPublico.fiscales[0]);
+  do {
+    flag = 0;
+    printf("Ingrese su RUT:\n");
+    fgets(rut, RUT, stdin);
+    rut[strcspn(rut, "\n")] = 0;
+
+    limpiarBuffer();
+    printf("Ingrese su contraseña:\n");
+    fgets(contrasenia, TEXTO, stdin);
+    contrasenia[strcspn(contrasenia, "\n")] = 0;
+
+    for (i = 0; i < ministerioPublico -> tamFiscal; i++) {
+      if ((strcmp(ministerioPublico->fiscales[i]-> rut, rut) == 0) && (strcmp(ministerioPublico->fiscales[i]-> contrasenia, contrasenia) == 0)) {
+        printf("Se a iniciado sesion correctamente\n");
+        esperarEnter();
+        mostrarMenuPrincipal(ministerioPublico->fiscales[i]);
+        flag = 1;
+      }
+    }
+    if (flag == 0) {
+      printf("Contraseña o RUT equivocados\n");
+    }
+
+    printf("Que es lo que desea hacer: \n");
+    printf("0. terminar la ejecucion del programa\n");
+    printf("NUMERO CUALQUIERA. volver a intentar\n");
+    scanf("%d", &opcion);
+    limpiarBuffer();
+
+  }while (opcion != 0);
+
 
   return 0;
 }
