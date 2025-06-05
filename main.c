@@ -3294,11 +3294,13 @@ void inicializarDatosPrueba(struct MinisterioPublico **mp) {
     struct Resolucion* res;
     struct NodoResoluciones* nodoRes;
     struct arbolCarpetas* arbol;
-
+    int i;
     /* Inicializar Ministerio Público */
     (*mp)->tamFiscal = 103;
     (*mp)->fiscales = (struct Fiscal**)malloc(sizeof(struct Fiscal*) * 103);
-
+    for (i = 0; i < 103; i++) {
+      (*mp)->fiscales[i] = NULL;
+    }
     /* Crear fiscal */
     fiscal = (struct Fiscal*)malloc(sizeof(struct Fiscal));
     strcpy(fiscal->rut, "12345678-9");
@@ -3316,6 +3318,9 @@ void inicializarDatosPrueba(struct MinisterioPublico **mp) {
     denuncia->causas = NULL;
     denuncia->rutVictimas = NULL;
     denuncia -> rutVictimas = (struct rutVictimas **)malloc(40 * sizeof(struct rutVictimas*));
+    for (i = 0; i < 40; i++) {
+      denuncia -> rutVictimas[i] = NULL;
+    }
     denuncia -> pLibreRutVictimas = -1;
 
     /* Nodo de denuncia */
@@ -3416,18 +3421,20 @@ int main(){
     printf("Ingrese su RUT:\n");
     fgets(rut, RUT, stdin);
     rut[strcspn(rut, "\n")] = 0;
-
     limpiarBuffer();
     printf("Ingrese su contraseña:\n");
     fgets(contrasenia, TEXTO, stdin);
     contrasenia[strcspn(contrasenia, "\n")] = 0;
 
     for (i = 0; i < ministerioPublico -> tamFiscal; i++) {
-      if ((strcmp(ministerioPublico->fiscales[i]-> rut, rut) == 0) && (strcmp(ministerioPublico->fiscales[i]-> contrasenia, contrasenia) == 0)) {
-        printf("Se a iniciado sesion correctamente\n");
-        esperarEnter();
-        mostrarMenuPrincipal(ministerioPublico->fiscales[i]);
-        flag = 1;
+      if (ministerioPublico->fiscales[i] != NULL) {
+        if ((strcmp(ministerioPublico->fiscales[i]-> rut, rut) == 0) && (strcmp(ministerioPublico->fiscales[i]-> contrasenia, contrasenia) == 0)) {
+          printf("Se a iniciado sesion correctamente\n");
+          esperarEnter();
+          mostrarMenuPrincipal(ministerioPublico->fiscales[i]);
+          flag = 1;
+          break;
+        }
       }
     }
     if (flag == 0) {
