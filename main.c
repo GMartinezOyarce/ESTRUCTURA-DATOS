@@ -55,6 +55,7 @@ struct Diligencia {
    *Si Origen Diligencia == 0 lo pidio El fiscal
    *Si origen == 1 lo pidio la victima,
    *Si origen == 2 lo pidio el imputado
+   *Si Origen == 3 Lo pidio un Juez
    */
   int OrigenDiligencia;
 
@@ -618,7 +619,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
     }
   }while (1);
 
-  denuncia->rutVictimas = (struct RutVictima**)malloc(1000*sizeof(struct RutVictima*));
+  denuncia->rutVictimas = (struct RutVictima**)malloc(40*sizeof(struct RutVictima*));
   denuncia->pLibreRutVictimas = 0;
   limpiarPantalla();
   do {
@@ -1248,7 +1249,178 @@ void agregarDiligencia(struct Fiscal *fiscal) {
 
 /*---------funcion para asignar prioridad a las diligencias--------*/
 
+struct Imputado *buscarImputado(struct CarpetaInvestigativa *carpeta, char rut[RUT]) {
+  struct NodoImputados *rec;
+  if (carpeta->imputado == NULL) {
+    printf("No hay Imputados en la Carpeta \n\n");
+    return NULL;
+  }
+  rec = carpeta->imputado;
+  while (rec != NULL) {
+    if (strcmp(rut,rec->imputado->rut) == 0) {
+      return rec->imputado;
+    }
+    rec = rec->sig;
+  }
+  return NULL;
 
+}
+
+int agregarSentencia(struct CarpetaInvestigativa *carpeta) {
+  char rut[RUT];
+  struct Imputado *imputado;
+  int opcion;
+  do {
+    printf("Ingrese El Rut del Imputado:\n");
+    fgets(rut, RUT, stdin);
+    rut[strcspn(rut, "\n")] = 0;
+    imputado = buscarImputado(carpeta, rut);
+    if (imputado == NULL) {
+      printf("No se encontro Al Imputado\n\n");
+      printf("0 = Volver, 1 = Volver a Intentar");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+      if (opcion == 0) {
+        return 0;
+      }
+    }else {
+      break;
+    }
+  }while (1);
+
+  printf("Indique el tipo De Sentencia: (0 = Condenatoria, 1 = Absolutoria)\n");
+  scanf("%d", &imputado->tipoSentencia);
+  printf("\n\nDescriba la Sentencia");
+  fgets(imputado->descripcionSentencia, TEXTO, stdin);
+  return 1;
+
+}
+
+int agregarDiligenciaJuez(struct CarpetaInvestigativa *carpeta) {
+  struct Diligencia *diligencia;
+  struct NodoDiligencias *rec,*nodo;
+  char *fecha;
+  diligencia = (struct Diligencia*)malloc(sizeof(struct Diligencia));
+  diligencia->OrigenDiligencia = 3;
+
+  printf("Ingrese el tipo de Diligencia:\n");
+  fgets(diligencia->tipoDiligencia, TEXTO, stdin);
+
+  printf("Ingrese Descripcion de Diligencia:\n");
+  fgets(diligencia-> descripcionDiligencia, TEXTO, stdin);
+
+  printf("Ingrese Fecha de Diligencia\n");
+  fecha = ingresarFecha();
+  if (fecha == NULL) {
+    return 0;
+  }
+  strcpy(diligencia->fechaDiligencia, fecha);
+
+  do {
+    printf("\nIngrese Urgencia: (1 = Baja, 2 = Media, 3 = Alta)\n");
+    scanf("%d", &diligencia->urgencia);
+  }while (diligencia->urgencia>3 && diligencia->urgencia<1);
+
+  do {
+    printf("\nIngrese Impacto para la Investigacion: (1 = Baja, 2 = Media, 3 = Alta)\n");
+    scanf("%d", &diligencia->impacto);
+  }while (diligencia->impacto>3 && diligencia->impacto<1);
+
+  nodo = (struct NodoDiligencias*)malloc(sizeof(struct NodoDiligencias));
+  nodo->diligencia = diligencia;
+  nodo->sig = NULL;
+  if (carpeta->diligencias == NULL) {
+    carpeta->diligencias = nodo;
+  }else {
+    rec = carpeta->diligencias;
+    while (rec->sig != NULL) {
+      rec = rec->sig;
+    }
+    rec->sig = nodo;
+
+    return 1;
+  }
+
+
+}
+
+int agregarMedidaCautelar(struct CarpetaInvestigativa *carpeta) {
+
+  struct Imputado *imputado;
+  char rut[RUT];
+  int opcion;
+
+  do {
+    printf("Ingrese El Rut del Imputado:\n");
+    fgets(rut, RUT, stdin);
+    rut[strcspn(rut, "\n")] = 0;
+    imputado = buscarImputado(carpeta, rut);
+    if (imputado == NULL) {
+      printf("No se encontro Al Imputado\n\n");
+      printf("0 = Volver, 1 = Volver a Intentar");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+      if (opcion == 0) {
+        return 0;
+      }
+    }else {
+      break;
+    }
+  }while (1);
+
+  printf("Ingrese Las medidas Cautelares:\n");
+  fgets(imputado->medidasCautelares, TEXTO, stdin);
+
+  return 1;
+}
+
+int sobreseimiento(struct CarpetaInvestigativa *carpeta) {
+  char rut[RUT];
+  int opcion;
+  struct Imputado *imputado;
+  struct NodoImputados *rec;
+
+  do {
+    printf("Ingrese El Rut del Imputado:\n");
+    fgets(rut, RUT, stdin);
+    rut[strcspn(rut, "\n")] = 0;
+    imputado = buscarImputado(carpeta, rut);
+    if (imputado == NULL) {
+      printf("No se encontro Al Imputado\n\n");
+      printf("0 = Volver, 1 = Volver a Intentar");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+      if (opcion == 0) {
+        return 0;
+      }
+    }else {
+      break;
+    }
+  }while (1);
+  /*Ya se verifica que el carpeta->imputado existe*/
+  rec = carpeta->imputado;
+  if (rec->imputado == imputado) {
+    carpeta->imputado = carpeta->imputado->sig;
+  }
+
+  return 1;
+
+
+
+
+}
+
+int accionResolucion(struct CarpetaInvestigativa *carpeta,int tipoCausa) {
+  int termino;
+  switch (tipoCausa) {
+    case 0: termino = agregarSentencia(carpeta);
+    case 1: termino = agregarDiligenciaJuez(carpeta);
+    case 2: termino = agregarMedidaCautelar(carpeta);
+    case 3: termino = sobreseimiento(carpeta);
+  }
+  return termino;
+
+}
 
 /*---------FUNCION AGREGAR RESOLUCION----------------*/
 void agregarResolucion(struct Fiscal *fiscal) {
@@ -1259,6 +1431,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
   char *fecha;
   char *rucTemporal;
   char rucCarpeta[RUC];
+  int correcto;
   limpiarPantalla();
 
   if (fiscal -> carpetas == NULL) {
@@ -1283,15 +1456,22 @@ void agregarResolucion(struct Fiscal *fiscal) {
   nuevaResolucion = (struct Resolucion*)malloc(sizeof(struct Resolucion));
   limpiarPantalla();
 
+  do {
+    printf("\nIngrese el tipo de resolución:\n");/*Tengo que agregar codigo para cada una de las opciones para agregarlo por sepradao a la carpeta*/
+    printf("0. Sentencia\n");
+    printf("1. Autorizacion para Diligancias\n");
+    printf("2. Medida Cautelar\n");
+    printf("3. Sobreseimiento\n");
+    scanf("%d", &nuevaResolucion->tipoResolucion);
+    limpiarPantalla();
+    limpiarBuffer();
+  }while (nuevaResolucion->tipoResolucion >= 0 && nuevaResolucion->tipoResolucion <= 3);
 
-  printf("\nIngrese el tipo de resolución:\n");/*Tengo que agregar codigo para cada una de las opciones para agregarlo por sepradao a la carpeta*/
-  printf("0. Sentencia\n");
-  printf("1. Autorizacion para Diligancias\n");
-  printf("2. Medida Cautelar\n");
-  printf("3. Sobreseimiento\n");
-  scanf("%d", &nuevaResolucion->tipoResolucion);
-  limpiarBuffer();
 
+  correcto = accionResolucion(carpeta,nuevaResolucion->tipoResolucion);
+  if (correcto == 0) {
+    return;
+  }
   /*Si origen == 0 la resolucion fue emitida por el Juez de Garantia
    * Si origen == 1 la resolucion fue emitida por el tribunal de Juicio Oral
    */
@@ -1786,6 +1966,7 @@ void mostrarDiligencias(struct Fiscal *fiscal) {
       case 0: printf("Fiscal\n"); break;
       case 1: printf("Victima\n"); break;
       case 2: printf("Imputado\n"); break;
+      case 3: printf("Juez\n");break;
       default: printf("Desconocido\n"); break;
     }
     printf("  Descripcion: %s\n", head->diligencia->descripcionDiligencia);
@@ -1856,6 +2037,7 @@ void mostrarDiligenciasOrdenadas(struct Fiscal *fiscal) {
 
   printf("=== Lista de Diligencias Ordenadas por Prioridad ===\n");
   head = carpeta->diligencias;
+
   while (head != NULL) {
     printf("====== DILIGENCIA %d ======\n", numDiligencia++);
     printf("- Urgencia: %d\n", head->diligencia->urgencia);
@@ -1910,6 +2092,7 @@ void listarDiligenciasPendientes(struct Fiscal *fiscal) {
         case 0: printf("Fiscal\n"); break;
         case 1: printf("Victima\n"); break;
         case 2: printf("Imputado\n"); break;
+        case 3: printf("Juez\n"); break;
         default: printf("Desconocido\n"); break;
       }
 
@@ -3043,9 +3226,8 @@ void menuDenuncias(struct Fiscal *fiscal) {
     printf("1. Agregar Denuncia\n");
     printf("2. Buscar Denuncia por RUC\n");
     printf("3. Buscar Denuncia por ESTADO");
-    printf("4. Modificar Denuncia\n");
-    printf("5. Eliminar Denuncia\n");
-    printf("6. Listar Todas las Denuncias\n");
+    printf("4. Modificar Estado Denuncia\n");
+    printf("5. Listar Todas las Denuncias\n");
     printf("0. Volver al Menú Principal\n");
     printf("Seleccione una opción: ");
     scanf("%d", &opcion);
