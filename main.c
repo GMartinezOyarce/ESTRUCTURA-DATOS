@@ -33,7 +33,7 @@ struct Resolucion {
    * si Tipo Resolucion == 2 es una medida Cautelar
    * si tipo Resolucion == 3 es un sobreseimiento
    */
-  int tipoResolucion;;
+  int tipoResolucion;
 
   /*Si origen == 0 la resolucion fue emitida por el Juez de Garantia
    * Si origen == 1 la resolucion fue emitida por el tribunal de Juicio Oral
@@ -259,9 +259,10 @@ void limpiarPantalla() {
   for(i=0;i<20;i++) printf("\n");
 }
 struct CarpetaInvestigativa* BUSCARCARPETA(struct arbolCarpetas *raiz, char *ruc) {
+  int cmp;
   if (raiz == NULL) return NULL;
 
-  int cmp = strcmp(ruc, raiz->carpetaInvestigativa->ruc);
+  cmp = strcmp(ruc, raiz->carpetaInvestigativa->ruc);
   if (cmp == 0) return raiz->carpetaInvestigativa;
   if (cmp < 0) return BUSCARCARPETA(raiz->izq, ruc);
   return BUSCARCARPETA(raiz->der, ruc);
