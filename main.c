@@ -683,7 +683,45 @@ void listarDenuncias(struct Fiscal *fiscal) {
   }
 }
 
+void modificarEstadoDenuncia(struct Fiscal *fiscal) {
 
+  struct Denuncia *denuncia;
+  char ruc[RUC];
+  char *temporal;
+  int opcion;
+  if (fiscal->denuncias == NULL) {
+    printf("No Hay Denuncias En el Sistema\n");
+  }
+  do {
+    temporal = ingresarRuc();
+    if (temporal == NULL) {
+      return;
+    }
+    strcpy(ruc, temporal);
+    break;
+
+  }while (1);
+  denuncia = BUSCARDENUNCIA(fiscal,ruc);
+
+  do {
+    printf("Ingrese el nuevo estado de la denuncia:\n");
+    printf("-1 = Sin investigacion\n");
+    printf("0 = en investigacion\n");
+    printf("1 = en Juicio Oral\n");
+    printf("2 = Archivada\n");
+    printf("3 = Cerrada\n");
+    printf("Seleccione una opcion: \n");
+    scanf("%d", &opcion);
+    if (opcion >= -1 || opcion <= 3) {
+      break;
+    }
+    printf("\n");
+  }while (1);
+  denuncia->estadoDenuncia = opcion;
+
+return;
+
+}
 /*---------------------FUNCIONES SOBRE CARPETAS----------------*/
 
 /*---------------------FUNCION CREAR CARPETA
