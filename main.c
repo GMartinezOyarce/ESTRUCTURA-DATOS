@@ -2654,7 +2654,7 @@ void listarSentenciasPorCausa(struct Fiscal *fiscal) {
   printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
   printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
   printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
-  printf("Ingrese un número:");
+  printf("Ingrese un numero:");
   scanf("%d", &tipoCausa);
   limpiarBuffer();
 
@@ -2692,43 +2692,43 @@ void listarResolucionesRecursivo(struct arbolCarpetas *raiz) {
   while (resoluciones != NULL) {
     if (resoluciones->resolucion!=NULL) {
       if (resoluciones->resolucion->tipoResolucion==0) {
-        printf("Tipo Resolución: Sentencia\n");
+        printf("Tipo Resolucion: Sentencia\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==1) {
-        printf("Tipo Resolución: Autorización para Diligencias\n");
+        printf("Tipo Resolucion: Autorización para Diligencias\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==2) {
-        printf("Tipo Resolución: Medida Cautelar\n");
+        printf("Tipo Resolucion: Medida Cautelar\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==3) {
-        printf("Tipo Resolución: Sobreseimiento\n");
+        printf("Tipo Resolucion: Sobreseimiento\n");
       }
       else {
-        printf("No hay Tipo de Resolución Registrado.\n");
+        printf("No hay Tipo de Resolucion Registrado.\n");
       }
 
       if (resoluciones->resolucion->origenResolucion==0) {
-        printf("Origen: La Resolución fue emitida por el Juez de Garantía\n");
+        printf("Origen: La Resolucion fue emitida por el Juez de Garantía\n");
       }
       else if (resoluciones->resolucion->origenResolucion==1) {
-        printf("Origen: La Resolución fue emitida por el tribunal de Juicio Oral\n");
+        printf("Origen: La Resolucion fue emitida por el tribunal de Juicio Oral\n");
       }
       else {
-        printf("Origen: No ha sido especificado.");
+        printf("Origen: No ha sido especificado.\n");
       }
 
       if (resoluciones->resolucion->descripcion!=NULL) {
-        printf("Descripción de la Resolución: %s",resoluciones->resolucion->descripcion);
+        printf("Descripcion de la Resolución: %s\n",resoluciones->resolucion->descripcion);
       }
       else {
-        printf("Descripción No ha sido especificada.");
+        printf("Descripcion No ha sido especificada.\n");
       }
 
       if (resoluciones->resolucion->fecha!=NULL) {
-        printf("Fecha: %s",resoluciones->resolucion->fecha);
+        printf("Fecha: %s\n",resoluciones->resolucion->fecha);
       }
       else {
-        printf("Fecha: No ha sido especificada.");
+        printf("Fecha: No ha sido especificada.\n");
       }
     }
     resoluciones=resoluciones->sig;
@@ -2740,7 +2740,7 @@ void listarResolucionesRecursivo(struct arbolCarpetas *raiz) {
 
 void ListarResoluciones(struct Fiscal *fiscal) {
   limpiarPantalla();
-  printf("=============== LISTADO DE RESOLUCIONES =============");
+  printf("=============== LISTADO DE RESOLUCIONES =============\n\n");
 
   if (fiscal-> carpetas == NULL) {
     printf("NO HAY RESOLUCIONES REGISTRADAS");
@@ -2749,8 +2749,7 @@ void ListarResoluciones(struct Fiscal *fiscal) {
   /*el listar Resoluciones solo se puede hacer recursivo*/
   listarResolucionesRecursivo(fiscal-> carpetas);
 
-  printf("Presione Enter para continuar...");
-  getchar();
+  esperarEnter();
 }
 
 void listarResolucionesPorCausaRecursivo(struct arbolCarpetas *raiz, int tipoCausa) {
@@ -2791,43 +2790,43 @@ void listarResolucionesPorCausaRecursivo(struct arbolCarpetas *raiz, int tipoCau
   while (resoluciones != NULL && CausaEncontrada==1) {
     if (resoluciones->resolucion!=NULL) {
       if (resoluciones->resolucion->tipoResolucion==0) {
-        printf("Tipo Resolución: Sentencia\n");
+        printf("Tipo Resolucion: Sentencia\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==1) {
-        printf("Tipo Resolución: Autorización para Diligencias\n");
+        printf("Tipo Resolucion: Autorización para Diligencias\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==2) {
-        printf("Tipo Resolución: Medida Cautelar\n");
+        printf("Tipo Resolucion: Medida Cautelar\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==3) {
-        printf("Tipo Resolución: Sobreseimiento\n");
+        printf("Tipo Resolucion: Sobreseimiento\n");
       }
       else {
-        printf("No hay Tipo de Resolución Registrado.\n");
+        printf("No hay Tipo de Resolucion Registrado.\n");
       }
 
       if (resoluciones->resolucion->origenResolucion==0) {
-        printf("Origen: La Resolución fue emitida por el Juez de Garantía\n");
+        printf("Origen: La Resolucion fue emitida por el Juez de Garantía\n");
       }
       else if (resoluciones->resolucion->origenResolucion==1) {
-        printf("Origen: La Resolución fue emitida por el tribunal de Juicio Oral\n");
+        printf("Origen: La Resolucion fue emitida por el tribunal de Juicio Oral\n");
       }
       else {
-        printf("Origen: No ha sido especificado.");
+        printf("Origen: No ha sido especificado.\n");
       }
 
       if (resoluciones->resolucion->descripcion!=NULL) {
-        printf("Descripción de la Resolución: %s",resoluciones->resolucion->descripcion);
+        printf("Descripcion de la Resolución: %s\n",resoluciones->resolucion->descripcion);
       }
       else {
-        printf("Descripción No ha sido especificada.");
+        printf("Descripcion No ha sido especificada.\n");
       }
 
       if (resoluciones->resolucion->fecha!=NULL) {
-        printf("Fecha: %s",resoluciones->resolucion->fecha);
+        printf("Fecha: %s\n",resoluciones->resolucion->fecha);
       }
       else {
-        printf("Fecha: No ha sido especificada.");
+        printf("Fecha: No ha sido especificada.\n");
       }
     }
     resoluciones=resoluciones->sig;
@@ -2857,8 +2856,7 @@ void ListarResolucionesPorCausa(struct Fiscal *fiscal) {
   /*el listar Resoluciones solo se puede hacer recursivo*/
   listarResolucionesPorCausaRecursivo(fiscal-> carpetas, tipoCausa);
 
-  printf("Presione Enter para continuar...");
-  getchar();
+  esperarEnter();
 }
 
 void listarResolucionesPorImputadoRecursivo(struct arbolCarpetas *raiz, char *rut) {
@@ -2899,36 +2897,36 @@ void listarResolucionesPorImputadoRecursivo(struct arbolCarpetas *raiz, char *ru
   while (resoluciones != NULL && ImputadoEncontrado==1) {
     if (resoluciones->resolucion!=NULL) {
       if (resoluciones->resolucion->tipoResolucion==0) {
-        printf("Tipo Resolución: Sentencia\n");
+        printf("Tipo Resolucion: Sentencia\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==1) {
-        printf("Tipo Resolución: Autorización para Diligencias\n");
+        printf("Tipo Resolucion: Autorización para Diligencias\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==2) {
-        printf("Tipo Resolución: Medida Cautelar\n");
+        printf("Tipo Resolucion: Medida Cautelar\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==3) {
-        printf("Tipo Resolución: Sobreseimiento\n");
+        printf("Tipo Resolucion: Sobreseimiento\n");
       }
       else {
-        printf("No hay Tipo de Resolución Registrado.\n");
+        printf("No hay Tipo de Resolucion Registrado.\n");
       }
 
       if (resoluciones->resolucion->origenResolucion==0) {
-        printf("Origen: La Resolución fue emitida por el Juez de Garantía\n");
+        printf("Origen: La Resolucion fue emitida por el Juez de Garantía\n");
       }
       else if (resoluciones->resolucion->origenResolucion==1) {
-        printf("Origen: La Resolución fue emitida por el tribunal de Juicio Oral\n");
+        printf("Origen: La Resolucion fue emitida por el tribunal de Juicio Oral\n");
       }
       else {
         printf("Origen: No ha sido especificado.");
       }
 
       if (resoluciones->resolucion->descripcion!=NULL) {
-        printf("Descripción de la Resolución: %s",resoluciones->resolucion->descripcion);
+        printf("Descripcion de la Resolución: %s",resoluciones->resolucion->descripcion);
       }
       else {
-        printf("Descripción No ha sido especificada.");
+        printf("Descripcion No ha sido especificada.");
       }
 
       if (resoluciones->resolucion->fecha!=NULL) {
@@ -2949,6 +2947,7 @@ void ListarResolucionesPorImputado(struct Fiscal *fiscal) {
   char rut[RUT];
   limpiarPantalla();
   printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Resoluciones: ");
+  limpiarBuffer();
   fgets(rut, RUT, stdin);
   rut[strcspn(rut, "\n")]= 0;
   printf("\n\n=============== LISTADO DE RESOLUCIONES =============\n\n");
@@ -2960,8 +2959,7 @@ void ListarResolucionesPorImputado(struct Fiscal *fiscal) {
   /*el listar Resoluciones solo se puede hacer recursivo*/
   listarResolucionesPorImputadoRecursivo(fiscal-> carpetas, rut);
 
-  printf("Presione Enter para continuar...");
-  getchar();
+  esperarEnter();
 }
 
 void listarResolucionesPorTipoRecursivo(struct arbolCarpetas *raiz, int tipo) {
@@ -2986,43 +2984,43 @@ void listarResolucionesPorTipoRecursivo(struct arbolCarpetas *raiz, int tipo) {
       printf("--------------------------------------------------\n");
       printf("RUC: %s\n", carpeta->ruc);
       if (resoluciones->resolucion->tipoResolucion==0) {
-        printf("Tipo Resolución: Sentencia\n");
+        printf("Tipo Resolucion: Sentencia\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==1) {
-        printf("Tipo Resolución: Autorización para Diligencias\n");
+        printf("Tipo Resolucion: Autorizacion para Diligencias\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==2) {
-        printf("Tipo Resolución: Medida Cautelar\n");
+        printf("Tipo Resolucion: Medida Cautelar\n");
       }
       else if (resoluciones->resolucion->tipoResolucion==3) {
-        printf("Tipo Resolución: Sobreseimiento\n");
+        printf("Tipo Resolucion: Sobreseimiento\n");
       }
       else {
-        printf("No hay Tipo de Resolución Registrado.\n");
+        printf("No hay Tipo de Resolucion Registrado.\n");
       }
 
       if (resoluciones->resolucion->origenResolucion==0) {
-        printf("Origen: La Resolución fue emitida por el Juez de Garantía\n");
+        printf("Origen: La Resolucion fue emitida por el Juez de Garantia\n");
       }
       else if (resoluciones->resolucion->origenResolucion==1) {
-        printf("Origen: La Resolución fue emitida por el tribunal de Juicio Oral\n");
+        printf("Origen: La Resolucion fue emitida por el tribunal de Juicio Oral\n");
       }
       else {
-        printf("Origen: No ha sido especificado.");
+        printf("Origen: No ha sido especificado.\n");
       }
 
       if (resoluciones->resolucion->descripcion!=NULL) {
-        printf("Descripción de la Resolución: %s",resoluciones->resolucion->descripcion);
+        printf("Descripcion de la Resolucion: %s\n",resoluciones->resolucion->descripcion);
       }
       else {
-        printf("Descripción No ha sido especificada.");
+        printf("Descripcion No ha sido especificada.\n");
       }
 
       if (resoluciones->resolucion->fecha!=NULL) {
-        printf("Fecha: %s",resoluciones->resolucion->fecha);
+        printf("Fecha: %s\n",resoluciones->resolucion->fecha);
       }
       else {
-        printf("Fecha: No ha sido especificada.");
+        printf("Fecha: No ha sido especificada.\n");
       }
     }
     resoluciones=resoluciones->sig;
@@ -3038,10 +3036,10 @@ void ListarResolucionesPorTipo(struct Fiscal *fiscal) {
   printf("Ingrese el Tipo por el cual desea Filtrar las Resoluciones:\n\n");
   printf("Formato:\n");
   printf("0 Si es Sentencia o Fallo\n");
-  printf("1 Si es Autorización para diligencias\n");
+  printf("1 Si es Autorizacion para diligencias\n");
   printf("2 Si es una medida Cautelar\n");
   printf("3 Si es un sobreseimiento\n");
-  printf("Ingrese un número:");
+  printf("Ingrese un numero:");
   scanf("%d", &tipo);
   limpiarBuffer();
   printf("\n\n=============== LISTADO DE RESOLUCIONES =============\n\n");
@@ -3053,8 +3051,7 @@ void ListarResolucionesPorTipo(struct Fiscal *fiscal) {
   /*el listar Resoluciones solo se puede hacer recursivo*/
   listarResolucionesPorTipoRecursivo(fiscal-> carpetas, tipo);
 
-  printf("Presione Enter para continuar...");
-  getchar();
+  esperarEnter();
 }
 
 
@@ -3075,7 +3072,7 @@ void AgregarResolucion(struct Fiscal *fiscal) {
     rucBusqueda[strcspn(rucBusqueda, "\n")] = 0;
 
     if (fiscal -> carpetas == NULL) {
-      printf("No hay carpetas a las que pueda agregarle una Resolución");
+      printf("No hay carpetas a las que pueda agregarle una Resolucion");
       printf("Presione Enter para continuar");
       getchar();
       return;
@@ -3084,10 +3081,10 @@ void AgregarResolucion(struct Fiscal *fiscal) {
     carpetaEncontrada = BUSCARCARPETA(fiscal->carpetas, rucBusqueda);
 
     if (carpetaEncontrada == NULL) {
-      printf("\nNo se encontró ninguna carpeta con el RUC %s\n", rucBusqueda);
+      printf("\nNo se encontro ninguna carpeta con el RUC %s\n", rucBusqueda);
       printf("1. Intentar nuevamente\n");
-      printf("2. Volver al menú anterior\n");
-      printf("Seleccione una opción: ");
+      printf("2. Volver al menu anterior\n");
+      printf("Seleccione una opcion: ");
 
 
       scanf("%d", &opcion);
@@ -3103,29 +3100,29 @@ void AgregarResolucion(struct Fiscal *fiscal) {
   nuevo=(struct Resolucion *)malloc(sizeof(struct Resolucion));
   nodo=(struct NodoResoluciones *)malloc(sizeof(struct NodoResoluciones));
 
-  printf("Ingrese el Tipo de Resolución\n\n");
+  printf("Ingrese el Tipo de Resolucion\n\n");
   printf("Formato:\n");
   printf("0: Sentencia\n");
-  printf("1: Autorización para Diligencias\n");
+  printf("1: Autorizacion para Diligencias\n");
   printf("2: Medida Cautelar\n");
   printf("3: Sobreseimiento\n");
-  printf("Ingrese un número: ");
+  printf("Ingrese un numero: ");
   scanf("%d", &nuevo->tipoResolucion);
   limpiarBuffer();
 
-  printf("\n\nIngrese el Origen de la Resolución\n\n");
+  printf("\n\nIngrese el Origen de la Resolucion\n\n");
   printf("Formato:\n");
-  printf("0: Emitida por el Juez de Garantía\n");
+  printf("0: Emitida por el Juez de Garantia\n");
   printf("1: Emitida por el Tribunal de Juicio Oral\n");
-  printf("Ingrese un número: ");
+  printf("Ingrese un numero: ");
   scanf("%d", &nuevo->origenResolucion);
   limpiarBuffer();
 
-  printf("\n\nIngrese la descripción de la Resolución:");
+  printf("\n\nIngrese la descripción de la Resolucion:");
   fgets(nuevo->descripcion, TEXTO, stdin);
   nuevo->descripcion[strcspn(nuevo->descripcion, "\n")] = 0;
 
-  printf("\n\nIngrese la fecha de la Resolución:");
+  printf("\n\nIngrese la fecha de la Resolucion:");
   fgets(nuevo->fecha, FECHA, stdin);
   nuevo->fecha[strcspn(nuevo->fecha, "\n")] = 0;
 
@@ -3142,9 +3139,8 @@ void AgregarResolucion(struct Fiscal *fiscal) {
     rec->sig = nodo;
   }
 
-  printf("La Resolución se asignó correctamente");
-  printf("Presione Enter para continuar");
-  getchar();
+  printf("La Resolución se asigno correctamente\n\n");
+  esperarEnter();
 
 }
 
@@ -3282,7 +3278,7 @@ void menuCausas(struct Fiscal *fiscal) {
       case 4: ModificarCausa(fiscal); break;
       case 5: ListarCausas(fiscal); break;
       case 0: break;
-      default: printf("Opción inválida.\n");
+      default: printf("Opcion inválida.\n");
     }
   } while(opcion != 0);
 }
@@ -3290,17 +3286,17 @@ void menuCausas(struct Fiscal *fiscal) {
 void menuSentenciasResoluciones(struct Fiscal *fiscal) {
   int opcion;
   do {
-    printf("\n--- Gestión de Sentencias y Resoluciones ---\n");
+    printf("\n--- Gestion de Sentencias y Resoluciones ---\n");
     printf("1. Agregar Resolucion\n");
-    printf("2. Buscar Resolución por Causa\n");
-    printf("3. Buscar Resolución por Imputado\n");
-    printf("4. Buscar Resolución por Tipo de Resolución\n");
+    printf("2. Buscar Resolucion por Causa\n");
+    printf("3. Buscar Resolucion por Imputado\n");
+    printf("4. Buscar Resolucion por Tipo de Resolucion\n");
     printf("5. Buscar Sentencia por Causa\n");
     printf("6. Buscar Sentencia por Imputado\n");
     printf("7. Listar Todas las Sentencias\n");
     printf("8. Listar Todas las Resoluciones\n");
-    printf("0. Volver al Menú Principal\n");
-    printf("Seleccione una opción: ");
+    printf("0. Volver al Menu Principal\n");
+    printf("Seleccione una opcion: ");
     scanf("%d", &opcion);
 
     switch(opcion) {
@@ -3385,7 +3381,7 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
       case 6: menuSentenciasResoluciones(fiscal); break;
       case 7: menuReportes(fiscal); break;
       case 0: return;
-      default: printf("Opción inválida. Intente nuevamente.\n");
+      default: printf("Opcion invalida. Intente nuevamente.\n");
     }
   } while(opcion != 0);
 }
