@@ -1507,15 +1507,15 @@ void agregarResolucion(struct Fiscal *fiscal) {
   limpiarPantalla();
 
   do {
-    printf("\nIngrese el tipo de resolución:\n");/*Tengo que agregar codigo para cada una de las opciones para agregarlo por sepradao a la carpeta*/
+    printf("\nIngrese el tipo de resolucion:\n");/*Tengo que agregar codigo para cada una de las opciones para agregarlo por sepradao a la carpeta*/
     printf("0. Sentencia\n");
     printf("1. Autorizacion para Diligancias\n");
     printf("2. Medida Cautelar\n");
     printf("3. Sobreseimiento\n");
     scanf("%d", &nuevaResolucion->tipoResolucion);
-    limpiarPantalla();
     limpiarBuffer();
-  }while (nuevaResolucion->tipoResolucion >= 0 && nuevaResolucion->tipoResolucion <= 3);
+    limpiarPantalla();
+  }while (nuevaResolucion->tipoResolucion <= 0 && nuevaResolucion->tipoResolucion >= 3);
 
 
   correcto = accionResolucion(carpeta,nuevaResolucion->tipoResolucion);
@@ -1534,6 +1534,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
   printf("Ingrese la Descripcion de su Resolucion\n");
   fgets(nuevaResolucion->descripcion, TEXTO, stdin);
   nuevaResolucion->descripcion[strcspn(nuevaResolucion->descripcion, "\n")] = 0;
+  limpiarBuffer();
 
   fecha = ingresarFecha();
   if (fecha == NULL) return;
@@ -2200,13 +2201,13 @@ void ListarCausas(struct Fiscal *fiscal) {
             printf("CAUSA %d: Falta\n",i);
           }
           else{
-            printf("CAUSA %d: NO SE PRESENTA UNA CAUSA",i);
+            printf("CAUSA %d: NO SE PRESENTA UNA CAUSA\n",i);
           }
           if (rec->causa!=NULL && rec->causa->descripcionCausa!=NULL) {
             printf("Descripcion de la Causa %d: %s\n",i,rec->causa->descripcionCausa);
           }
           else {
-            printf("Descripcion de la Causa %d: NO HAY.",i);
+            printf("Descripcion de la Causa %d: NO HAY.\n",i);
           }
           rec=rec->sig;
           i++;
@@ -2216,8 +2217,7 @@ void ListarCausas(struct Fiscal *fiscal) {
     }while (denuncias!=NULL && denuncias!=headdenuncias);
   }
 
-  printf("\nPresione Enter para continuar\n");
-  getchar();
+  esperarEnter();
 }
 
 void CausaBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
@@ -2334,11 +2334,12 @@ void BuscarCausasDenuncia(struct Fiscal *fiscal) {
 }
 
 void agregarCausa(struct Fiscal *fiscal) {
-  limpiarPantalla();
   int opcion;
   char *rucTemp;
   char rucBusqueda[RUC];
   struct Denuncia *denunciaEncontrada;
+
+  limpiarPantalla();
 
   if (fiscal->denuncias== NULL) {
     printf("No hay denuncias en el Sistema");
@@ -2385,7 +2386,6 @@ void agregarCausa(struct Fiscal *fiscal) {
 }
 
 void ModificarCausa(struct Fiscal *fiscal) {
-  limpiarPantalla();
   int opcion;
   char *rucTemp;
   char rucBusqueda[RUC];
@@ -2393,6 +2393,8 @@ void ModificarCausa(struct Fiscal *fiscal) {
   struct NodoCausas *rec;
   int i=0;
   int modificar, seguir=0;
+
+  limpiarPantalla();
 
   if (fiscal->denuncias== NULL) {
     printf("No hay denuncias en el Sistema");
@@ -2403,7 +2405,7 @@ void ModificarCausa(struct Fiscal *fiscal) {
   do {
     rucTemp = ingresarRuc();
     if (rucTemp == NULL) {
-      printf("aaaa%s",rucBusqueda);
+      printf("%s",rucBusqueda);
       return; /*Si retorna NUll el usuario quiere volver al menu Principal*/
     }
     strcpy(rucBusqueda, rucTemp);
