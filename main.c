@@ -1399,9 +1399,20 @@ int sobreseimiento(struct CarpetaInvestigativa *carpeta) {
   }while (1);
   /*Ya se verifica que el carpeta->imputado existe*/
   rec = carpeta->imputado;
-  if (rec->imputado == imputado) {
-    carpeta->imputado = carpeta->imputado->sig;
+
+  if (carpeta -> imputado-> imputado == imputado) {
+    carpeta -> imputado = carpeta -> imputado -> sig;
   }
+  else {
+    while (rec-> sig -> imputado != imputado) {
+      rec = rec-> sig;
+    }
+    rec -> sig = rec-> sig-> sig;
+  }
+
+  /*if (rec->imputado == imputado) {
+    carpeta->imputado = carpeta->imputado->sig;
+  }*/
 
   return 1;
 
