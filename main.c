@@ -1892,36 +1892,29 @@ void modificarImputado(struct Fiscal *fiscal) {
         printf("Descripcion sentencia actual: %s\n", actual->imputado->descripcionSentencia);
 
         printf("\nSeleccione que desea modificar:\n");
-        printf("1. Medidas Cautelares\n");
-        printf("2. Tipo de Sentencia (0: Condenatoria, 1: Absolutoria)\n");
-        printf("3. Descripcion de la Sentencia\n");
-        printf("4. Cancelar\n");
+        printf("1. Tipo de Sentencia (0: Condenatoria, 1: Absolutoria)\n");
+        printf("2. Descripcion de la Sentencia\n");
+        printf("3. Cancelar\n");
         scanf("%d", &opcion);
         limpiarBuffer();
 
         switch (opcion) {
-          case 1:
-            printf("Ingrese nuevas medidas cautelares: ");
-            fgets(actual->imputado->medidasCautelares, TEXTO, stdin);
-            actual->imputado->medidasCautelares[strcspn(actual->imputado->medidasCautelares, "\n")] = 0;
-            printf("Medidas actualizadas correctamente.\n");
-            break;
 
-          case 2:
+          case 1:
             printf("Ingrese nuevo tipo de sentencia (0: Condenatoria, 1: Absolutoria): ");
             scanf("%d", &actual->imputado->tipoSentencia);
             limpiarBuffer();
             printf("Tipo de sentencia actualizado correctamente.\n");
             break;
 
-          case 3:
+          case 2:
             printf("Ingrese nueva descripcion de sentencia: ");
             fgets(actual->imputado->descripcionSentencia, TEXTO, stdin);
             actual->imputado->descripcionSentencia[strcspn(actual->imputado->descripcionSentencia, "\n")] = 0;
             printf("Descripcion de sentencia actualizada correctamente.\n");
             break;
 
-          case 4:
+          case 3:
             printf("Operacion cancelada.\n");
             return;
 
