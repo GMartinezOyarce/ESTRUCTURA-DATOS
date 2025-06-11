@@ -278,13 +278,13 @@ void limpiarBuffer() {
 void esperarEnter() {
   printf("\nPresione Enter para continuar...\n");
   limpiarBuffer(); /* Consume el '\n' previo si existe*/
-  getchar(); /* Espera a que el usuario presione Enter*/
+  (void)getchar(); /* Espera a que el usuario presione Enter*/
 }
 
 /*Función para buscar una denuncia por RUC en la lista de denuncias del fiscal*/
 struct Denuncia* BUSCARDENUNCIA(struct Fiscal *fiscal, char *ruc) {
-  struct NodoDenuncias *actual = fiscal->denuncias,*head;
-  head = actual;
+  struct NodoDenuncias *head = fiscal->denuncias,*actual;
+  actual = head;
   if (fiscal -> denuncias == NULL) return NULL;
   do{
     if (strcmp(actual->denuncia->ruc, ruc) == 0) {
@@ -1402,8 +1402,7 @@ int agregarDiligenciaJuez(struct CarpetaInvestigativa *carpeta) {
 
     return 1;
   }
-
-
+  return 0;
 }
 
 int agregarMedidaCautelar(struct CarpetaInvestigativa *carpeta) {
@@ -3131,8 +3130,7 @@ void AgregarResolucion(struct Fiscal *fiscal) {
 
     if (fiscal -> carpetas == NULL) {
       printf("No hay carpetas a las que pueda agregarle una Resolucion");
-      printf("Presione Enter para continuar");
-      getchar();
+      esperarEnter();
       return;
     }
 
