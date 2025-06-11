@@ -413,7 +413,7 @@ void AGREGARCAUSAS(struct Denuncia *denuncia) {
 
 /*-----------------------FUNCIONES DE DENUNCIAS----------------------------*/
 void printDenuncia (struct Denuncia *denuncia) {
-  struct NodoCausas *head = denuncia->causas,*rec = denuncia->causas;
+  struct NodoCausas *rec = denuncia->causas;
   int i;
   printf("\n\n");
   printf("RUC: %s\n\n",denuncia->ruc);
@@ -485,7 +485,6 @@ void printDenuncia (struct Denuncia *denuncia) {
     }
   }
   esperarEnter();
-
 }
 void buscarDenunciaRUC(struct Fiscal *fiscal) {
   struct Denuncia *denuncia;
