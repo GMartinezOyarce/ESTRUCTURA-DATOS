@@ -555,6 +555,7 @@ void buscarDenunciaEstado(struct Fiscal *fiscal) {
 void agregarDenuncia(struct Fiscal *fiscal) {
   struct NodoDenuncias *nodo;
   struct Denuncia *denuncia;
+  int i;
   int opcion;
   char ruc[RUC];
   char *temporal;
@@ -2840,7 +2841,7 @@ void listarResolucionesPorCausaRecursivo(struct arbolCarpetas *raiz, int tipoCau
     printf("RUC: %s\n", carpeta->ruc);
   }
 
-  //AQUÍ VA EL RECORRER RESOLUCIONES
+  /*AQUÍ VA EL RECORRER RESOLUCIONES*/
 
   resoluciones = carpeta->resoluciones;
 
@@ -2889,7 +2890,7 @@ void listarResolucionesPorCausaRecursivo(struct arbolCarpetas *raiz, int tipoCau
     resoluciones=resoluciones->sig;
   }
 
-  // 3. Recorre subárbol derecho
+  /* 3. Recorre subarbol derecho*/
   listarResolucionesPorCausaRecursivo(raiz->der, tipoCausa);
 }
 
@@ -2947,7 +2948,7 @@ void listarResolucionesPorImputadoRecursivo(struct arbolCarpetas *raiz, char *ru
     printf("RUC: %s\n", carpeta->ruc);
   }
 
-  //AQUÍ VA EL RECORRER RESOLUCIONES
+  /*AQUI VA EL RECORRER RESOLUCIONES*/
 
   resoluciones = carpeta->resoluciones;
 
@@ -2996,7 +2997,7 @@ void listarResolucionesPorImputadoRecursivo(struct arbolCarpetas *raiz, char *ru
     resoluciones=resoluciones->sig;
   }
 
-  // 3. Recorre subárbol derecho
+  /* 3. Recorre subarbol derecho*/
   listarResolucionesPorImputadoRecursivo(raiz->der, rut);
 }
 
@@ -3032,7 +3033,7 @@ void listarResolucionesPorTipoRecursivo(struct arbolCarpetas *raiz, int tipo) {
   listarResolucionesRecursivo(raiz-> izq);
   carpeta = raiz -> carpetaInvestigativa;
 
-  //AQUÍ VA EL RECORRER RESOLUCIONES
+  /*AQUI VA EL RECORRER RESOLUCIONES*/
 
   resoluciones = carpeta->resoluciones;
 
@@ -3083,7 +3084,7 @@ void listarResolucionesPorTipoRecursivo(struct arbolCarpetas *raiz, int tipo) {
     resoluciones=resoluciones->sig;
   }
 
-  // 3. Recorre subárbol derecho
+  /* 3. Recorre subarbol derecho*/
   listarResolucionesRecursivo(raiz->der);
 }
 
@@ -3149,7 +3150,7 @@ void AgregarResolucion(struct Fiscal *fiscal) {
 
 
       if (opcion == 2) {
-        return; // Salir de la función si el usuario elige volver
+        return; /* Salir de la funcion si el usuario elige volver*/
       }
     }
   } while (carpetaEncontrada == NULL);
@@ -3510,7 +3511,7 @@ void inicializarDatosPrueba(struct MinisterioPublico **mp) {
     /* Crear imputado y nodo */
     imputado = (struct Imputado*)malloc(sizeof(struct Imputado));
     strcpy(imputado->rut, "19283746-5");
-    imputado->tipoSentencia = -1;  // aún no tiene sentencia
+    imputado->tipoSentencia = -1;  /* aun no tiene sentencia*/
     strcpy(imputado->medidasCautelares, "Arraigo nacional");
     strcpy(imputado->descripcionSentencia, "");
     imputado->causas = NULL;
