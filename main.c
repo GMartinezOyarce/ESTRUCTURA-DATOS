@@ -633,6 +633,9 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   }while (1);
 
   denuncia->rutVictimas = (struct RutVictima**)malloc(40*sizeof(struct RutVictima*));
+  for (i = 0; i < 40; i++) {
+    denuncia -> rutVictimas[i] = NULL;
+  }
   denuncia->pLibreRutVictimas = 0;
   limpiarPantalla();
   do {
@@ -795,7 +798,7 @@ void CrearCarpeta(struct Fiscal *fiscal) {
 
 
       if (opcion == 2) {
-        return; // Salir de la función si el usuario elige volver
+        return; /* Salir de la funcion si el usuario elige volver*/
 
       }
     }
@@ -825,7 +828,7 @@ void CrearCarpeta(struct Fiscal *fiscal) {
 
   /* Paso 3: Insertar la carpeta en el árbol*/
   if (fiscal -> carpetas == NULL) {
-    // Crear el árbol si no existe
+    /* Crear el arbol si no existe*/
     fiscal -> carpetas = (struct arbolCarpetas*)malloc(sizeof(struct arbolCarpetas));
     fiscal -> carpetas -> carpetaInvestigativa = nuevaCarpeta;
     fiscal -> carpetas -> izq = NULL;
@@ -1778,7 +1781,7 @@ void listarCarpetasRecursivo(struct arbolCarpetas *raiz) {
   else
     printf("Sin imputado asignado\n");
 
-  // 3. Recorre subárbol derecho
+  /* 3. Recorre subarbol derecho*/
   listarCarpetasRecursivo(raiz->der);
 }
 
@@ -2546,7 +2549,7 @@ void listarSentenciasRecursivo(struct arbolCarpetas *raiz) {
   else{
   printf("Sin imputados asignados\n");
   }
-  // 3. Recorre subárbol derecho
+  /* 3. Recorre subarbol derecho*/
   listarSentenciasRecursivo(raiz->der);
 }
 
@@ -2608,7 +2611,7 @@ void listarSentenciasPorImputadoRecursivo(struct arbolCarpetas *raiz, char *rut)
   else{
   printf("Sin imputados asignados\n");
   }
-  // 3. Recorre subárbol derecho
+  /* 3. Recorre subárbol derecho*/
   listarSentenciasPorImputadoRecursivo(raiz->der, rut);
 }
 
@@ -2694,7 +2697,7 @@ void listarSentenciasPorCausaRecursivo(struct arbolCarpetas *raiz,int tipoCausa)
   else{
   printf("Sin imputados asignados\n");
   }
-  // 3. Recorre subárbol derecho
+  /* 3. Recorre subárbol derecho*/
   listarSentenciasPorCausaRecursivo(raiz->der,tipoCausa);
 }
 
@@ -2739,7 +2742,7 @@ void listarResolucionesRecursivo(struct arbolCarpetas *raiz) {
   printf("--------------------------------------------------\n");
   printf("RUC: %s\n", carpeta->ruc);
 
-  //AQUÍ VA EL RECORRER RESOLUCIONES
+  /*AQUI VA EL RECORRER RESOLUCIONES*/
 
   resoluciones = carpeta->resoluciones;
 
@@ -2788,7 +2791,7 @@ void listarResolucionesRecursivo(struct arbolCarpetas *raiz) {
     resoluciones=resoluciones->sig;
   }
 
-  // 3. Recorre subárbol derecho
+  /* 3. Recorre subarbol derecho*/
   listarResolucionesRecursivo(raiz->der);
 }
 
@@ -3479,7 +3482,7 @@ void inicializarDatosPrueba(struct MinisterioPublico **mp) {
     denuncia->estadoDenuncia = 0;
     denuncia->causas = NULL;
     denuncia->rutVictimas = NULL;
-    denuncia -> rutVictimas = (struct rutVictimas **)malloc(40 * sizeof(struct rutVictimas*));
+    denuncia -> rutVictimas = (struct RutVictima **)malloc(40 * sizeof(struct RutVictima*));
     for (i = 0; i < 40; i++) {
       denuncia -> rutVictimas[i] = NULL;
     }
