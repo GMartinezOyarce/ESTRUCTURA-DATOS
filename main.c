@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define TEXTO 1001
 #define RUC 15
@@ -3194,7 +3195,7 @@ void AgregarResolucion(struct Fiscal *fiscal) {
     rec->sig = nodo;
   }
 
-  printf("La Resolución se asigno correctamente\n\n");
+  printf("La Resolucion se asigno correctamente\n\n");
   esperarEnter();
 
 }
@@ -3212,8 +3213,13 @@ void menuDenuncias(struct Fiscal *fiscal) {
     printf("4. Modificar Estado Denuncia\n");
     printf("5. Listar Todas las Denuncias\n");
     printf("0. Volver al Menu Principal\n");
-    printf("Seleccione una opción: ");
-    scanf("%d", &opcion);
+
+    do {
+      printf("Seleccione una opcion: ");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+    }while (isdigit(opcion) != 0 );
+
 
     switch(opcion) {
       case 1: agregarDenuncia(fiscal); break;
@@ -3222,7 +3228,7 @@ void menuDenuncias(struct Fiscal *fiscal) {
       case 4: modificarEstadoDenuncia(fiscal); break;
       case 5: listarDenuncias(fiscal); break;
       case 0: break;
-      default: printf("Opción inválida.\n");
+      default: printf("Opcion invalida.\n");
     }
   } while(opcion != 0);
 }
@@ -3245,9 +3251,11 @@ void menuCarpetas(struct Fiscal *fiscal) {
     printf("9. listar todas las Carpetas.\n");
     printf("0. Volver al Menu Principal.\n");
 
-    printf("INGRESE SU OPCION:  ");
-
-    scanf("%d", &opcion);
+    do {
+      printf("Seleccione una opcion: ");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+    }while (isdigit(opcion) != 0 );
 
     switch(opcion) {
       case 1: CrearCarpeta(fiscal); break;
@@ -3275,8 +3283,12 @@ void menuImputados(struct Fiscal *fiscal){
     printf("4. Buscar Imputado por RUT o Causa\n");
     printf("5. Listar Todos los imputados del Fiscal\n");
     printf("0. Volver al Menu Principal\n");
-    printf("Seleccione una opcion: ");
-    scanf("%d", &opcion);
+
+    do {
+      printf("Seleccione una opcion: ");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+    }while (isdigit(opcion) != 0 );
 
     switch(opcion) {
       case 1: agregarImputado(fiscal); break;
@@ -3299,8 +3311,12 @@ void menuDiligencias(struct Fiscal *fiscal){
     printf("3. Asignar prioridad a Diligencia y mostrar la lista\n");
     printf("4. Ver diligencias pendientes por carpeta\n");
     printf("0. Volver al Menu Principal\n");
-    printf("Seleccione una opcion: ");
-    scanf("%d", &opcion);
+
+    do {
+      printf("Seleccione una opcion: ");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+    }while (isdigit(opcion) != 0 );
 
     switch(opcion) {
       case 1: agregarDiligencia(fiscal); break;
@@ -3323,8 +3339,12 @@ void menuCausas(struct Fiscal *fiscal) {
     printf("4. Modificar Estado de la Causa\n");
     printf("5. Listar Todas las Causas\n");
     printf("0. Volver al Menu Principal\n");
-    printf("Seleccione una opcion: ");
-    scanf("%d", &opcion);
+
+    do {
+      printf("Seleccione una opcion: ");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+    }while (isdigit(opcion) != 0 );
 
     switch(opcion) {
       case 1: agregarCausa(fiscal); break;
@@ -3333,7 +3353,7 @@ void menuCausas(struct Fiscal *fiscal) {
       case 4: ModificarCausa(fiscal); break;
       case 5: ListarCausas(fiscal); break;
       case 0: break;
-      default: printf("Opcion inválida.\n");
+      default: printf("Opcion invalida.\n");
     }
   } while(opcion != 0);
 }
@@ -3351,8 +3371,12 @@ void menuSentenciasResoluciones(struct Fiscal *fiscal) {
     printf("7. Listar Todas las Sentencias\n");
     printf("8. Listar Todas las Resoluciones\n");
     printf("0. Volver al Menu Principal\n");
-    printf("Seleccione una opcion: ");
-    scanf("%d", &opcion);
+
+    do {
+      printf("Seleccione una opcion: ");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+    }while (isdigit(opcion) != 0 );
 
     switch(opcion) {
       case 1: agregarResolucion(fiscal); break;
@@ -3364,7 +3388,7 @@ void menuSentenciasResoluciones(struct Fiscal *fiscal) {
       case 7: listarSentencias(fiscal); break;
       case 8: ListarResoluciones(fiscal); break;
       case 0: break;;
-      default: printf("Opción invalida.\n");
+      default: printf("Opcion invalida.\n");
     }
   } while(opcion != 0);
 }
@@ -3386,9 +3410,12 @@ void menuReportes(struct Fiscal *fiscal) {
     printf("10. Mostrar diligencias ordenadas por urgencia\n");
     printf("11. Listar diligencias pendientes\n");
     printf("0. Volver al menu principal\n");
-    printf("Seleccione una opcion: ");
-    scanf("%d", &opcion);
-    limpiarBuffer();
+
+    do {
+      printf("Seleccione una opcion: ");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+    }while (isdigit(opcion) != 0 );
 
     switch(opcion) {
       case 1: listarDenuncias(fiscal); break;
@@ -3423,9 +3450,12 @@ void mostrarMenuPrincipal(struct Fiscal *fiscal) {
     printf("6. Gestionar Sentencias y Resoluciones\n");
     printf("7. Generar Reportes\n");
     printf("0. Salir\n");
-    printf("Seleccione una opcion: ");
-    scanf("%d", &opcion);
-    limpiarBuffer();
+
+    do {
+      printf("Seleccione una opción: ");
+      scanf("%d", &opcion);
+      limpiarBuffer();
+    }while (isdigit(opcion) != 0 );
 
     switch(opcion) {
       case 1: menuDenuncias(fiscal); break;
