@@ -3208,10 +3208,10 @@ void menuDenuncias(struct Fiscal *fiscal) {
     printf("\n--- Gestión de Denuncias ---\n");
     printf("1. Agregar Denuncia\n");
     printf("2. Buscar Denuncia por RUC\n");
-    printf("3. Buscar Denuncia por ESTADO");
+    printf("3. Buscar Denuncia por ESTADO\n");
     printf("4. Modificar Estado Denuncia\n");
     printf("5. Listar Todas las Denuncias\n");
-    printf("0. Volver al Menú Principal\n");
+    printf("0. Volver al Menu Principal\n");
     printf("Seleccione una opción: ");
     scanf("%d", &opcion);
 
@@ -3219,7 +3219,7 @@ void menuDenuncias(struct Fiscal *fiscal) {
       case 1: agregarDenuncia(fiscal); break;
       case 2: buscarDenunciaRUC(fiscal); break;
       case 3: buscarDenunciaEstado(fiscal); break;
-      case 4: /* función modificar denuncia */ break;
+      case 4: modificarEstadoDenuncia(fiscal); break;
       case 5: listarDenuncias(fiscal); break;
       case 0: break;
       default: printf("Opción inválida.\n");
@@ -3364,7 +3364,7 @@ void menuSentenciasResoluciones(struct Fiscal *fiscal) {
       case 7: listarSentencias(fiscal); break;
       case 8: ListarResoluciones(fiscal); break;
       case 0: break;;
-      default: printf("Opción inválida.\n");
+      default: printf("Opción invalida.\n");
     }
   } while(opcion != 0);
 }
@@ -3596,7 +3596,7 @@ int main(){
           esperarEnter();
           mostrarMenuPrincipal(ministerioPublico->fiscales[i]);
           flag = 1;
-          break;
+          return 0;
         }
       }
     }
