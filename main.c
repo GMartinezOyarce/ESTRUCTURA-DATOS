@@ -2,12 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+/*-------------Defines para Tamaños de Strings-------------*/
 #define TEXTO 1001
 #define RUC 15
 #define FECHA 11
 #define RUT 11
 #define MAXVICTIMAS 1000
+
+/*-------------Defines para Print Errores-------------*/
+#define FORMATO 0
+#define DENUNCIA 1
+#define CARPETA 2
+#define DILIGENCIA 3
+#define IMPUTADO 4
+#define RESOLUCION 5
+#define PRUEBA 6
+#define DECLARACION 7
+#define CAUSA 8
 
 struct Prueba {
   /*Si Tipo Prueba == 0 es un informe Pericial
@@ -45,7 +56,7 @@ struct Resolucion {
 
 };
 
-/*Lista simple Circular*/
+/*Lista simple*/
 struct NodoResoluciones {
   struct Resolucion *resolucion;
   struct NodoResoluciones *sig;
@@ -255,6 +266,33 @@ struct MinisterioPublico {
 
 
 /*-----------------------FUNCIONES DE MENUS----------------------------*/
+
+void printError(int tipo) {
+  switch(tipo) {
+    case FORMATO: printf("\nFormato Equivocado\n");break;
+    case DENUNCIA: printf("\nDenuncia No encontrada\n");break;
+    case CARPETA: printf("\nCarpeta Investigativa No Encontrada\n");break;
+    case DILIGENCIA: printf("\nDiligencia No Encontrada\n");break;
+    case IMPUTADO: printf("\nImputado No Encontrada\n");break;
+    case RESOLUCION: printf("\nResolucion No Encontrada\n");break;
+    case PRUEBA: printf("\nPrueba No Encontrada\n");break;
+    case DECLARACION: printf("\nDeclaracion No Encontrada\n");break;
+    case CAUSA: printf("\nCausa No Encontrada\n");break;
+  }
+  return;
+}
+
+int preguntarUsuario() {
+  int opcion;
+  printf("1: Intentar nuevamente\n");
+  printf("2: Volver al menu anterior\n");
+  printf("Seleccione una opcion: \n");
+  scanf("%d",&opcion);
+  getchar();
+
+  return opcion;
+}
+
 void limpiarPantalla() {
   int i;
   for(i=0;i<20;i++) printf("\n");
@@ -743,7 +781,7 @@ void modificarEstadoDenuncia(struct Fiscal *fiscal) {
   }while (1);
   denuncia->estadoDenuncia = opcion;
 
-return;
+  return;
 
 }
 /*---------------------FUNCIONES SOBRE CARPETAS----------------*/
