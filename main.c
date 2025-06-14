@@ -2,14 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-/*-------------Defines para Tamaños de Strings-------------*/
+/*--------------------Defines para Tamaños de Strings---------------------*/
+
 #define TEXTO 1001
 #define RUC 15
 #define FECHA 11
 #define RUT 11
 #define MAXVICTIMAS 1000
+/*------------------------------------------------------------------------*/
 
-/*-------------Defines para Print Errores-------------*/
+/*-----------------------Defines para Print Errores-----------------------*/
+
 #define FORMATO 0
 #define DENUNCIA 1
 #define CARPETA 2
@@ -20,6 +23,7 @@
 #define DECLARACION 7
 #define CAUSA 8
 
+/*-------------------------ESTRUCTURA DEL SISTEMA-------------------------*/
 struct Prueba {
   /*Si Tipo Prueba == 0 es un informe Pericial
    * Si Tipo Prueba == 1 es una grabacion
@@ -263,40 +267,27 @@ struct MinisterioPublico {
   int tamFiscal;
 };
 
+/*------------------------------------------------------------------------*/
 
+/*------------------------FUNCIONES DE MENUS------------------------------*/
 
-/*-----------------------FUNCIONES DE MENUS----------------------------*/
-
-void printError(int tipo) {
-  switch(tipo){
-    case FORMATO: printf("\nFormato Equivocado\n");break;
-    case DENUNCIA: printf("\nDenuncia No encontrada\n");break;
-    case CARPETA: printf("\nCarpeta Investigativa No Encontrada\n");break;
-    case DILIGENCIA: printf("\nDiligencia No Encontrada\n");break;
-    case IMPUTADO: printf("\nImputado No Encontrada\n");break;
-    case RESOLUCION: printf("\nResolucion No Encontrada\n");break;
-    case PRUEBA: printf("\nPrueba No Encontrada\n");break;
-    case DECLARACION: printf("\nDeclaracion No Encontrada\n");break;
-    case CAUSA: printf("\nCausa No Encontrada\n");break;
-    default: printf("\nError desconocido\n"); break;
-  }
-}
-
-int preguntarUsuario() {
-  int opcion;
-  printf("1: Intentar nuevamente\n");
-  printf("2: Volver al menu anterior\n");
-  printf("Seleccione una opcion: \n");
-  scanf("%d",&opcion);
-  (void)getchar();
-
-  return opcion;
-}
-
+/*Funcion que genera Espacios Vacios para Limpiar La pantalla*/
 void limpiarPantalla() {
   int i;
   for(i=0;i<20;i++) printf("\n");
 }
+
+
+/* Limpiar el buffer de entrada después de un scanf()*/
+void limpiarBuffer() {
+  int c;
+  while ((c = getchar()) != '\n' && c != EOF);
+}
+/*------------------------------------------------------------------------*/
+
+/*-----------------------FUNCIONES DE BUSQUEDA----------------------------*/
+
+/*Funcion que Busca Una Carpeta dentro del Arbol Carpetas por su ruc y la retorna*/
 struct CarpetaInvestigativa* BUSCARCARPETA(struct arbolCarpetas *raiz, char *ruc) {
   int cmp;
   if (raiz == NULL) return NULL;
@@ -307,18 +298,6 @@ struct CarpetaInvestigativa* BUSCARCARPETA(struct arbolCarpetas *raiz, char *ruc
   return BUSCARCARPETA(raiz->der, ruc);
 }
 
-/* Limpiar el buffer de entrada después de un scanf()*/
-void limpiarBuffer() {
-  int c;
-  while ((c = getchar()) != '\n' && c != EOF);
-}
-
-/* Esperar a que el usuario presione Enter*/
-void esperarEnter() {
-  printf("\nPresione Enter para continuar...\n");
-  limpiarBuffer(); /* Consume el '\n' previo si existe*/
-  (void)getchar(); /* Espera a que el usuario presione Enter*/
-}
 
 /*Función para buscar una denuncia por RUC en la lista de denuncias del fiscal*/
 struct Denuncia* BUSCARDENUNCIA(struct Fiscal *fiscal, char *ruc) {
@@ -334,16 +313,35 @@ struct Denuncia* BUSCARDENUNCIA(struct Fiscal *fiscal, char *ruc) {
   return NULL;
 }
 
-int revisarEspacios( char *str) {
-  int i;
-  for (i = 0; str[i] != '\0'; i++) {
-    if (str[i] == ' ') {
-      return 1; /* contiene espacio*/
-    }
+/*------------------------------------------------------------------------*/
+
+/*------------------------FUNCIONES DE PRINTS-----------------------------*/
+/*Funcion Para Printear Errores*/
+void printError(int tipo) {
+  switch(tipo){
+    case FORMATO: printf("\nFormato Equivocado\n");break;
+    case DENUNCIA: printf("\nDenuncia No encontrada\n");break;
+    case CARPETA: printf("\nCarpeta Investigativa No Encontrada\n");break;
+    case DILIGENCIA: printf("\nDiligencia No Encontrada\n");break;
+    case IMPUTADO: printf("\nImputado No Encontrada\n");break;
+    case RESOLUCION: printf("\nResolucion No Encontrada\n");break;
+    case PRUEBA: printf("\nPrueba No Encontrada\n");break;
+    case DECLARACION: printf("\nDeclaracion No Encontrada\n");break;
+    case CAUSA: printf("\nCausa No Encontrada\n");break;
+    default: printf("\nError desconocido\n"); break;
   }
-  return 0; /*no contiene espacios*/
 }
 
+/*Funcion para Decirle al usuario que intente de nuevo*/
+void preguntarUsuario(int *opcion) {
+  printf("1: Intentar nuevamente\n");
+  printf("2: Volver al menu anterior\n");
+  printf("Seleccione una opcion: \n");
+  scanf("%d",&(*opcion));
+  (void)getchar();
+}
+
+/*Funcion para Cuando ocurre un error en el procedimiento*/
 void ingresarOpcion(int *opcionDestino) {
   int resultadoScan;
   do {
@@ -361,23 +359,37 @@ void ingresarOpcion(int *opcionDestino) {
   } while (1);
 }
 
+/* Esperar a que el usuario presione Enter*/
+void esperarEnter() {
+  printf("\nPresione Enter para continuar...\n");
+  limpiarBuffer(); /* Consume el '\n' previo si existe*/
+  (void)getchar(); /* Espera a que el usuario presione Enter*/
+}
+/*------------------------------------------------------------------------*/
 
-/*Revisar si funciona*/
+/*-------------------FUNCIONES PARA INGRESAR DATOS------------------------*/
+/*Esta Funcion analiza un string y devielve 0 si esta no contiene espacios*/
+int revisarEspacios( char *str) {
+  int i;
+  for (i = 0; str[i] != '\0'; i++) {
+    if (str[i] == ' ') {
+      return 1; /* contiene espacio*/
+    }
+  }
+  return 0; /*no contiene espacios*/
+}
+
 char *ingresarRuc() {
   char ruc[RUC];
   char *vacio = NULL;
   char *ret;
   int opcion;
   do {
-    printf("Ingrese RUC de la carpeta / denuncia:\n");
     limpiarBuffer();
     fgets(ruc, RUC, stdin);
     ruc[strcspn(ruc, "\n")] = 0;
     if (ruc[9] != '-' || revisarEspacios(ruc) == 1) {
-      printf("Formato Equivocado\n");
-      printf("1. Intentar nuevamente\n");
-      printf("2. Volver al menu anterior\n");
-      printf("Seleccione una opcion: \n");
+      preguntarUsuario(&opcion);
       scanf("%d", &opcion);
       if (opcion == 2) {
         return vacio;
@@ -425,8 +437,9 @@ char *ingresarFecha() {
   }
   return ret;
 }
-
-void AGREGARCAUSAS(struct Denuncia *denuncia) {
+/*------------------------------------------------------------------------*/
+/*Funcion para Agregar una sola Causa*/
+void AGREGARCAUSA(struct Denuncia *denuncia) {
   struct NodoCausas *nuevoNodo = NULL,*head;
 
 
@@ -616,6 +629,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   char ruc[RUC];
   char *temporal;
   printf("---------------CREAR DEMANDA-------------------\n");
+  printf("Ingrese RUC de la carpeta / denuncia:\n");
   temporal = ingresarRuc();
   if (temporal == NULL) {
     return;
@@ -678,7 +692,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
 
   denuncia->causas = NULL;
   do {
-    AGREGARCAUSAS(denuncia);
+    AGREGARCAUSA(denuncia);
 
     printf("Desea Agregar Otra Causa a su denuncia?\n");
     printf("1 = SI , Cualquier otra tecla = NO\n");
@@ -2443,7 +2457,7 @@ void agregarCausa(struct Fiscal *fiscal) {
     }
   }while (denunciaEncontrada == NULL);
 
-  AGREGARCAUSAS(denunciaEncontrada);
+  AGREGARCAUSA(denunciaEncontrada);
   while (1) {
 
     printf("Desea Agregar otra Causa: \n");
@@ -2452,7 +2466,7 @@ void agregarCausa(struct Fiscal *fiscal) {
     scanf("%d", &opcion);
     limpiarBuffer();
     if (opcion == 0) {
-      AGREGARCAUSAS(denunciaEncontrada);
+      AGREGARCAUSA(denunciaEncontrada);
     }else
       return;
   }
