@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
+#define TRUE 1
+#define FALSE 0
 /*--------------------Defines para Tamaños de Strings---------------------*/
 
 #define TEXTO 1001
@@ -365,6 +368,8 @@ void esperarEnter() {
   limpiarBuffer(); /* Consume el '\n' previo si existe*/
   (void)getchar(); /* Espera a que el usuario presione Enter*/
 }
+
+
 /*------------------------------------------------------------------------*/
 
 /*-------------------FUNCIONES PARA INGRESAR DATOS------------------------*/
@@ -413,16 +418,12 @@ char *ingresarFecha() {
   int opcion;
   do {
 
-    printf("Ingrese Fecha: (Formato: 01/01/2000 )\n");
     fgets(fecha, FECHA, stdin);
     limpiarBuffer();
     limpiarPantalla();
     if (revisarEspacios(fecha) == 1 || fecha[2]!= '/'|| fecha[5] != '/') {
-      printf("Formato Equivocado:\n");
-      printf("1. Intentar nuevamente\n");
-      printf("2. Volver al menu anterior\n");
-      printf("Seleccione una opcion: \n");
-      scanf("%d", &opcion);
+      printError(FORMATO);
+      preguntarUsuario(&opcion);
       limpiarBuffer();
       if (opcion == 2) {
         return vacio;
@@ -438,15 +439,38 @@ char *ingresarFecha() {
   return ret;
 }
 /*------------------------------------------------------------------------*/
-/*Funcion para Agregar una sola Causa*/
-void AGREGARCAUSA(struct Denuncia *denuncia) {
-  struct NodoCausas *nuevoNodo = NULL,*head;
 
-
-  limpiarPantalla();
+struct NodoCausas *crearNodoCausas() {
+  struct NodoCausas *nuevoNodo;
   nuevoNodo = (struct NodoCausas *)malloc(sizeof(struct NodoCausas));
   nuevoNodo->causa = (struct Causa *)malloc(sizeof(struct Causa));
   nuevoNodo->sig = NULL;
+  return nuevoNodo;
+}
+
+int anidarCausa(struct Denuncia *denuncia, struct NodoCausas *nuevoNodo) {
+  struct NodoCausas *head = denuncia->causas;
+  if (denuncia == NULL || nuevoNodo == NULL) {
+    return FALSE;
+  }
+  if (denuncia->causas == NULL) {
+
+    denuncia->causas = nuevoNodo;
+
+  } else {
+
+    head = denuncia->causas;
+    while (head->sig != NULL) {
+      head = head->sig;
+    }
+    head->sig = nuevoNodo;
+  }
+  return TRUE;
+}
+
+/*Funcion para Agregar una sola Causa*/
+void AGREGARCAUSA(struct Denuncia *denuncia) {
+  struct NodoCausas *nuevoNodo = crearNodoCausas();
   do {
     limpiarPantalla();
     printf("Ingrese La Causa:\n");
@@ -462,19 +486,8 @@ void AGREGARCAUSA(struct Denuncia *denuncia) {
       break;
     }
   }while (1);
-
-
-  if (denuncia->causas == NULL) {
-
-    denuncia->causas = nuevoNodo;
-
-  } else {
-
-    head = denuncia->causas;
-    while (head->sig != NULL) {
-      head = head->sig;
-    }
-    head->sig = nuevoNodo;
+  if (!anidarCausa(denuncia,nuevoNodo)) {
+    printf("Error al anidar Causa\n");
   }
 }
 
@@ -620,6 +633,37 @@ void buscarDenunciaEstado(struct Fiscal *fiscal) {
 
 }
 
+int anidarDenuncia(struct Fiscal *fiscal, struct Denuncia *denuncia) {
+  struct NodoDenuncias *nodo,*head = fiscal->denuncias, *actual;
+  nodo = (struct NodoDenuncias *)malloc(sizeof(struct NodoDenuncias));
+  if (nodo == NULL) {
+    /*Si el Malloc Falla Retorna False*/
+    return FALSE;
+  }
+  nodo ->denuncia = denuncia;
+  /*Si el nodo esta vacio*/
+  if (fiscal->denuncias == NULL) {
+    fiscal->denuncias = nodo;
+
+    nodo ->ant = nodo;
+    nodo ->sig = nodo;
+  }else {
+    /*Si Solo existe un nodo*/
+    if (fiscal->denuncias->sig == fiscal->denuncias) {
+      fiscal->denuncias->sig = nodo;
+      fiscal->denuncias -> ant = nodo;
+      nodo->sig = fiscal->denuncias;
+      nodo->ant = fiscal->denuncias;
+    }else {
+      /*Si existen 2 nodos o más*/
+      nodo ->ant = fiscal->denuncias->ant;
+      nodo ->sig = fiscal->denuncias;
+      fiscal->denuncias->ant->sig = nodo;
+      fiscal->denuncias->ant = nodo;
+    }
+  }
+  return TRUE;
+}
 
 void agregarDenuncia(struct Fiscal *fiscal) {
   struct NodoDenuncias *nodo;
@@ -684,6 +728,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   }while(1);
 
   /*Se ingresa la fecha*/
+  printf("Ingrese Fecha: (Formato: 01/01/2000)\n");
   temporal = ingresarFecha();
   if (temporal == NULL) {
     return;
@@ -732,30 +777,12 @@ void agregarDenuncia(struct Fiscal *fiscal) {
 
   denuncia->estadoDenuncia = -1;
 
-  nodo = (struct NodoDenuncias *)malloc(sizeof(struct NodoDenuncias));
-  nodo ->denuncia = denuncia;
-  /*Si el nodo esta vacio*/
-  if (fiscal->denuncias == NULL) {
-    fiscal->denuncias = nodo;
 
-    nodo ->ant = nodo;
-    nodo ->sig = nodo;
+  if (!anidarDenuncia(fiscal,denuncia)) {
+    printf("Error al Anidar Denuncia.\n");
   }else {
-    /*Si Solo existe un nodo*/
-    if (fiscal->denuncias->sig == fiscal->denuncias) {
-      fiscal->denuncias->sig = nodo;
-      fiscal->denuncias -> ant = nodo;
-      nodo->sig = fiscal->denuncias;
-      nodo->ant = fiscal->denuncias;
-    }else {
-      /*Si existen 2 nodos o más*/
-      nodo ->ant = fiscal->denuncias->ant;
-      nodo ->sig = fiscal->denuncias;
-      fiscal->denuncias->ant->sig = nodo;
-      fiscal->denuncias->ant = nodo;
-    }
+    printf("Se ha Agregado Su denuncia\n");
   }
-  printf("Se ha Agregado Su denuncia\n");
 
 }
 
@@ -2420,7 +2447,7 @@ void BuscarCausasDenuncia(struct Fiscal *fiscal) {
   esperarEnter();
 }
 
-void agregarCausa(struct Fiscal *fiscal) {
+void agregarCausas(struct Fiscal *fiscal) {
   int opcion;
   char *rucTemp;
   char rucBusqueda[RUC];
@@ -3398,7 +3425,7 @@ void menuCausas(struct Fiscal *fiscal) {
     ingresarOpcion(&opcion);
 
     switch(opcion) {
-      case 1: agregarCausa(fiscal); break;
+      case 1: agregarCausas(fiscal); break;
       case 2: BuscarCausasPorImputado(fiscal); break;
       case 3: BuscarCausasDenuncia(fiscal); break;
       case 4: ModificarCausa(fiscal); break;
