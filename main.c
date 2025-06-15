@@ -333,15 +333,8 @@ void printError(int tipo) {
     case CAUSA: printf("\nCausa No Encontrada\n");break;
     default: printf("\nError desconocido\n"); break;
   }
-}
-
-/*Funcion para Decirle al usuario que intente de nuevo*/
-void preguntarUsuario(int *opcion) {
   printf("1: Intentar nuevamente\n");
-  printf("2: Volver al menu anterior\n");
-  printf("Seleccione una opcion: \n");
-  scanf("%d",&(*opcion));
-  (void)getchar();
+  printf("Cualquier otro Numero: Volver al menu anterior\n");
 }
 
 /*Funcion para Cuando ocurre un error en el procedimiento*/
@@ -349,7 +342,7 @@ void ingresarOpcion(int *opcionDestino) {
   int resultadoScan;
   do {
     printf("Seleccione una opcion: ");
-    resultadoScan = scanf("%d", opcionDestino);
+    resultadoScan = scanf("%d", &opcionDestino);
 
     if (resultadoScan == 1) {
       limpiarBuffer();
@@ -394,9 +387,9 @@ char *ingresarRuc() {
     fgets(ruc, RUC, stdin);
     ruc[strcspn(ruc, "\n")] = 0;
     if (ruc[9] != '-' || revisarEspacios(ruc) == 1) {
-      preguntarUsuario(&opcion);
-      scanf("%d", &opcion);
-      if (opcion == 2) {
+      printError(FORMATO);
+      ingresarOpcion(&opcion);
+      if (opcion!= 1) {
         return vacio;
       }
     }else {
@@ -423,9 +416,9 @@ char *ingresarFecha() {
     limpiarPantalla();
     if (revisarEspacios(fecha) == 1 || fecha[2]!= '/'|| fecha[5] != '/') {
       printError(FORMATO);
-      preguntarUsuario(&opcion);
+      ingresarOpcion(&opcion);
       limpiarBuffer();
-      if (opcion == 2) {
+      if (opcion != 1) {
         return vacio;
       }
     }else {
@@ -1455,6 +1448,7 @@ int agregarSentencia(struct CarpetaInvestigativa *carpeta) {
 
 }
 
+/*Pendiente*/
 int agregarDiligenciaJuez(struct CarpetaInvestigativa *carpeta) {
   struct Diligencia *diligencia;
   struct NodoDiligencias *rec,*nodo;
@@ -1502,7 +1496,7 @@ int agregarDiligenciaJuez(struct CarpetaInvestigativa *carpeta) {
   return 0;
 }
 
-int agregarMedidaCautelar(struct CarpetaInvestigativa *carpeta) {
+void agregarMedidaCautelar(struct CarpetaInvestigativa *carpeta,int *correctamente) {
 
   struct Imputado *imputado;
   char rut[RUT];
@@ -1514,30 +1508,53 @@ int agregarMedidaCautelar(struct CarpetaInvestigativa *carpeta) {
     rut[strcspn(rut, "\n")] = 0;
     imputado = buscarImputado(carpeta, rut);
     if (imputado == NULL) {
-      printf("No se encontro Al Imputado\n\n");
-      printf("0 = Volver, 1 = Volver a Intentar");
-      scanf("%d", &opcion);
-      limpiarBuffer();
+      printError(IMPUTADO);
+      ingresarOpcion(&opcion);
       if (opcion == 0) {
-        return 0;
+        (*correctamente) = 0;
+        return;
       }
-    }else {
-      break;
     }
-  }while (1);
+  }while (imputado == NULL);
 
   printf("Ingrese Las medidas Cautelares:\n");
   limpiarBuffer();
   fgets(imputado->medidasCautelares, TEXTO, stdin);
-
-  return 1;
+  if (strchr(imputado->medidasCautelares, '\n') == NULL) {
+    printf("Advertencia:El texto es muy largo, este pudo haber sido cortado.\n");
+    limpiarBuffer();
+  }
+  (*correctamente) = 1;
 }
 
-int sobreseimiento(struct CarpetaInvestigativa *carpeta) {
+int eliminarImputado(struct CarpetaInvestigativa *carpeta, struct Imputado *imputado) {
+  struct NodoImputados *rec;
+  /*Ya se verifica que el carpeta->imputado existe en la funcion Buscar Imputado*/
+  rec = carpeta->imputado;
+  /*Si el Nodo a Eliminar es el Head o el primer Nodo*/
+  if (carpeta -> imputado-> imputado == imputado) {
+    carpeta -> imputado = carpeta -> imputado -> sig;
+    return 1;
+  }
+  else {
+    /*Recorremos hasta encontrar al imputado*/
+    while (rec-> sig -> imputado != imputado || rec->sig == NULL) {
+      rec = rec-> sig;
+    }
+    if (rec->sig == NULL) {
+      return 0;
+    }
+    rec -> sig = rec-> sig-> sig;
+    return 1;
+
+  }
+  return 0;
+}
+
+void sobreseimiento(struct CarpetaInvestigativa *carpeta, int *correctamente) {
   char rut[RUT];
   int opcion;
   struct Imputado *imputado;
-  struct NodoImputados *rec;
 
   do {
     printf("Ingrese El Rut del Imputado:\n");
@@ -1545,52 +1562,35 @@ int sobreseimiento(struct CarpetaInvestigativa *carpeta) {
     rut[strcspn(rut, "\n")] = 0;
     imputado = buscarImputado(carpeta, rut);
     if (imputado == NULL) {
-      printf("No se encontro Al Imputado\n\n");
-      printf("0 = Volver al Menu Principal, 1 = Volver a Intentar");
-      scanf("%d", &opcion);
-      limpiarBuffer();
-      if (opcion == 0) {
-        return 0;
+      printError(IMPUTADO);
+      ingresarOpcion(&opcion);
+      if (opcion != 1) {
+        (*correctamente) = 0;
       }
     }else {
       break;
     }
   }while (1);
-  /*Ya se verifica que el carpeta->imputado existe en la funcion Buscar Imputado*/
-  rec = carpeta->imputado;
-
-  if (carpeta -> imputado-> imputado == imputado) {
-    carpeta -> imputado = carpeta -> imputado -> sig;
+  if (!eliminarImputado(carpeta, imputado)) {
+    printf("Error al eliminar Imputado\n\n");
+    (*correctamente) = 0;
+  }else {
+    printf("Se Ha desenlazado Correctamente al Imputado\n\n");
+    (*correctamente) = 1;
   }
-  else {
-    while (rec-> sig -> imputado != imputado) {
-      rec = rec-> sig;
-    }
-    rec -> sig = rec-> sig-> sig;
-  }
-
-  /*if (rec->imputado == imputado) {
-    carpeta->imputado = carpeta->imputado->sig;
-  }*/
-
-  printf("Se Ha desenlazado Correctamente al Imputado\n\n");
-  return 1;
-
-
-
 
 }
 
 int accionResolucion(struct CarpetaInvestigativa *carpeta,int tipoCausa) {
-  int termino;
+  int correctamente;
   switch (tipoCausa) {
-    case 0: termino = agregarSentencia(carpeta); break;
-    case 1: termino = agregarDiligenciaJuez(carpeta); break;
-    case 2: termino = agregarMedidaCautelar(carpeta); break;
-    case 3: termino = sobreseimiento(carpeta); break;
+    case 0: agregarSentencia(carpeta); break;
+    case 1: agregarDiligenciaJuez(carpeta); break;
+    case 2: agregarMedidaCautelar(carpeta,&correctamente); break;
+    case 3: sobreseimiento(carpeta,&correctamente); break;
     default: return 0;
   }
-  return termino;
+  return correctamente;
 
 }
 
@@ -2471,27 +2471,22 @@ void agregarCausas(struct Fiscal *fiscal) {
 
 
     if (denunciaEncontrada == NULL) {
-      printf("\nNo se encontró ninguna denuncia con el RUC %s\n", rucBusqueda);
-      printf("1. Intentar nuevamente\n");
-      printf("2. Volver al menú anterior\n");
-      printf("Seleccione una opción: \n");
-
-      scanf("%d", &opcion);
-
-      if (opcion == 2) {
+      printError(DENUNCIA);
+      ingresarOpcion(&opcion);
+      if (opcion != 1) {
         return; /* Salir de la función si el usuario elige volver*/
       }
     }
   }while (denunciaEncontrada == NULL);
 
   AGREGARCAUSA(denunciaEncontrada);
+
   while (1) {
 
     printf("Desea Agregar otra Causa: \n");
     printf("0: Agregar otra Causa \n");
     printf("Cualquier otra numero: Volver Al Menu Principal  \n");
-    scanf("%d", &opcion);
-    limpiarBuffer();
+    ingresarOpcion(&opcion);
     if (opcion == 0) {
       AGREGARCAUSA(denunciaEncontrada);
     }else
