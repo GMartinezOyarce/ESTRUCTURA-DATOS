@@ -342,7 +342,7 @@ void ingresarOpcion(int *opcionDestino) {
   int resultadoScan;
   do {
     printf("Seleccione una opcion: ");
-    resultadoScan = scanf("%d", &opcionDestino);
+    resultadoScan = scanf("%d", opcionDestino);
 
     if (resultadoScan == 1) {
       limpiarBuffer();
