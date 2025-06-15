@@ -2284,18 +2284,22 @@ void listarDiligenciasPendientes(struct Fiscal *fiscal) {
 
 
 void ListarCausas(struct Fiscal *fiscal) {
+  /*ListarCausas es un procedimiento. Lo único que hace es imprimir las Causas encontradas en denuncias.*/
   int i;
   struct NodoCausas *rec=NULL;
   struct NodoDenuncias *denuncias=NULL;
   struct NodoDenuncias *headdenuncias=NULL;
   limpiarPantalla();
+  /*limpiarPantalla es un procedimiento que salta 20 líneas, para limpiar la pantalla.*/
   printf("\n--- Causas de Denuncias ---\n\n\n");
   denuncias=fiscal->denuncias;
   headdenuncias=denuncias;
 
   if (denuncias != NULL) {
     do {
+      /*Si el head del nodo denuncias no está vacío, se recorre la lista circular hasta encontrarse a si mismo, sin contar la primera vez*/
       if (denuncias->denuncia!=NULL) {
+        /*Si los datos de la denuncia en la que estamos no están vacíos, mostramos su RUC.*/
         rec=denuncias->denuncia->causas;
         i=1;
         if (denuncias->denuncia->ruc==NULL) {
@@ -2305,6 +2309,7 @@ void ListarCausas(struct Fiscal *fiscal) {
           printf("RUC: %s\n",denuncias->denuncia->ruc);
         }
         while (rec!=NULL) {
+          /*Y mostramos los datos de cada una de sus causas.*/
           if (rec->causa!=NULL && rec->causa->tipoCausa==0) {
             printf("CAUSA %d: Crimen\n",i);
           }
@@ -2335,6 +2340,7 @@ void ListarCausas(struct Fiscal *fiscal) {
 }
 
 void CausaBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
+  /*Procedimiento que Busca a un Imputado dado un RUT e imprime sus Causas*/
   struct NodoImputados *actual;
   struct NodoCausas *rec;
   int i=1;
@@ -2380,15 +2386,20 @@ void CausaBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
 }
 
 void BuscarCausasPorImputado(struct Fiscal *fiscal) {
+  /*ES POSIBLE QUE HAYA QUE PEDIR EL RUT EN UN PROCEDIMIENTO APARTE.*/
+  /*BuscarCausasPorImputado es un procedimiento que le pide al usuario un RUT y lo usa para imprimir las Causas del Imputado con ese RUT usando el procedimiento CausaBuscarRUT*/
   char rut[RUT];
 
   if(fiscal->carpetas == NULL) {
     printf("No hay carpetas registradas.\n");
     return;
   }
+  /*limpiarPantalla es un procedimiento que salta 20 líneas, para limpiar la pantalla.*/
   limpiarPantalla();
+
   printf("=== BUSCAR CAUSA POR IMPUTADO ===\n");
   printf("Ingrese el RUT del Imputado: ");
+  /*Se pide el RUT y luego se llama al procedimiento CausaBuscarRUT, que busca al imputado con ese RUT e imprime sus causas.*/
   limpiarBuffer();
   fgets(rut, RUT, stdin);
   rut[strcspn(rut, "\n")]= 0;  /*saltar linea de posible espacio*/
@@ -2397,10 +2408,13 @@ void BuscarCausasPorImputado(struct Fiscal *fiscal) {
 }
 
 void BuscarCausasDenuncia(struct Fiscal *fiscal) {
+  /*ES POSIBLE QUE HAYA QUE PEDIR EL RUC EN UN PROCEDIMIENTO APARTE.*/
+  /*BuscarCausasPorImputado es un procedimiento que le pide al usuario un RUC y lo usa para imprimir las Causas de la denuncia con ese RUC*/
   int i;
   char ruc[RUC];
   struct NodoCausas *rec=NULL;
   struct NodoDenuncias *denuncias=NULL, *headDenuncias=NULL;
+  /*limpiarPantalla es un procedimiento que salta 20 líneas, para limpiar la pantalla.*/
   limpiarPantalla();
   printf("=== BUSCAR CAUSA POR DENUNCIA ===\n");
   printf("Ingrese el RUC de la Denuncia: ");
@@ -2453,6 +2467,7 @@ void agregarCausas(struct Fiscal *fiscal) {
   char rucBusqueda[RUC];
   struct Denuncia *denunciaEncontrada;
 
+  /*limpiarPantalla es un procedimiento que salta 20 líneas, para limpiar la pantalla.*/
   limpiarPantalla();
 
   if (fiscal->denuncias== NULL) {
