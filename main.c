@@ -1903,59 +1903,61 @@ void listarCarpetas(struct Fiscal *fiscal) {
 
 /*--------Función recorrerRut--------*/
 
-void recorrerBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
+struct Imputado *buscarImputadoPorRUT(struct arbolCarpetas *nodo, char *rut) {
   struct NodoImputados *actual;
-  struct NodoCausas *causaActual;
-  int numCausa = 1;
-  if (nodoArbol == NULL || nodoArbol->carpetaInvestigativa == NULL) {
-      return;
-  }
-  recorrerBuscarRUT(nodoArbol->izq, rutBuscado);
+  struct Imputado *encontrado;
 
-  actual = nodoArbol->carpetaInvestigativa->imputado;
-  while (actual!=NULL) {
-    if (strcmp(actual->imputado->rut, rutBuscado) == 0) {
-      printf("\n====== Imputado Encontrado ======\n");
-      printf("RUT: %s\n", actual->imputado->rut);
-      causaActual = actual->imputado->causas;
-      while (causaActual != NULL) {
-        printf("====== CAUSA: %d ======\n", numCausa++);
-        if (causaActual->causa->tipoCausa == 0) {
-          printf("Tipo: Crimen\n");
-        }
-        else if (causaActual->causa->tipoCausa == 1) {
-          printf("Tipo: Delito Simple\n");
-        }
-        else if (causaActual->causa->tipoCausa == 2) {
-          printf("Tipo:Falta\n");
-        }
-        printf("Descripcion: %s\n", causaActual->causa->descripcionCausa);
-        causaActual = causaActual->sig;
-      }
-      printf("Medidas cautelares: %s\n", actual->imputado->medidasCautelares);
-      printf("RUC de la carpeta: %s\n\n", nodoArbol->carpetaInvestigativa->ruc);
+  if (nodo == NULL)
+    return NULL;
+
+  actual = nodo->carpetaInvestigativa->imputado;
+  while (actual != NULL) {
+    if (strcmp(actual->imputado->rut, rut) == 0) {
+      return actual->imputado;
     }
     actual = actual->sig;
   }
-  recorrerBuscarRUT(nodoArbol->der, rutBuscado);
+
+  encontrado = buscarImputadoPorRUT(nodo->izq, rut);
+  if (encontrado != NULL)
+    return encontrado;
+
+  return buscarImputadoPorRUT(nodo->der, rut);
 }
 
-void buscarImputadoPorRut(struct Fiscal *fiscal){
-  char rut[RUT];
 
-  if(fiscal->carpetas == NULL) {
+
+void buscarImputadoPorRut(struct Fiscal *fiscal) {
+  char rut[RUT];
+  struct Imputado *imputado;
+
+  if (fiscal->carpetas == NULL) {
     printf("No hay carpetas registradas.\n");
     return;
   }
+
   limpiarPantalla();
   printf("=== BUSCAR IMPUTADO POR RUT ===\n");
   printf("Ingrese el RUT del imputado: ");
   limpiarBuffer();
   fgets(rut, RUT, stdin);
-  rut[strcspn(rut, "\n")]= 0;
-  recorrerBuscarRUT(fiscal->carpetas, rut);
+  rut[strcspn(rut, "\n")] = 0;
 
+  imputado = buscarImputadoPorRUT(fiscal->carpetas, rut);
+
+  if (imputado == NULL) {
+    printf("No se encontro un imputado con ese RUT.\n");
+  } else {
+    printf("\n====== IMPUTADO ENCONTRADO ======\n");
+    printf("RUT: %s\n", imputado->rut);
+    printf("Medidas cautelares: %s\n", imputado->medidasCautelares);
+    printf("Tipo de sentencia: %d\n", imputado->tipoSentencia);
+    printf("Descripcion de la sentencia: %s\n", imputado->descripcionSentencia);
+  }
+
+  esperarEnter();
 }
+
 
 
 /*---------Funcion para modificar al imputado-------------*/
