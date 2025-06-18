@@ -2342,18 +2342,21 @@ void ListarCausas(struct Fiscal *fiscal) {
 }
 
 void CausaBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
-  /*Procedimiento que Busca a un Imputado dado un RUT e imprime sus Causas*/
+  /*Procedimiento Recursivo que Busca a un Imputado dado un RUT e imprime sus Causas*/
   struct NodoImputados *actual;
   struct NodoCausas *rec;
   int i=1;
   if (nodoArbol == NULL || nodoArbol->carpetaInvestigativa == NULL) {
     return;
   }
+  /*Se va recorriendo el Árbol de carpetas de modo IN-ORDER*/
   CausaBuscarRUT(nodoArbol->izq, rutBuscado);
 
   actual = nodoArbol->carpetaInvestigativa->imputado;
   while (actual!=NULL) {
+    /*Se recorren todos los imputados de cada nodo del árbol hasta encontrar el que buscamos.*/
     if (strcmp(actual->imputado->rut, rutBuscado) == 0) {
+      /*Al encontrarlo se muestra información básica acerca del imputado y todas sus causas*/
       printf("\n--- Imputado Encontrado ---\n");
       printf("RUT: %s\n", actual->imputado->rut);
       rec=actual->imputado->causas;
@@ -2388,7 +2391,6 @@ void CausaBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
 }
 
 void BuscarCausasPorImputado(struct Fiscal *fiscal) {
-  /*ES POSIBLE QUE HAYA QUE PEDIR EL RUT EN UN PROCEDIMIENTO APARTE.*/
   /*BuscarCausasPorImputado es un procedimiento que le pide al usuario un RUT y lo usa para imprimir las Causas del Imputado con ese RUT usando el procedimiento CausaBuscarRUT*/
   char rut[RUT];
 
@@ -2410,7 +2412,6 @@ void BuscarCausasPorImputado(struct Fiscal *fiscal) {
 }
 
 void BuscarCausasDenuncia(struct Fiscal *fiscal) {
-  /*ES POSIBLE QUE HAYA QUE PEDIR EL RUC EN UN PROCEDIMIENTO APARTE.*/
   /*BuscarCausasPorImputado es un procedimiento que le pide al usuario un RUC y lo usa para imprimir las Causas de la denuncia con ese RUC*/
   int i;
   char ruc[RUC];
@@ -2420,6 +2421,7 @@ void BuscarCausasDenuncia(struct Fiscal *fiscal) {
   limpiarPantalla();
   printf("=== BUSCAR CAUSA POR DENUNCIA ===\n");
   printf("Ingrese el RUC de la Denuncia: ");
+  /*Se pide el RUC*/
   limpiarBuffer();
   fgets(ruc, RUC, stdin);
   ruc[strcspn(ruc, "\n")]= 0;  /*saltar linea de posible espacio*/
@@ -2430,6 +2432,7 @@ void BuscarCausasDenuncia(struct Fiscal *fiscal) {
 
   do {
     if (denuncias->denuncia!=NULL && denuncias->denuncia->ruc!=NULL && strcmp(denuncias->denuncia->ruc,ruc)==0) {
+      /*Se recorren las denuncias. Una vez encontrada la buscada, se imprimen sus Causas.*/
       rec=denuncias->denuncia->causas;
       i=1;
       printf("RUC: %s\n",denuncias->denuncia->ruc);
@@ -2464,6 +2467,7 @@ void BuscarCausasDenuncia(struct Fiscal *fiscal) {
 }
 
 void agregarCausas(struct Fiscal *fiscal) {
+  /*agregarCausas es un procedimiento que le pide al usuario un RUC y le deja añadir Causas en la denuncia que tenga ese RUC*/
   int opcion;
   char *rucTemp;
   char rucBusqueda[RUC];
@@ -2511,7 +2515,22 @@ void agregarCausas(struct Fiscal *fiscal) {
   }
 }
 
+void MODIFICARCAUSA(struct NodoCausas *rec) {
+  /*MODIFICARCAUSA es un sub-procedimiento usado en ModificarCausa*/
+  printf("\nIngrese el NUEVO Tipo de Causa:\n");
+  printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
+  printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
+  printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
+  printf("Ingrese un numero: ");
+  scanf("%d", &rec->causa->tipoCausa);
+  limpiarBuffer();
+
+  printf("Ingrese la descripcion de su Denuncia\n");
+  fgets(rec->causa->descripcionCausa, TEXTO, stdin);
+}
+
 void ModificarCausa(struct Fiscal *fiscal) {
+  /*ModificarCausa es un procedimiento que le pide al usuario un RUC y le muestra al usuario todas las Causas de la denuncia con ese RUC, para que pueda modificar las que guste.*/
   int opcion;
   char *rucTemp;
   char rucBusqueda[RUC];
@@ -2584,16 +2603,8 @@ void ModificarCausa(struct Fiscal *fiscal) {
     limpiarBuffer();
 
     if (modificar==1) {
-      printf("\nIngrese el NUEVO Tipo de Causa:\n");
-      printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
-      printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
-      printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
-      printf("Ingrese un numero: ");
-      scanf("%d", &rec->causa->tipoCausa);
-      limpiarBuffer();
 
-      printf("Ingrese la descripcion de su Denuncia\n");
-      fgets(rec->causa->descripcionCausa, TEXTO, stdin);
+      MODIFICARCAUSA(rec);
 
       printf("Desea continuar modificando causas con este RUC?\n\n");
       printf("Formato:\n");
@@ -2610,6 +2621,7 @@ void ModificarCausa(struct Fiscal *fiscal) {
 
 
 void listarSentenciasRecursivo(struct arbolCarpetas *raiz) {
+  /*listarSentenciasRecursivo es un procedimiento recursivo que lista todas las Sentencias*/
   struct CarpetaInvestigativa *carpeta;
   struct NodoImputados *recImputado = NULL;
   /*CASOS BASE*/
@@ -2664,6 +2676,7 @@ void listarSentenciasRecursivo(struct arbolCarpetas *raiz) {
 
 
 void listarSentencias(struct Fiscal *fiscal) {
+  /*listarSentencias es un procedimiento que usa el procedimiento recursivo listarSentenciasRecursivo para listar todas las Sentencias*/
   limpiarPantalla();
   printf("=============== LISTADO DE SENTENCIAS =============");
   if (fiscal-> carpetas == NULL) {
@@ -2677,6 +2690,7 @@ void listarSentencias(struct Fiscal *fiscal) {
 }
 
 void listarSentenciasPorImputadoRecursivo(struct arbolCarpetas *raiz, char *rut) {
+  /*listarSentenciasPorImputadoRecursivo es un procedimiento recursivo que lista la Sentencia de un Imputado según un RUT dado*/
   struct CarpetaInvestigativa *carpeta;
   struct NodoImputados *recImputado = NULL;
   /*CASOS BASE*/
@@ -2726,6 +2740,7 @@ void listarSentenciasPorImputadoRecursivo(struct arbolCarpetas *raiz, char *rut)
 
 
 void listarSentenciasPorImputado(struct Fiscal *fiscal) {
+  /*listarSentenciasPorImputado es un procedimiento que pide un RUT y usa el procedimiento recursivo listarSentenciasPorImputadoRecursivo para listar la Sentencia del Imputado con ese RUT*/
   char rut[RUT];
   limpiarPantalla();
 
@@ -2747,6 +2762,7 @@ void listarSentenciasPorImputado(struct Fiscal *fiscal) {
 }
 
 void listarSentenciasPorCausaRecursivo(struct arbolCarpetas *raiz,int tipoCausa) {
+  /*listarSentenciasPorCausaRecursivo es un procedimiento recursivo que lista las Sentencias de los Imputados que tengan alguna Causa de tipo especificado*/
   struct CarpetaInvestigativa *carpeta;
   struct NodoImputados *recImputado = NULL;
   struct NodoCausas *rec = NULL;
@@ -2812,6 +2828,7 @@ void listarSentenciasPorCausaRecursivo(struct arbolCarpetas *raiz,int tipoCausa)
 
 
 void listarSentenciasPorCausa(struct Fiscal *fiscal) {
+  /*listarSentenciasPorCausa es un procedimiento que pide un Tipo de Causa y usa el procedimiento recursivo listarSentenciasPorCausaRecursivo para listar las Sentencias de los Imputados con Causas de ese Tipo*/
   int tipoCausa;
   limpiarPantalla();
 
@@ -2837,6 +2854,7 @@ void listarSentenciasPorCausa(struct Fiscal *fiscal) {
 
 
 void listarResolucionesRecursivo(struct arbolCarpetas *raiz) {
+  /*listarResolucionesRecursivo es un procedimiento recursivo que lista todas las Resoluciones*/
   struct CarpetaInvestigativa *carpeta;
   struct NodoResoluciones *resoluciones=NULL;
 
@@ -2905,6 +2923,7 @@ void listarResolucionesRecursivo(struct arbolCarpetas *raiz) {
 }
 
 void ListarResoluciones(struct Fiscal *fiscal) {
+  /*listarResoluciones es un procedimiento que usa el procedimiento recursivo listarResolucionesRecursivo para listar todas las Resoluciones*/
   limpiarPantalla();
   printf("=============== LISTADO DE RESOLUCIONES =============\n\n");
 
@@ -2919,6 +2938,7 @@ void ListarResoluciones(struct Fiscal *fiscal) {
 }
 
 void listarResolucionesPorCausaRecursivo(struct arbolCarpetas *raiz, int tipoCausa) {
+  /*listarResolucionesPorCausaRecursivo es un procedimiento recursivo que lista las Resoluciones que tengan alguna de las Causas, de un tipo especificado, en la denuncia de su carpeta*/
   struct CarpetaInvestigativa *carpeta;
   struct NodoResoluciones *resoluciones=NULL;
   struct NodoCausas *rec=NULL;
@@ -3003,6 +3023,8 @@ void listarResolucionesPorCausaRecursivo(struct arbolCarpetas *raiz, int tipoCau
 }
 
 void ListarResolucionesPorCausa(struct Fiscal *fiscal) {
+  /*listarResolucionesPorCausa es un procedimiento que pide un Tipo de Causa y usa el procedimiento recursivo listarResolucionesPorCausaRecursivo para
+   listar las Resoluciones de las Carpetas que contengan una Denuncia con Causas de ese Tipo*/
   int tipoCausa;
   limpiarPantalla();
   printf("Ingrese el Tipo de Causa por el cual desea Filtrar las Resoluciones:\n\n");
@@ -3026,6 +3048,7 @@ void ListarResolucionesPorCausa(struct Fiscal *fiscal) {
 }
 
 void listarResolucionesPorImputadoRecursivo(struct arbolCarpetas *raiz, char *rut) {
+  /*listarResolucionesPorImputadoRecursivo es un procedimiento recursivo que lista las Resoluciones de un Imputado según un RUT dado*/
   struct CarpetaInvestigativa *carpeta;
   struct NodoResoluciones *resoluciones=NULL;
   struct NodoImputados *rec=NULL;
@@ -3110,6 +3133,7 @@ void listarResolucionesPorImputadoRecursivo(struct arbolCarpetas *raiz, char *ru
 }
 
 void ListarResolucionesPorImputado(struct Fiscal *fiscal) {
+  /*listarResolucionesPorImputado es un procedimiento que pide un RUT y usa el procedimiento recursivo listarResolucionesPorImputadoRecursivo para listar las Resoluciones del Imputado con ese RUT*/
   char rut[RUT];
   limpiarPantalla();
   printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Resoluciones: ");
@@ -3129,6 +3153,7 @@ void ListarResolucionesPorImputado(struct Fiscal *fiscal) {
 }
 
 void listarResolucionesPorTipoRecursivo(struct arbolCarpetas *raiz, int tipo) {
+  /*listarResolucionesPorTipoRecursivo es un procedimiento recursivo que lista las Resoluciones que tengan algún Tipo específico*/
   struct CarpetaInvestigativa *carpeta;
   struct NodoResoluciones *resoluciones=NULL;
 
@@ -3197,6 +3222,8 @@ void listarResolucionesPorTipoRecursivo(struct arbolCarpetas *raiz, int tipo) {
 }
 
 void ListarResolucionesPorTipo(struct Fiscal *fiscal) {
+  /*listarResolucionesPorTipo es un procedimiento que pide un Tipo de Resolución y usa el procedimiento recursivo listarResolucionesPorTipoRecursivo para listar
+    las Resoluciones de ese Tipo*/
   int tipo;
   limpiarPantalla();
   printf("Ingrese el Tipo por el cual desea Filtrar las Resoluciones:\n\n");
@@ -3223,6 +3250,7 @@ void ListarResolucionesPorTipo(struct Fiscal *fiscal) {
 
 
 void AgregarResolucion(struct Fiscal *fiscal) {
+  /*AgregarResolucion es un procedimiento que le pide al usuario un RUC y le deja añadir una Resolución en la denuncia que tenga ese RUC*/
   char rucBusqueda[RUC];
   int opcion;
   struct CarpetaInvestigativa *carpetaEncontrada=NULL;
