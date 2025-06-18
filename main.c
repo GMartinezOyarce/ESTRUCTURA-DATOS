@@ -2176,16 +2176,12 @@ void mostrarDiligencias(struct Fiscal *fiscal) { /*no cambiar xq es procedimient
 
 
 /*-----------mostrar y ordenar diligencias por prioridad---------*/
-void ordenarDiligenciasPorPrioridad(struct NodoDiligencias** head) {
+
+struct NodoDiligencias *ordenarDiligenciasPorPrioridadInterior(struct NodoDiligencias* head) {
   struct NodoDiligencias *ordenada = NULL;
-  struct NodoDiligencias *actual;
+  struct NodoDiligencias *actual = head;
   struct NodoDiligencias *siguiente;
   struct NodoDiligencias *temp;
-
-  if (*head == NULL)
-    return;
-
-  actual = *head;
 
   while (actual != NULL) {
     siguiente = actual->sig;
@@ -2206,13 +2202,14 @@ void ordenarDiligenciasPorPrioridad(struct NodoDiligencias** head) {
     actual = siguiente;
   }
 
-  *head = ordenada;
+  return ordenada;
 }
 
 
 void mostrarDiligenciasOrdenadas(struct Fiscal *fiscal) {
   struct CarpetaInvestigativa *carpeta;
   struct NodoDiligencias *head;
+  struct NodoDiligencias *ordenada;
   char rucCarpeta[RUC];
   int numDiligencia = 1;
 
@@ -2232,16 +2229,17 @@ void mostrarDiligenciasOrdenadas(struct Fiscal *fiscal) {
     return;
   }
 
-  ordenarDiligenciasPorPrioridad(&(carpeta->diligencias));
+  ordenada = ordenarDiligenciasPorPrioridadInterior(carpeta->diligencias);
 
   printf("=== Lista de Diligencias Ordenadas por Prioridad ===\n");
-  head = carpeta->diligencias;
+  head = ordenada;
 
   while (head != NULL) {
-    printf("====== DILIGENCIA %d ======\n", numDiligencia++);
+    printf("====== DILIGENCIA %d ======\n", numDiligencia);
     printf("- Urgencia: %d\n", head->diligencia->urgencia);
     printf("  Descripcion: %s\n\n", head->diligencia->descripcionDiligencia);
     head = head->sig;
+    numDiligencia++;
   }
 }
 
