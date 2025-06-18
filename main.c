@@ -1962,14 +1962,33 @@ void buscarImputadoPorRut(struct Fiscal *fiscal) {
 
 /*---------Funcion para modificar al imputado-------------*/
 
+int modificarImputadoInterno(struct Imputado *imputado, int opcion, int nuevoTipo, char *nuevaDescripcion) {
+  int huboCambios;
+
+  huboCambios = 0;
+
+  if (opcion == 1) {
+    imputado->tipoSentencia = nuevoTipo;
+    huboCambios = 1;
+  } else if (opcion == 2) {
+    strcpy(imputado->descripcionSentencia, nuevaDescripcion);
+    huboCambios = 1;
+  }
+
+  return huboCambios;
+}
+
 void modificarImputado(struct Fiscal *fiscal) {
   char rutBusqueda[RUT];
-  struct arbolCarpetas *nodoArbol = fiscal->carpetas;
-  struct NodoImputados *actual = NULL;
-  int encontrado = 0;
+  struct arbolCarpetas *nodoArbol;
+  struct NodoImputados *actual;
+  int encontrado;
   int opcion;
+  int nuevoTipo;
+  char nuevaDescripcion[TEXTO];
+  int resultado;
 
-  if (nodoArbol == NULL) {
+  if (fiscal->carpetas == NULL) {
     printf("No hay carpetas registradas.\n");
     return;
   }
@@ -1980,6 +1999,9 @@ void modificarImputado(struct Fiscal *fiscal) {
   limpiarBuffer();
   fgets(rutBusqueda, RUT, stdin);
   rutBusqueda[strcspn(rutBusqueda, "\n")] = 0;
+
+  nodoArbol = fiscal->carpetas;
+  encontrado = 0;
 
   while (nodoArbol != NULL) {
     actual = nodoArbol->carpetaInvestigativa->imputado;
@@ -2001,19 +2023,28 @@ void modificarImputado(struct Fiscal *fiscal) {
         limpiarBuffer();
 
         switch (opcion) {
-
           case 1:
             printf("Ingrese nuevo tipo de sentencia (0: Condenatoria, 1: Absolutoria): ");
-            scanf("%d", &actual->imputado->tipoSentencia);
+            scanf("%d", &nuevoTipo);
             limpiarBuffer();
-            printf("Tipo de sentencia actualizado correctamente.\n");
+            resultado = modificarImputadoInterno(actual->imputado, opcion, nuevoTipo, nuevaDescripcion);
+            if (resultado == 1) {
+              printf("Tipo de sentencia actualizado correctamente.\n");
+            } else {
+              printf("No se realizaron cambios.\n");
+            }
             break;
 
           case 2:
             printf("Ingrese nueva descripcion de sentencia: ");
-            fgets(actual->imputado->descripcionSentencia, TEXTO, stdin);
-            actual->imputado->descripcionSentencia[strcspn(actual->imputado->descripcionSentencia, "\n")] = 0;
-            printf("Descripcion de sentencia actualizada correctamente.\n");
+            fgets(nuevaDescripcion, TEXTO, stdin);
+            nuevaDescripcion[strcspn(nuevaDescripcion, "\n")] = 0;
+            resultado = modificarImputadoInterno(actual->imputado, opcion, nuevoTipo, nuevaDescripcion);
+            if (resultado == 1) {
+              printf("Descripcion de sentencia actualizada correctamente.\n");
+            } else {
+              printf("No se realizaron cambios.\n");
+            }
             break;
 
           case 3:
@@ -2042,6 +2073,7 @@ void modificarImputado(struct Fiscal *fiscal) {
     esperarEnter();
   }
 }
+
 
 /*-----------funcion para mostrar todos los imputados---------------*/
 
@@ -2101,7 +2133,7 @@ void mostrarTodosImputados(struct Fiscal *fiscal){
 
 /*------funcion mostrar diligencias-------*/
 
-void mostrarDiligencias(struct Fiscal *fiscal) {
+void mostrarDiligencias(struct Fiscal *fiscal) { /*no cambiar xq es procedimiento*/
   char rucCarpeta[RUC];
   struct CarpetaInvestigativa *carpeta;
   struct NodoDiligencias *head;
@@ -2144,16 +2176,12 @@ void mostrarDiligencias(struct Fiscal *fiscal) {
 
 
 /*-----------mostrar y ordenar diligencias por prioridad---------*/
-void ordenarDiligenciasPorPrioridad(struct NodoDiligencias** head) {
+
+struct NodoDiligencias *ordenarDiligenciasPorPrioridadInterior(struct NodoDiligencias* head) {
   struct NodoDiligencias *ordenada = NULL;
-  struct NodoDiligencias *actual;
+  struct NodoDiligencias *actual = head;
   struct NodoDiligencias *siguiente;
   struct NodoDiligencias *temp;
-
-  if (*head == NULL)
-    return;
-
-  actual = *head;
 
   while (actual != NULL) {
     siguiente = actual->sig;
@@ -2174,13 +2202,14 @@ void ordenarDiligenciasPorPrioridad(struct NodoDiligencias** head) {
     actual = siguiente;
   }
 
-  *head = ordenada;
+  return ordenada;
 }
 
 
 void mostrarDiligenciasOrdenadas(struct Fiscal *fiscal) {
   struct CarpetaInvestigativa *carpeta;
   struct NodoDiligencias *head;
+  struct NodoDiligencias *ordenada;
   char rucCarpeta[RUC];
   int numDiligencia = 1;
 
@@ -2200,16 +2229,17 @@ void mostrarDiligenciasOrdenadas(struct Fiscal *fiscal) {
     return;
   }
 
-  ordenarDiligenciasPorPrioridad(&(carpeta->diligencias));
+  ordenada = ordenarDiligenciasPorPrioridadInterior(carpeta->diligencias);
 
   printf("=== Lista de Diligencias Ordenadas por Prioridad ===\n");
-  head = carpeta->diligencias;
+  head = ordenada;
 
   while (head != NULL) {
-    printf("====== DILIGENCIA %d ======\n", numDiligencia++);
+    printf("====== DILIGENCIA %d ======\n", numDiligencia);
     printf("- Urgencia: %d\n", head->diligencia->urgencia);
     printf("  Descripcion: %s\n\n", head->diligencia->descripcionDiligencia);
     head = head->sig;
+    numDiligencia++;
   }
 }
 
