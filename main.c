@@ -680,7 +680,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
       printf("Este RUC ya existe dentro del sistema\n");
       printf("1. Intentar nuevamente\n");
       printf("2. Volver al menu anterior\n");
-      scanf("%d", &opcion);
+      ingresarOpcion(&opcion);
       limpiarBuffer();
       if (opcion == 2) {
         return;  /*Salir de la función si el usuario elige volver*/
@@ -707,10 +707,9 @@ void agregarDenuncia(struct Fiscal *fiscal) {
 
 
   limpiarPantalla();
-  limpiarBuffer();
+
   do {
     printf("Ingrese Su Rut:\n");
-    limpiarBuffer();
     fgets(denuncia ->rutDenunciante, 14, stdin);
     denuncia-> rutDenunciante[strcspn(denuncia -> rutDenunciante, "\n")] = 0;
     if (denuncia->rutDenunciante[0]  == '\0') {
@@ -797,6 +796,8 @@ void listarDenuncias(struct Fiscal *fiscal) {
   }
 }
 
+
+
 void modificarEstadoDenuncia(struct Fiscal *fiscal) {
 
   struct Denuncia *denuncia;
@@ -805,18 +806,18 @@ void modificarEstadoDenuncia(struct Fiscal *fiscal) {
   int opcion;
   if (fiscal->denuncias == NULL) {
     printf("No Hay Denuncias En el Sistema\n");
+    return;
   }
-  do {
-    temporal = ingresarRuc();
-    if (temporal == NULL) {
-      return;
-    }
-    strcpy(ruc, temporal);
-    break;
 
-  }while (1);
+  temporal = ingresarRuc();
+  if (temporal == NULL) {return;}
+  strcpy(ruc, temporal);
+
   denuncia = BUSCARDENUNCIA(fiscal,ruc);
-
+  if (denuncia == NULL) {
+    printf("No se encontro la Denuncia\n");
+    return;
+  }
   do {
     printf("Ingrese el nuevo estado de la denuncia:\n");
     printf("-1 = Sin investigacion\n");
@@ -824,16 +825,15 @@ void modificarEstadoDenuncia(struct Fiscal *fiscal) {
     printf("1 = en Juicio Oral\n");
     printf("2 = Archivada\n");
     printf("3 = Cerrada\n");
-    printf("Seleccione una opcion: \n");
-    scanf("%d", &opcion);
-    if (opcion >= -1 || opcion <= 3) {
+    ingresarOpcion(&opcion);
+    if (opcion >= -1 && opcion <= 3) {
       break;
     }
     printf("\n");
   }while (1);
+
   denuncia->estadoDenuncia = opcion;
 
-  return;
 
 }
 /*---------------------FUNCIONES SOBRE CARPETAS----------------*/
@@ -1448,10 +1448,31 @@ int agregarSentencia(struct CarpetaInvestigativa *carpeta) {
 
 }
 
-/*Pendiente*/
-int agregarDiligenciaJuez(struct CarpetaInvestigativa *carpeta) {
+int anidarDiligencia(struct CarpetaInvestigativa *carpeta,struct Diligencia *diligencia) {
+  struct NodoDiligencias *nodo,*rec;
+  nodo = (struct NodoDiligencias*)malloc(sizeof(struct NodoDiligencias));
+  if (nodo == NULL) {
+    return 0;
+  }
+  nodo->diligencia = diligencia;
+  nodo->sig = NULL;
+  if (carpeta->diligencias == NULL) {
+    carpeta->diligencias = nodo;
+    return 1;
+  }else {
+    rec = carpeta->diligencias;
+    while (rec->sig != NULL) {
+      rec = rec->sig;
+    }
+    rec->sig = nodo;
+
+    return 1;
+  }
+  return 0;
+}
+
+void agregarDiligenciaJuez(struct CarpetaInvestigativa *carpeta,int *correctamente) {
   struct Diligencia *diligencia;
-  struct NodoDiligencias *rec,*nodo;
   char *fecha;
   diligencia = (struct Diligencia*)malloc(sizeof(struct Diligencia));
   diligencia->OrigenDiligencia = 3;
@@ -1465,7 +1486,8 @@ int agregarDiligenciaJuez(struct CarpetaInvestigativa *carpeta) {
   printf("Ingrese Fecha de Diligencia\n");
   fecha = ingresarFecha();
   if (fecha == NULL) {
-    return 0;
+    (*correctamente) = 0;
+    return;
   }
   strcpy(diligencia->fechaDiligencia, fecha);
 
@@ -1479,21 +1501,12 @@ int agregarDiligenciaJuez(struct CarpetaInvestigativa *carpeta) {
     scanf("%d", &diligencia->impacto);
   }while (diligencia->impacto>3 && diligencia->impacto<1);
 
-  nodo = (struct NodoDiligencias*)malloc(sizeof(struct NodoDiligencias));
-  nodo->diligencia = diligencia;
-  nodo->sig = NULL;
-  if (carpeta->diligencias == NULL) {
-    carpeta->diligencias = nodo;
+  if (!anidarDiligencia(carpeta,diligencia)) {
+    printf("Error al Anidar Diligencia");
+    (*correctamente) = 0;
   }else {
-    rec = carpeta->diligencias;
-    while (rec->sig != NULL) {
-      rec = rec->sig;
-    }
-    rec->sig = nodo;
-
-    return 1;
+    (*correctamente) = 1;
   }
-  return 0;
 }
 
 void agregarMedidaCautelar(struct CarpetaInvestigativa *carpeta,int *correctamente) {
@@ -1585,7 +1598,7 @@ int accionResolucion(struct CarpetaInvestigativa *carpeta,int tipoCausa) {
   int correctamente;
   switch (tipoCausa) {
     case 0: agregarSentencia(carpeta); break;
-    case 1: agregarDiligenciaJuez(carpeta); break;
+    case 1: agregarDiligenciaJuez(carpeta,&correctamente); break;
     case 2: agregarMedidaCautelar(carpeta,&correctamente); break;
     case 3: sobreseimiento(carpeta,&correctamente); break;
     default: return 0;
