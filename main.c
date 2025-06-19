@@ -333,7 +333,7 @@ void printError(int tipo) {
     case CAUSA: printf("\nCausa No Encontrada\n");break;
     default: printf("\nError desconocido\n"); break;
   }
-  printf("1: Intentar nuevamente\n");
+  printf("1: Intentar nuevamente  Vuelva a ingresar el dato despues de escribir 1.\n");
   printf("Cualquier otro Numero: Volver al menu anterior\n");
 }
 
@@ -347,8 +347,7 @@ void ingresarOpcion(int *opcionDestino) {
     if (resultadoScan == 1) {
       limpiarBuffer();
       break;
-    }
-    else {
+    }else {
       printf("Error: Debe ingresar un numero entero valido.\n");
       limpiarBuffer();
     }
@@ -382,8 +381,8 @@ char *ingresarRuc() {
   char *vacio = NULL;
   char *ret;
   int opcion;
+
   do {
-    limpiarBuffer();
     fgets(ruc, RUC, stdin);
     ruc[strcspn(ruc, "\n")] = 0;
     if (ruc[9] != '-' || revisarEspacios(ruc) == 1) {
@@ -395,6 +394,7 @@ char *ingresarRuc() {
     }else {
       break;
     }
+
   }while (1);
   ret = malloc(RUC);
   if (ret != NULL) {
