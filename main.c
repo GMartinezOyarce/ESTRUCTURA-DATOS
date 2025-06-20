@@ -2091,53 +2091,102 @@ void modificarImputado(struct Fiscal *fiscal) {
 /*-----------funcion para mostrar todos los imputados---------------*/
 
 
-void mostrarTodosLosImputados(struct arbolCarpetas *nodoArbol) {
-  struct Imputado *imputado;
+struct NodoImputados *recolectarImputados(struct arbolCarpetas *nodoArbol) {
+  struct NodoImputados *lista = NULL;
   struct NodoImputados *actual;
-  struct NodoCausas *causaActual;
-  int numImputados = 1;
-  int numCausa = 1;
-  if(nodoArbol == NULL || nodoArbol->carpetaInvestigativa == NULL) {
-    return;
+  struct NodoImputados *nuevo;
+  struct NodoImputados *nodoImputado;
+
+  if (nodoArbol == NULL) {
+    return NULL;
   }
 
-  mostrarTodosLosImputados(nodoArbol->izq);
-  actual = nodoArbol->carpetaInvestigativa->imputado;
-  while (actual!=NULL) {
-    imputado = actual->imputado;
-    printf("\n==== IMPUTADO %d ====\n", numImputados++);
-    printf("RUT: %s\n", imputado->rut);
-    causaActual = imputado->causas;
-    while (causaActual!=NULL) {
-      printf("====== CAUSA: %d ======\n", numCausa++);
-      printf("Tipo: ");
-      if (causaActual->causa->tipoCausa == 0) {
-        printf("Crimen\n");
-      }else if (causaActual->causa->tipoCausa == 1) {
-        printf("Delito Simple\n");
-      }else if (causaActual->causa->tipoCausa == 2) {
-        printf("Falta\n");
+  lista = recolectarImputados(nodoArbol->izq);
+
+  nodoImputado = nodoArbol->carpetaInvestigativa->imputado;
+  while (nodoImputado != NULL) {
+    nuevo = (struct NodoImputados *)malloc(sizeof(struct NodoImputados));
+    nuevo->imputado = nodoImputado->imputado;
+    nuevo->sig = NULL;
+
+    if (lista == NULL) {
+      lista = nuevo;
+    } else {
+      actual = lista;
+      while (actual->sig != NULL) {
+        actual = actual->sig;
       }
-      printf("Descripcion: %s\n", causaActual->causa->descripcionCausa);
-      causaActual = causaActual->sig;
+      actual->sig = nuevo;
     }
-    printf("Medidas Cautelares: %s\n", imputado->medidasCautelares);
-    printf("RUC Carpeta: %s\n", nodoArbol->carpetaInvestigativa->ruc);
 
-    actual = actual->sig;
+    nodoImputado = nodoImputado->sig;
   }
-  mostrarTodosLosImputados(nodoArbol->der);
+
+  actual = lista;
+  if (actual == NULL) {
+    lista = recolectarImputados(nodoArbol->der);
+  } else {
+    while (actual->sig != NULL) {
+      actual = actual->sig;
+    }
+    actual->sig = recolectarImputados(nodoArbol->der);
+  }
+
+  return lista;
 }
 
-void mostrarTodosImputados(struct Fiscal *fiscal){
+
+void mostrarTodosImputados(struct Fiscal *fiscal) {
+  struct NodoImputados *lista;
+  struct NodoImputados *actual;
+  struct NodoCausas *causa;
+  int numImputado;
+  int numCausa;
+
   if (fiscal->carpetas == NULL) {
     printf("No hay carpetas registradas.\n");
+    esperarEnter();
     return;
   }
 
   limpiarPantalla();
   printf("=== LISTADO DE IMPUTADOS DEL FISCAL ===\n");
-  mostrarTodosLosImputados(fiscal->carpetas);
+  printf("========================================\n");
+
+  lista = recolectarImputados(fiscal->carpetas);
+  actual = lista;
+  numImputado = 1;
+
+  while (actual != NULL) {
+    printf("\n==== IMPUTADO %d ====\n", numImputado);
+    printf("RUT: %s\n", actual->imputado->rut);
+    printf("Medidas Cautelares: %s\n", actual->imputado->medidasCautelares);
+    printf("Tipo Sentencia: %d\n", actual->imputado->tipoSentencia);
+    printf("Descripcion Sentencia: %s\n", actual->imputado->descripcionSentencia);
+
+    causa = actual->imputado->causas;
+    numCausa = 1;
+    while (causa != NULL) {
+      printf("  Causa %d: ", numCausa);
+      if (causa->causa->tipoCausa == 0) {
+        printf("Crimen\n");
+      } else if (causa->causa->tipoCausa == 1) {
+        printf("Delito Simple\n");
+      } else if (causa->causa->tipoCausa == 2) {
+        printf("Falta\n");
+      } else {
+        printf("Desconocida\n");
+      }
+      printf("    Descripción: %s\n", causa->causa->descripcionCausa);
+      numCausa++;
+      causa = causa->sig;
+    }
+
+    numImputado++;
+    actual = actual->sig;
+  }
+
+  esperarEnter();
 }
 
 /*-----------------------------------------------------------------------*/
