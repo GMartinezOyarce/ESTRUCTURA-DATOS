@@ -1404,7 +1404,6 @@ void agregarDiligencia(struct Fiscal *fiscal) {
 struct Imputado *buscarImputado(struct CarpetaInvestigativa *carpeta, char rut[RUT]) {
   struct NodoImputados *rec;
   if (carpeta->imputado == NULL) {
-    printf("No hay Imputados en la Carpeta \n\n");
     return NULL;
   }
   rec = carpeta->imputado;
@@ -1418,7 +1417,7 @@ struct Imputado *buscarImputado(struct CarpetaInvestigativa *carpeta, char rut[R
 
 }
 
-int agregarSentencia(struct CarpetaInvestigativa *carpeta) {
+void agregarSentencia(struct CarpetaInvestigativa *carpeta,int *correctamente) {
   char rut[RUT];
   struct Imputado *imputado;
   int opcion;
@@ -1428,12 +1427,11 @@ int agregarSentencia(struct CarpetaInvestigativa *carpeta) {
     rut[strcspn(rut, "\n")] = 0;
     imputado = buscarImputado(carpeta, rut);
     if (imputado == NULL) {
-      printf("No se encontro Al Imputado\n\n");
-      printf("0 = Volver, 1 = Volver a Intentar");
-      scanf("%d", &opcion);
-      limpiarBuffer();
+      printError(IMPUTADO);
+      ingresarOpcion(&opcion);
       if (opcion == 0) {
-        return 0;
+        (*correctamente) = 0;
+        return;
       }
     }else {
       break;
@@ -1441,10 +1439,16 @@ int agregarSentencia(struct CarpetaInvestigativa *carpeta) {
   }while (1);
 
   printf("Indique el tipo De Sentencia: (0 = Condenatoria, 1 = Absolutoria)\n");
-  scanf("%d", &imputado->tipoSentencia);
-  printf("\n\nDescriba la Sentencia");
+  do {
+    ingresarOpcion(&opcion);
+    if (opcion != 0  && opcion != 1) {
+      printf("Ingrese una opcion valida\n");
+    }
+  }while (opcion != 0 && opcion != 1);
+  imputado->tipoSentencia = opcion;
+  printf("\n\nDescriba la Sentencia\n");
   fgets(imputado->descripcionSentencia, TEXTO, stdin);
-  return 1;
+  (*correctamente) = 1;
 
 }
 
@@ -1597,7 +1601,7 @@ void sobreseimiento(struct CarpetaInvestigativa *carpeta, int *correctamente) {
 int accionResolucion(struct CarpetaInvestigativa *carpeta,int tipoCausa) {
   int correctamente;
   switch (tipoCausa) {
-    case 0: agregarSentencia(carpeta); break;
+    case 0: agregarSentencia(carpeta,&correctamente); break;
     case 1: agregarDiligenciaJuez(carpeta,&correctamente); break;
     case 2: agregarMedidaCautelar(carpeta,&correctamente); break;
     case 3: sobreseimiento(carpeta,&correctamente); break;
