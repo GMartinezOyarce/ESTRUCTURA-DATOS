@@ -2275,43 +2275,24 @@ void CausaBuscarRUT(struct arbolCarpetas *nodoArbol, char *rutBuscado) {
   CausaBuscarRUT(nodoArbol->der, rutBuscado);
 }
 
-void BuscarCausasPorImputado(struct Fiscal *fiscal) {
+void BuscarCausasPorImputado(struct Fiscal *fiscal, char *rut) {
   /*BuscarCausasPorImputado es un procedimiento que le pide al usuario un RUT y lo usa para imprimir las Causas del Imputado con ese RUT usando el procedimiento CausaBuscarRUT*/
-  char rut[RUT];
 
   if(fiscal->carpetas == NULL) {
     printf("No hay carpetas registradas.\n");
     return;
   }
-  /*limpiarPantalla es un procedimiento que salta 20 líneas, para limpiar la pantalla.*/
-  limpiarPantalla();
 
-  printf("=== BUSCAR CAUSA POR IMPUTADO ===\n");
-  printf("Ingrese el RUT del Imputado: ");
-  /*Se pide el RUT y luego se llama al procedimiento CausaBuscarRUT, que busca al imputado con ese RUT e imprime sus causas.*/
-  limpiarBuffer();
-  fgets(rut, RUT, stdin);
-  rut[strcspn(rut, "\n")]= 0;  /*saltar linea de posible espacio*/
   CausaBuscarRUT(fiscal->carpetas, rut);
   esperarEnter();
 }
 
-void BuscarCausasDenuncia(struct Fiscal *fiscal) {
-  /*BuscarCausasPorImputado es un procedimiento que le pide al usuario un RUC y lo usa para imprimir las Causas de la denuncia con ese RUC*/
+void BuscarCausasDenuncia(struct Fiscal *fiscal, char *ruc) {
+  /*BuscarCausasDenuncia es un procedimiento que imprime las Causas de la denuncia con un RUC*/
   int i;
-  char ruc[RUC];
   struct NodoCausas *rec=NULL;
   struct NodoDenuncias *denuncias=NULL, *headDenuncias=NULL;
-  /*limpiarPantalla es un procedimiento que salta 20 líneas, para limpiar la pantalla.*/
-  limpiarPantalla();
-  printf("=== BUSCAR CAUSA POR DENUNCIA ===\n");
-  printf("Ingrese el RUC de la Denuncia: ");
-  /*Se pide el RUC*/
-  limpiarBuffer();
-  fgets(ruc, RUC, stdin);
-  ruc[strcspn(ruc, "\n")]= 0;  /*saltar linea de posible espacio*/
 
-  printf("\n\n--- Causas de Denuncias ---\n\n\n");
   denuncias=fiscal->denuncias;
   headDenuncias=denuncias;
 
@@ -2414,47 +2395,11 @@ void MODIFICARCAUSA(struct NodoCausas *rec) {
   fgets(rec->causa->descripcionCausa, TEXTO, stdin);
 }
 
-void ModificarCausa(struct Fiscal *fiscal) {
+void ModificarCausa(struct Fiscal *fiscal, struct Denuncia *denunciaEncontrada) {
   /*ModificarCausa es un procedimiento que le pide al usuario un RUC y le muestra al usuario todas las Causas de la denuncia con ese RUC, para que pueda modificar las que guste.*/
-  int opcion;
-  char *rucTemp;
-  char rucBusqueda[RUC];
-  struct Denuncia *denunciaEncontrada;
   struct NodoCausas *rec;
   int i=0;
   int modificar, seguir=0;
-
-  limpiarPantalla();
-
-  if (fiscal->denuncias== NULL) {
-    printf("No hay denuncias en el Sistema");
-    return;
-  }
-
-  printf("Modificar Causas: \n\n");
-  do {
-    rucTemp = ingresarRuc();
-    if (rucTemp == NULL) {
-      printf("%s",rucBusqueda);
-      return; /*Si retorna NUll el usuario quiere volver al menu Principal*/
-    }
-    strcpy(rucBusqueda, rucTemp);
-    denunciaEncontrada = BUSCARDENUNCIA(fiscal, rucBusqueda);
-
-
-    if (denunciaEncontrada == NULL) {
-      printf("\nNo se encontró ninguna denuncia con el RUC %s\n", rucBusqueda);
-      printf("1. Intentar nuevamente\n");
-      printf("2. Volver al menú anterior\n");
-      printf("Seleccione una opción: ");
-
-      scanf("%d", &opcion);
-
-      if (opcion == 2) {
-        return; /* Salir de la función si el usuario elige volver*/
-      }
-    }
-  }while (denunciaEncontrada == NULL);
 
   rec=denunciaEncontrada->causas;
 
@@ -2624,18 +2569,8 @@ void listarSentenciasPorImputadoRecursivo(struct arbolCarpetas *raiz, char *rut)
 }
 
 
-void listarSentenciasPorImputado(struct Fiscal *fiscal) {
+void listarSentenciasPorImputado(struct Fiscal *fiscal, char *rut) {
   /*listarSentenciasPorImputado es un procedimiento que pide un RUT y usa el procedimiento recursivo listarSentenciasPorImputadoRecursivo para listar la Sentencia del Imputado con ese RUT*/
-  char rut[RUT];
-  limpiarPantalla();
-
-  limpiarBuffer();
-  printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Sentencias: ");
-  fgets(rut, RUT, stdin);
-  rut[strcspn(rut, "\n")]= 0;
-
-
-  printf("\n\n=============== LISTADO DE SENTENCIAS =============\n\n");
   if (fiscal-> carpetas == NULL) {
     printf("NO HAY SENTENCIAS REGISTRADAS");
     return;
@@ -2712,21 +2647,9 @@ void listarSentenciasPorCausaRecursivo(struct arbolCarpetas *raiz,int tipoCausa)
 }
 
 
-void listarSentenciasPorCausa(struct Fiscal *fiscal) {
+void listarSentenciasPorCausa(struct Fiscal *fiscal, int tipoCausa) {
   /*listarSentenciasPorCausa es un procedimiento que pide un Tipo de Causa y usa el procedimiento recursivo listarSentenciasPorCausaRecursivo para listar las Sentencias de los Imputados con Causas de ese Tipo*/
-  int tipoCausa;
-  limpiarPantalla();
 
-  printf("Ingrese el Tipo de Causa por el cual desea Filtrar las Resoluciones:\n\n");
-  printf("Formato:\n");
-  printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
-  printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
-  printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
-  printf("Ingrese un numero:");
-  scanf("%d", &tipoCausa);
-  limpiarBuffer();
-
-  printf("=============== LISTADO DE SENTENCIAS =============");
   if (fiscal-> carpetas == NULL) {
     printf("NO HAY SENTENCIAS REGISTRADAS");
     return;
@@ -2907,20 +2830,9 @@ void listarResolucionesPorCausaRecursivo(struct arbolCarpetas *raiz, int tipoCau
   listarResolucionesPorCausaRecursivo(raiz->der, tipoCausa);
 }
 
-void ListarResolucionesPorCausa(struct Fiscal *fiscal) {
+void ListarResolucionesPorCausa(struct Fiscal *fiscal, int tipoCausa) {
   /*listarResolucionesPorCausa es un procedimiento que pide un Tipo de Causa y usa el procedimiento recursivo listarResolucionesPorCausaRecursivo para
    listar las Resoluciones de las Carpetas que contengan una Denuncia con Causas de ese Tipo*/
-  int tipoCausa;
-  limpiarPantalla();
-  printf("Ingrese el Tipo de Causa por el cual desea Filtrar las Resoluciones:\n\n");
-  printf("Formato:\n");
-  printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
-  printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
-  printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
-  printf("Ingrese un número:");
-  scanf("%d", &tipoCausa);
-  limpiarBuffer();
-  printf("\n\n=============== LISTADO DE RESOLUCIONES =============\n\n");
 
   if (fiscal-> carpetas == NULL) {
     printf("NO HAY RESOLUCIONES REGISTRADAS");
@@ -3017,15 +2929,8 @@ void listarResolucionesPorImputadoRecursivo(struct arbolCarpetas *raiz, char *ru
   listarResolucionesPorImputadoRecursivo(raiz->der, rut);
 }
 
-void ListarResolucionesPorImputado(struct Fiscal *fiscal) {
+void ListarResolucionesPorImputado(struct Fiscal *fiscal, char *rut) {
   /*listarResolucionesPorImputado es un procedimiento que pide un RUT y usa el procedimiento recursivo listarResolucionesPorImputadoRecursivo para listar las Resoluciones del Imputado con ese RUT*/
-  char rut[RUT];
-  limpiarPantalla();
-  printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Resoluciones: ");
-  limpiarBuffer();
-  fgets(rut, RUT, stdin);
-  rut[strcspn(rut, "\n")]= 0;
-  printf("\n\n=============== LISTADO DE RESOLUCIONES =============\n\n");
 
   if (fiscal-> carpetas == NULL) {
     printf("NO HAY RESOLUCIONES REGISTRADAS");
@@ -3106,21 +3011,9 @@ void listarResolucionesPorTipoRecursivo(struct arbolCarpetas *raiz, int tipo) {
   listarResolucionesRecursivo(raiz->der);
 }
 
-void ListarResolucionesPorTipo(struct Fiscal *fiscal) {
+void ListarResolucionesPorTipo(struct Fiscal *fiscal, int tipo) {
   /*listarResolucionesPorTipo es un procedimiento que pide un Tipo de Resolución y usa el procedimiento recursivo listarResolucionesPorTipoRecursivo para listar
     las Resoluciones de ese Tipo*/
-  int tipo;
-  limpiarPantalla();
-  printf("Ingrese el Tipo por el cual desea Filtrar las Resoluciones:\n\n");
-  printf("Formato:\n");
-  printf("0 Si es Sentencia o Fallo\n");
-  printf("1 Si es Autorizacion para diligencias\n");
-  printf("2 Si es una medida Cautelar\n");
-  printf("3 Si es un sobreseimiento\n");
-  printf("Ingrese un numero:");
-  scanf("%d", &tipo);
-  limpiarBuffer();
-  printf("\n\n=============== LISTADO DE RESOLUCIONES =============\n\n");
 
   if (fiscal-> carpetas == NULL) {
     printf("NO HAY RESOLUCIONES REGISTRADAS");
@@ -3563,6 +3456,12 @@ void menuDiligencias(struct Fiscal *fiscal){
 
 void menuCausas(struct Fiscal *fiscal) {
   int opcion;
+  int eleccion;
+  char rut[RUT];
+  char *ruc;
+  char *rucTemp;
+  struct Denuncia *denunciaEncontrada;
+
   do {
     limpiarPantalla();
     printf("\n--- Gestion de Causas ---\n");
@@ -3577,18 +3476,80 @@ void menuCausas(struct Fiscal *fiscal) {
 
     switch(opcion) {
       case 1: agregarCausas(fiscal); break;
-      case 2: BuscarCausasPorImputado(fiscal); break;
-      case 3: BuscarCausasDenuncia(fiscal); break;
-      case 4: ModificarCausa(fiscal); break;
+      case 2: {
+        limpiarPantalla();
+
+        printf("=== BUSCAR CAUSA POR IMPUTADO ===\n");
+        printf("Ingrese el RUT del Imputado: ");
+
+        limpiarBuffer();
+        fgets(rut, RUT, stdin);
+        rut[strcspn(rut, "\n")]= 0;
+
+        BuscarCausasPorImputado(fiscal,rut);
+
+        break;
+      }
+      case 3: {
+        /*limpiarPantalla es un procedimiento que salta 20 líneas, para limpiar la pantalla.*/
+        limpiarPantalla();
+        printf("=== BUSCAR CAUSA POR DENUNCIA ===\n");
+        printf("Ingrese el RUC de la Denuncia: ");
+
+        /*Se pide el RUC*/
+        ruc=ingresarRuc();
+
+        printf("\n\n--- Causas de Denuncias ---\n\n\n");
+        BuscarCausasDenuncia(fiscal,ruc);
+        break;
+      }
+      case 4: {
+        limpiarPantalla();
+
+        if (fiscal->denuncias== NULL) {
+          printf("No hay denuncias en el Sistema");
+          return;
+        }
+
+        printf("Modificar Causas: \n\n");
+        do {
+          rucTemp = ingresarRuc();
+          if (rucTemp == NULL) {
+            return; /*Si retorna NUll el usuario quiere volver al menu Principal*/
+          }
+          strcpy(ruc, rucTemp);
+          denunciaEncontrada = BUSCARDENUNCIA(fiscal, ruc);
+
+
+          if (denunciaEncontrada == NULL) {
+            printf("\nNo se encontró ninguna denuncia con el RUC %s\n", ruc);
+            printf("1. Intentar nuevamente\n");
+            printf("2. Volver al menú anterior\n");
+            printf("Seleccione una opción: ");
+
+            scanf("%d", &eleccion);
+
+            if (eleccion == 2) {
+              return; /* Salir de la función si el usuario elige volver*/
+            }
+          }
+        }while (denunciaEncontrada == NULL);
+
+        ModificarCausa(fiscal,denunciaEncontrada);
+        break;
+      }
       case 5: ListarCausas(fiscal); break;
       case 0: break;
       default: printf("Opcion invalida.\n");
     }
-  } while(opcion != 0);
+  } while(eleccion != 0);
 }
 
 void menuSentenciasResoluciones(struct Fiscal *fiscal) {
   int opcion;
+  int tipo;
+  char ruc[RUC];
+  char rut[RUT];
   do {
     limpiarPantalla();
     printf("\n--- Gestion de Sentencias y Resoluciones ---\n");
@@ -3602,15 +3563,97 @@ void menuSentenciasResoluciones(struct Fiscal *fiscal) {
     printf("8. Listar Todas las Resoluciones\n");
     printf("0. Volver al Menu Principal\n");
 
-    ingresarOpcion(&ingresarOpcion);
+    ingresarOpcion(&opcion);
 
     switch(opcion) {
       case 1: agregarResolucion(fiscal); break;
-      case 2: ListarResolucionesPorCausa(fiscal); break;
-      case 3: ListarResolucionesPorImputado(fiscal); break;
-      case 4: ListarResolucionesPorTipo(fiscal); break;
-      case 5: listarSentenciasPorCausa(fiscal); break;
-      case 6: listarSentenciasPorImputado(fiscal); break;
+      case 2: {
+        limpiarPantalla();
+
+        printf("Ingrese el Tipo de Causa por el cual desea Filtrar las Resoluciones:\n\n");
+        printf("Formato:\n");
+        printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
+        printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
+        printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
+        printf("Ingrese un número:");
+
+        scanf("%d", &tipo);
+        limpiarBuffer();
+
+        printf("\n\n=============== LISTADO DE RESOLUCIONES =============\n\n");
+
+        ListarResolucionesPorCausa(fiscal, tipo);
+
+        break;
+      }
+      case 3: {
+        limpiarPantalla();
+
+        printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Resoluciones: ");
+
+        limpiarBuffer();
+        fgets(rut, RUT, stdin);
+        rut[strcspn(rut, "\n")]= 0;
+
+        printf("\n\n=============== LISTADO DE RESOLUCIONES =============\n\n");
+
+        ListarResolucionesPorImputado(fiscal,rut);
+
+        break;
+      }
+      case 4: {
+        limpiarPantalla();
+
+        printf("Ingrese el Tipo por el cual desea Filtrar las Resoluciones:\n\n");
+        printf("Formato:\n");
+        printf("0 Si es Sentencia o Fallo\n");
+        printf("1 Si es Autorizacion para diligencias\n");
+        printf("2 Si es una medida Cautelar\n");
+        printf("3 Si es un sobreseimiento\n");
+        printf("Ingrese un numero:");
+
+        scanf("%d", &tipo);
+        limpiarBuffer();
+
+        printf("\n\n=============== LISTADO DE RESOLUCIONES =============\n\n");
+
+        ListarResolucionesPorTipo(fiscal,tipo);
+
+        break;
+      }
+      case 5: {
+        limpiarPantalla();
+
+        printf("Ingrese el Tipo de Causa por el cual desea Filtrar las Resoluciones:\n\n");
+        printf("Formato:\n");
+        printf("0 Si es un Crimen (Infraccion grave como Homicidio)\n");
+        printf("1 Si es un Delito Simple (Ejemplo: Hurto o Estafa)\n");
+        printf("2 Si es una Falta (Ejemplo: Infracciones de Transito)\n");
+        printf("Ingrese un numero:");
+
+        scanf("%d", &tipo);
+        limpiarBuffer();
+
+        printf("=============== LISTADO DE SENTENCIAS =============");
+
+        listarSentenciasPorCausa(fiscal,tipo);
+
+        break;
+      }
+      case 6: {
+        limpiarPantalla();
+
+        limpiarBuffer();
+        printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Sentencias: ");
+        fgets(rut, RUT, stdin);
+        rut[strcspn(rut, "\n")]= 0;
+
+        printf("\n\n=============== LISTADO DE SENTENCIAS =============\n\n");
+
+        listarSentenciasPorImputado(fiscal,rut);
+
+        break;
+      }
       case 7: listarSentencias(fiscal); break;
       case 8: ListarResoluciones(fiscal); break;
       case 0: break;;
