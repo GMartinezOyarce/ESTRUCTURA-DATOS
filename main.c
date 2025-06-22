@@ -1536,6 +1536,7 @@ void agregarImputado(struct Fiscal *fiscal) {
   }
 
   do {
+    printf("Ingrese RUC de la carpeta(123456789-2024)\n");
     rucTemporal = ingresarRuc();
     if (rucTemporal == NULL)
       return;
@@ -1745,7 +1746,6 @@ void buscarImputadoPorRut(struct Fiscal *fiscal) {
   limpiarPantalla();
   printf("=== BUSCAR IMPUTADO POR RUT ===\n");
   printf("Ingrese el RUT del imputado: ");
-  limpiarBuffer();
   fgets(rut, RUT, stdin);
   rut[strcspn(rut, "\n")] = 0;
 
@@ -1802,7 +1802,6 @@ void modificarImputado(struct Fiscal *fiscal) {
   limpiarPantalla();
   printf("=== MODIFICAR IMPUTADO ===\n");
   printf("Ingrese el RUT del imputado: ");
-  limpiarBuffer();
   fgets(rutBusqueda, RUT, stdin);
   rutBusqueda[strcspn(rutBusqueda, "\n")] = 0;
 
