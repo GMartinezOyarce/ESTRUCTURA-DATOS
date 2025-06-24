@@ -633,7 +633,7 @@ void buscarDenunciaEstado(struct Fiscal *fiscal) {
 }
 
 int anidarDenuncia(struct Fiscal *fiscal, struct Denuncia *denuncia) {
-  struct NodoDenuncias *nodo,*head = fiscal->denuncias, *actual;
+  struct NodoDenuncias *nodo;
   nodo = (struct NodoDenuncias *)malloc(sizeof(struct NodoDenuncias));
   if (nodo == NULL) {
     /*Si el Malloc Falla Retorna False*/
@@ -1293,7 +1293,6 @@ int anidarDiligencia(struct CarpetaInvestigativa *carpeta,struct Diligencia *dil
 
     return 1;
   }
-  return 0;
 }
 
 void agregarDiligenciaJuez(struct CarpetaInvestigativa *carpeta,int *correctamente) {
@@ -1384,9 +1383,7 @@ int eliminarImputado(struct CarpetaInvestigativa *carpeta, struct Imputado *impu
     }
     rec -> sig = rec-> sig-> sig;
     return 1;
-
   }
-  return 0;
 }
 
 void sobreseimiento(struct CarpetaInvestigativa *carpeta, int *correctamente) {
@@ -2401,7 +2398,7 @@ void MODIFICARCAUSA(struct NodoCausas *rec) {
   fgets(rec->causa->descripcionCausa, TEXTO, stdin);
 }
 
-void ModificarCausa(struct Fiscal *fiscal, struct Denuncia *denunciaEncontrada) {
+void ModificarCausa(struct Denuncia *denunciaEncontrada) {
   /*ModificarCausa es un procedimiento que le pide al usuario un RUC y le muestra al usuario todas las Causas de la denuncia con ese RUC, para que pueda modificar las que guste.*/
   struct NodoCausas *rec;
   int i=0;
@@ -3491,11 +3488,7 @@ void menuImputados(struct Fiscal *fiscal){
   }
 }
 
-while
-(opcion
-!=
-0
-);
+while(opcion!=0);
 }
 
 void menuDiligencias(struct Fiscal *fiscal) {
@@ -3505,7 +3498,7 @@ void menuDiligencias(struct Fiscal *fiscal) {
   char* fechaTemporal;
   struct Diligencia* nuevaDil;
   do {
-    limpiarPantalla;
+    limpiarPantalla();
     printf("--- Gestion de Diligencias ---\n");
     printf("1. Agregar diligencias\n");
     printf("2. Mostrar diligencias\n");
@@ -3662,7 +3655,7 @@ void menuCausas(struct Fiscal *fiscal) {
           }
         }while (denunciaEncontrada == NULL);
 
-        ModificarCausa(fiscal,denunciaEncontrada);
+        ModificarCausa(denunciaEncontrada);
         break;
       }
       case 5: ListarCausas(fiscal); break;
