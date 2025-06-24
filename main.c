@@ -521,7 +521,7 @@ void printDenuncia (struct Denuncia *denuncia) {
   if (rec == NULL) {
     printf("NO HAY CAUSAS\n\n");
   }else {
-    printf("----------Causas----------");
+    printf("----------Causas----------\n");
     while (rec != NULL){
       /*Print de las causas*/
       if (rec->causa->tipoCausa == 0) {
@@ -575,6 +575,7 @@ void buscarDenunciaRUC(struct Fiscal *fiscal) {
   if (fiscal->denuncias == NULL) {
     printf("No Hay Denuncias En el Sistema\n");
   }
+  printf("Ingrese el Ruc de la denuncia: (Formato: 123456789-2024)\n");
   do {
     temporal = ingresarRuc();
     if (temporal == NULL) {
@@ -591,7 +592,6 @@ void buscarDenunciaRUC(struct Fiscal *fiscal) {
   }else {
     printDenuncia(denuncia);
   }
-  esperarEnter();
   return;
 }
 
@@ -609,11 +609,11 @@ void buscarDenunciaEstado(struct Fiscal *fiscal) {
       printf("1 = en Juicio Oral\n");
       printf("2 = Archivada\n");
       printf("3 = Cerrada\n");
-      printf("Seleccione una opcion: \n");
-      limpiarBuffer();
-      scanf("%d", &opcion);
+      ingresarOpcion(&opcion);
       if (opcion == -1 || opcion == 0 || opcion == 1|| opcion == 2 || opcion == 3) {
         break;
+      }else {
+        printf("");
       }
       limpiarPantalla();
     }while (1);
@@ -715,7 +715,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   limpiarPantalla();
 
   do {
-    printf("Ingrese Su Rut:\n");
+    printf("Ingrese Su Rut: (Formato:12345678-9)\n");
     fgets(denuncia ->rutDenunciante, 14, stdin);
     denuncia-> rutDenunciante[strcspn(denuncia -> rutDenunciante, "\n")] = 0;
     if (denuncia->rutDenunciante[0]  == '\0') {
@@ -738,9 +738,9 @@ void agregarDenuncia(struct Fiscal *fiscal) {
     AGREGARCAUSA(denuncia);
 
     printf("Desea Agregar Otra Causa a su denuncia?\n");
-    printf("1 = SI , Cualquier otra tecla = NO\n");
+    printf("1 = SI , Cualquier otro Numero = NO\n");
 
-    scanf("%d", &opcion);
+    ingresarOpcion(&opcion);
     if (opcion != 1) {
       break;
     }
@@ -755,7 +755,7 @@ void agregarDenuncia(struct Fiscal *fiscal) {
   do {
     limpiarBuffer();
     denuncia->rutVictimas[denuncia->pLibreRutVictimas] = (struct RutVictima*)malloc(sizeof(struct RutVictima));
-    printf("Ingrese Rut de la victima: \n");
+    printf("Ingrese Rut de la victima: (Formato:12345678-9) \n");
     fgets(denuncia->rutVictimas[denuncia->pLibreRutVictimas]->rut, RUT, stdin);
     denuncia->rutVictimas[denuncia->pLibreRutVictimas]->rut[strcspn(denuncia->rutVictimas[denuncia->pLibreRutVictimas]->rut, "\n")] = 0;
     limpiarBuffer();
@@ -814,7 +814,7 @@ void modificarEstadoDenuncia(struct Fiscal *fiscal) {
     printf("No Hay Denuncias En el Sistema\n");
     return;
   }
-
+  printf("Ingrese El Ruc de la denuncia: ()\n");
   temporal = ingresarRuc();
   if (temporal == NULL) {return;}
   strcpy(ruc, temporal);
@@ -1302,13 +1302,13 @@ void agregarDiligenciaJuez(struct CarpetaInvestigativa *carpeta,int *correctamen
   diligencia = (struct Diligencia*)malloc(sizeof(struct Diligencia));
   diligencia->OrigenDiligencia = 3;
 
-  printf("Ingrese el tipo de Diligencia:\n");
+  printf("Ingrese el tipo de Diligencia: (Ingrese texto:)\n");
   fgets(diligencia->tipoDiligencia, TEXTO, stdin);
 
   printf("Ingrese Descripcion de Diligencia:\n");
   fgets(diligencia-> descripcionDiligencia, TEXTO, stdin);
 
-  printf("Ingrese Fecha de Diligencia\n");
+  printf("Ingrese Fecha de Diligencia: (Formato:20/04/2024)\n");
   fecha = ingresarFecha();
   if (fecha == NULL) {
     (*correctamente) = 0;
@@ -1433,9 +1433,26 @@ int accionResolucion(struct CarpetaInvestigativa *carpeta,int tipoCausa) {
 }
 
 /*---------FUNCION AGREGAR RESOLUCION----------------*/
-void agregarResolucion(struct Fiscal *fiscal) {
-  struct NodoResoluciones *nodo;
+void anidarResolusion(struct CarpetaInvestigativa *carpeta,struct Resolucion *nueva) {
   struct NodoResoluciones *rec;
+  struct NodoResoluciones *nodo;
+  nodo = (struct NodoResoluciones*)malloc(sizeof(struct NodoResoluciones));
+
+  nodo->resolucion = nueva;
+  nodo->sig = NULL;
+
+  if (carpeta->resoluciones == NULL) {
+    carpeta->resoluciones = nodo;
+  } else {
+    rec = carpeta->resoluciones;
+    while (rec->sig != NULL) {
+      rec = rec->sig;
+    }
+    rec->sig = nodo;
+  }
+}
+
+void agregarResolucion(struct Fiscal *fiscal) {
   struct Resolucion *nuevaResolucion;
   struct CarpetaInvestigativa *carpeta;
   char *fecha;
@@ -1463,7 +1480,6 @@ void agregarResolucion(struct Fiscal *fiscal) {
       break;
   }while(1);
 
-  nodo = (struct NodoResoluciones*)malloc(sizeof(struct NodoResoluciones));
   nuevaResolucion = (struct Resolucion*)malloc(sizeof(struct Resolucion));
   limpiarPantalla();
 
@@ -1492,27 +1508,16 @@ void agregarResolucion(struct Fiscal *fiscal) {
   scanf("%d", &nuevaResolucion-> origenResolucion);
   limpiarBuffer();
 
-  printf("Ingrese la Descripcion de su Resolucion\n");
+  printf("Ingrese la Descripcion de su Resolucion:\n");
   fgets(nuevaResolucion->descripcion, TEXTO, stdin);
   nuevaResolucion->descripcion[strcspn(nuevaResolucion->descripcion, "\n")] = 0;
 
-  printf("Ingrese una fecha");
+  printf("Ingrese una fecha: Formato:(12/04/2025)\n");
   fecha = ingresarFecha();
   if (fecha == NULL) return;
   strcpy(nuevaResolucion->fecha, fecha);
+  anidarResolusion(carpeta,nuevaResolucion);
 
-  nodo->resolucion = nuevaResolucion;
-  nodo->sig = NULL;
-
-  if (carpeta->resoluciones == NULL) {
-    carpeta->resoluciones = nodo;
-  } else {
-    rec = carpeta->resoluciones;
-    while (rec->sig != NULL) {
-      rec = rec->sig;
-    }
-    rec->sig = nodo;
-  }
   printf("Resolucion agregada Correctamente\n");
   esperarEnter();
 }
@@ -2821,7 +2826,7 @@ void listarResolucionesPorCausaRecursivo(struct arbolCarpetas *raiz, int tipoCau
       }
 
       if (resoluciones->resolucion->fecha!=NULL) {
-        printf("Fecha: %s\n",resoluciones->resolucion->fecha);
+        printf("Fecha: %s\n\n",resoluciones->resolucion->fecha);
       }
       else {
         printf("Fecha: No ha sido especificada.\n");
