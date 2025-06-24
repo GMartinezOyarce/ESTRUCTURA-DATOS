@@ -2117,7 +2117,6 @@ void listarDiligenciasPendientes(struct Fiscal *fiscal) {
   }
 
   printf("Ingrese el RUC de la carpeta: ");
-  limpiarBuffer();
   fgets(rucCarpeta, RUC, stdin);
   rucCarpeta[strcspn(rucCarpeta, "\n")] = 0;
 
