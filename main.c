@@ -1450,13 +1450,14 @@ void agregarResolucion(struct Fiscal *fiscal) {
   }
 
   do {
+    printf("Ingrese un RUC: ");
     rucTemporal = ingresarRuc();
     if (rucTemporal == NULL)
       return;
     strcpy(rucCarpeta, rucTemporal);
     carpeta = BUSCARCARPETA(fiscal->carpetas, rucCarpeta);
     if (carpeta == NULL) {
-      printf("No existe una carpeta con ese RUC INTENTE DENUEVO\n\n");
+      printf("No existe una carpeta con ese RUC INTENTE DE NUEVO\n\n");
     }
     else
       break;
@@ -1495,6 +1496,7 @@ void agregarResolucion(struct Fiscal *fiscal) {
   fgets(nuevaResolucion->descripcion, TEXTO, stdin);
   nuevaResolucion->descripcion[strcspn(nuevaResolucion->descripcion, "\n")] = 0;
 
+  printf("Ingrese una fecha");
   fecha = ingresarFecha();
   if (fecha == NULL) return;
   strcpy(nuevaResolucion->fecha, fecha);
@@ -2189,10 +2191,10 @@ void ListarCausas(struct Fiscal *fiscal) {
         rec=denuncias->denuncia->causas;
         i=1;
         if (denuncias->denuncia->ruc==NULL) {
-          printf("RUC: NO ENCONTRADO\n");
+          printf("RUC: NO ENCONTRADO\n\n");
         }
         else {
-          printf("RUC: %s\n",denuncias->denuncia->ruc);
+          printf("RUC: %s\n\n",denuncias->denuncia->ruc);
         }
         while (rec!=NULL) {
           /*Y mostramos los datos de cada una de sus causas.*/
@@ -2209,10 +2211,10 @@ void ListarCausas(struct Fiscal *fiscal) {
             printf("CAUSA %d: NO SE PRESENTA UNA CAUSA\n",i);
           }
           if (rec->causa!=NULL && rec->causa->descripcionCausa!=NULL) {
-            printf("Descripcion de la Causa %d: %s\n",i,rec->causa->descripcionCausa);
+            printf("Descripcion de la Causa %d: %s\n\n",i,rec->causa->descripcionCausa);
           }
           else {
-            printf("Descripcion de la Causa %d: NO HAY.\n",i);
+            printf("Descripcion de la Causa %d: NO HAY.\n\n",i);
           }
           rec=rec->sig;
           i++;
@@ -2348,6 +2350,7 @@ void agregarCausas(struct Fiscal *fiscal) {
 
   printf("Agregar Causas: \n\n");
   do {
+    printf("Ingrese el RUC: ");
     rucTemp = ingresarRuc();
     if (rucTemp == NULL) {
       return; /*Si retorna NUll el usuario quiere volver al menu Principal*/
@@ -2445,7 +2448,10 @@ void ModificarCausa(struct Fiscal *fiscal, struct Denuncia *denunciaEncontrada) 
 
       if (seguir==2) break;
     }
+    rec=rec->sig;
   }
+  printf("\n\nSe han acabado las Causas\n");
+  esperarEnter();
 }
 
 
@@ -3457,7 +3463,7 @@ void menuCausas(struct Fiscal *fiscal) {
   int opcion;
   int eleccion;
   char rut[RUT];
-  char *ruc;
+  char ruc [RUC];
   char *rucTemp;
   struct Denuncia *denunciaEncontrada;
 
@@ -3481,9 +3487,9 @@ void menuCausas(struct Fiscal *fiscal) {
         printf("=== BUSCAR CAUSA POR IMPUTADO ===\n");
         printf("Ingrese el RUT del Imputado: ");
 
-        limpiarBuffer();
         fgets(rut, RUT, stdin);
         rut[strcspn(rut, "\n")]= 0;
+        printf("\nese %s\n",rut);
 
         BuscarCausasPorImputado(fiscal,rut);
 
@@ -3496,10 +3502,10 @@ void menuCausas(struct Fiscal *fiscal) {
         printf("Ingrese el RUC de la Denuncia: ");
 
         /*Se pide el RUC*/
-        ruc=ingresarRuc();
+        rucTemp=ingresarRuc();
 
         printf("\n\n--- Causas de Denuncias ---\n\n\n");
-        BuscarCausasDenuncia(fiscal,ruc);
+        BuscarCausasDenuncia(fiscal,rucTemp);
         break;
       }
       case 4: {
@@ -3512,6 +3518,7 @@ void menuCausas(struct Fiscal *fiscal) {
 
         printf("Modificar Causas: \n\n");
         do {
+          printf("Ingrese el RUC de la Denuncia: ");
           rucTemp = ingresarRuc();
           if (rucTemp == NULL) {
             return; /*Si retorna NUll el usuario quiere volver al menu Principal*/
@@ -3541,7 +3548,7 @@ void menuCausas(struct Fiscal *fiscal) {
       case 0: break;
       default: printf("Opcion invalida.\n");
     }
-  } while(eleccion != 0);
+  } while(opcion != 0);
 }
 
 void menuSentenciasResoluciones(struct Fiscal *fiscal) {
@@ -3590,7 +3597,6 @@ void menuSentenciasResoluciones(struct Fiscal *fiscal) {
 
         printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Resoluciones: ");
 
-        limpiarBuffer();
         fgets(rut, RUT, stdin);
         rut[strcspn(rut, "\n")]= 0;
 
@@ -3642,7 +3648,6 @@ void menuSentenciasResoluciones(struct Fiscal *fiscal) {
       case 6: {
         limpiarPantalla();
 
-        limpiarBuffer();
         printf("Ingrese el RUT del Imputado por el cual desea Filtrar las Sentencias: ");
         fgets(rut, RUT, stdin);
         rut[strcspn(rut, "\n")]= 0;
