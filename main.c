@@ -16,18 +16,18 @@
 
 /*-----------------------Defines para Print Errores-----------------------*/
 
-#define FORMATO 0
-#define DENUNCIA 1
-#define CARPETA 2
-#define DILIGENCIA 3
-#define IMPUTADO 4
-#define RESOLUCION 5
-#define PRUEBA 6
-#define DECLARACION 7
-#define CAUSA 8
-#define DENUNCIAINEXISTENTE 9
-#define CARPETAENCONTRADA 10
-#define CARPETAINEXISTENTE 11
+#define FORMATO 1
+#define DENUNCIA 2
+#define CARPETA 3
+#define DILIGENCIA 4
+#define IMPUTADO 5
+#define RESOLUCION 6
+#define PRUEBA 7
+#define DECLARACION 8
+#define CAUSA 9
+#define DENUNCIAINEXISTENTE 10
+#define CARPETAENCONTRADA 11
+#define CARPETAINEXISTENTE 12
 
 /*-------------------------ESTRUCTURA DEL SISTEMA-------------------------*/
 struct Prueba {
