@@ -1145,7 +1145,7 @@ int buscarCarpetaRuc(struct Fiscal *fiscal, char *rucIngresado) {
     printf("No hay Resoluciones\n");
   printf("\nCARPETA MOSTRADA CORRECTAMENTE\n");
   esperarEnter();
-  return;
+  return 0;
 }
 
 /*-----------------------------FUNCION MODIFICAR ESTADO CARPETA-------------------------*/
@@ -3206,11 +3206,12 @@ void menuCarpetas(struct Fiscal *fiscal) {
               resultado = buscarCarpetaRuc(fiscal, rucIngresado);
               if (resultado != 0) {
                   printError(resultado);
+                  esperarEnter();
               }
             } else {
               printf("\nOperación cancelada.\n");
+              esperarEnter();
             }
-            esperarEnter();
             break;
         }
         case 3: { /* MODIFICAR ESTADO */
@@ -3411,6 +3412,11 @@ void menuCarpetas(struct Fiscal *fiscal) {
 
 void menuImputados(struct Fiscal *fiscal){
   int opcion;
+  char* rucIngresado;
+  int resultado;
+  struct Declaracion* nuevaDecl;
+  char* fechaTemporal;
+
   do {
     limpiarPantalla();
     printf("\n--- Gestion de Imputados---\n");
@@ -3426,18 +3432,75 @@ void menuImputados(struct Fiscal *fiscal){
     switch(opcion) {
       case 1: agregarImputado(fiscal); break;
       case 2: modificarImputado(fiscal); break;
-      //case 3: agregarDeclaracion(fiscal); break;
-      case 4: buscarImputadoPorRut(fiscal); break;
-      case 5: mostrarTodosImputados(fiscal); break;
-      case 0: break;
-      default: printf("Opcion invalida.\n");
-    }
-  }while(opcion != 0);
+      case 3: { /* AGREGAR DECLARACIÓN */
+        limpiarPantalla();
+        printf("--- Agregar Declaración a Carpeta ---\n");
+        printf("Ingrese el RUC de la carpeta:\n");
+        rucIngresado = ingresarRuc();
+        if (rucIngresado == NULL) { break; }
+
+        if (BUSCARCARPETA(fiscal->carpetas, rucIngresado) == NULL) {
+          printError(CARPETA);
+          esperarEnter();
+          break;
+        }
+
+        printf("\n--- Ingresando datos de la nueva declaración ---\n");
+        nuevaDecl = (struct Declaracion *) malloc(sizeof(struct Declaracion));
+        if (nuevaDecl == NULL) { break; }
+
+        limpiarBuffer();
+        printf("Ingrese RUT del declarante: \n");
+        fgets(nuevaDecl->rut, RUT, stdin);
+        nuevaDecl->rut[strcspn(nuevaDecl->rut, "\n")] = 0;
+
+        printf("Ingrese origen (0: Víctima, 1: Testigo, 2: Imputado): \n");
+        ingresarOpcion(&nuevaDecl->origenDeclaracion);
+
+        printf("Ingrese el texto de la declaración (MAX 1000 caracteres): \n");
+        fgets(nuevaDecl->declaracion, TEXTO, stdin);
+        nuevaDecl->declaracion[strcspn(nuevaDecl->declaracion, "\n")] = 0;
+
+        printf("Ingrese la fecha (dd/mm/aaaa):\n");
+        fechaTemporal = ingresarFecha();
+        if (fechaTemporal != NULL) {
+          strcpy(nuevaDecl->fecha, fechaTemporal);
+        } else {
+          break;
+        }
+        resultado = agregarDeclaracion(fiscal, rucIngresado, nuevaDecl);
+        if (resultado == 0) {
+          printf("\n¡Declaración agregada con éxito!\n");
+        } else {
+          printf("\nError: No se pudo agregar la declaración.\n");
+          printError(resultado);
+        }
+        esperarEnter();
+        break;
+    };
+  case 4: buscarImputadoPorRut(fiscal);
+    break;
+  case 5: mostrarTodosImputados(fiscal);
+    break;
+  case 0: break;
+  default: printf("Opcion invalida.\n");
+  }
 }
 
-void menuDiligencias(struct Fiscal *fiscal){
+while
+(opcion
+!=
+0
+);
+}
+
+void menuDiligencias(struct Fiscal *fiscal) {
   int opcion;
-  do{
+  char* rucIngresado;
+  int resultado;
+  char* fechaTemporal;
+  struct Diligencia* nuevaDil;
+  do {
     limpiarPantalla;
     printf("--- Gestion de Diligencias ---\n");
     printf("1. Agregar diligencias\n");
@@ -3449,7 +3512,61 @@ void menuDiligencias(struct Fiscal *fiscal){
     ingresarOpcion(&opcion);
 
     switch(opcion) {
-      //case 1: agregarDiligencia(fiscal); break;
+      case 1: { /* AGREGAR DILIGENCIA */
+            limpiarPantalla();
+            printf("--- Agregar Diligencia a Carpeta ---\n");
+
+            printf("Ingrese el RUC de la carpeta:\n");
+            rucIngresado = ingresarRuc();
+            if (rucIngresado == NULL) { break; }
+
+            if (BUSCARCARPETA(fiscal->carpetas, rucIngresado) == NULL) {
+                printError(CARPETA);
+                esperarEnter();
+                break;
+            }
+
+            printf("\n--- Rellenando datos de la nueva diligencia ---\n");
+            nuevaDil = (struct Diligencia*)malloc(sizeof(struct Diligencia));
+            if(nuevaDil == NULL) { break; }
+
+            printf("Ingrese origen (0: Fiscal, 1: Victima, 2: Imputado, 3: Juez): \n");
+            ingresarOpcion(&nuevaDil->OrigenDiligencia);
+            limpiarBuffer();
+
+            printf("Ingrese tipo de diligencia (ej. Allanamiento): \n");
+            fgets(nuevaDil->tipoDiligencia, TEXTO, stdin);
+            nuevaDil->tipoDiligencia[strcspn(nuevaDil->tipoDiligencia, "\n")] = 0;
+
+            printf("Ingrese descripcion: \n");
+            fgets(nuevaDil->descripcionDiligencia, TEXTO, stdin);
+            nuevaDil->descripcionDiligencia[strcspn(nuevaDil->descripcionDiligencia, "\n")] = 0;
+
+            printf("Ingrese fecha (dd/mm/aaaa): \n");
+            fechaTemporal = ingresarFecha();
+            if (fechaTemporal == NULL) { break; }
+            strcpy(nuevaDil->fechaDiligencia, fechaTemporal);
+
+            printf("Ingrese aprobacion (1: Aprobada, 0: Rechazada, -1: En proceso): \n");
+            ingresarOpcion(&nuevaDil->aprobacion);
+
+            printf("Ingrese urgencia (1: Baja, 2: Media, 3: Alta): \n");
+            ingresarOpcion(&nuevaDil->urgencia);
+
+            printf("Ingrese impacto (1: Bajo, 2: Medio, 3: Alto): \n");
+            ingresarOpcion(&nuevaDil->impacto);
+
+            resultado = agregarDiligencia(fiscal, rucIngresado, nuevaDil);
+
+            if (resultado == 0) {
+                printf("\n¡Diligencia agregada con éxito!\n");
+            } else {
+                printf("\nError: No se pudo agregar la diligencia.\n");
+            }
+
+            esperarEnter();
+            break;
+        }
       case 2 : mostrarDiligencias(fiscal); break;
       case 3: mostrarDiligenciasOrdenadas(fiscal); break;
       case 4: listarDiligenciasPendientes(fiscal); break;
